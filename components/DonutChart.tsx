@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart, ArcElement, Legend } from 'chart.js'
+import { WalletContext } from './WalletContextProvider';
 Chart.register(ArcElement);
 
-export default function DonutChart({available_to_Borrow,CollateralBalance,BorrowBalance}: any){
+export default function DonutChart({}: any){
+  
+  const {
+		availableToBorrow, totalDebt, totalCollateral
+	} = useContext(WalletContext);
+  
   const data = {
     labels: [
       'Red',
@@ -18,7 +24,7 @@ export default function DonutChart({available_to_Borrow,CollateralBalance,Borrow
     maintainAspectRatio: false,
     datasets: [{
       label: 'My First Dataset',
-      data: [available_to_Borrow, CollateralBalance, BorrowBalance],
+      data: [availableToBorrow(), totalCollateral > 0 ? totalCollateral : 1, totalDebt],
       backgroundColor: [
         'rgb(255, 99, 132)',
         'rgb(54, 162, 235)',

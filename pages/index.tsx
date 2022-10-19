@@ -15,6 +15,7 @@ import { BiError, BiErrorAlt } from 'react-icons/bi';
 function App() {
 	const { colorMode } = useColorMode();
 	const [minCRatio, setMinCRatio] = useState(0);
+	const [safeCRatio, setSafeCRatio] = useState(0);
 
 	const {
 		isConnected,
@@ -26,12 +27,14 @@ function App() {
 		totalCollateral,
 		totalDebt,
 		isDataReady,
-		connectionError
+		connectionError,
+		availableToBorrow
 	} = useContext(WalletContext);
 
 	useEffect(() => {
 		// getUserData();
 		setMinCRatio(130);
+		setSafeCRatio(200);
 	}, []);
 
 	function getUserData(_address: string | null = address) {
@@ -45,23 +48,24 @@ function App() {
 	return (
 		<>
 			{
-			connectionError.length == 0? isConnected ? 
-			isDataReady ? (
+			// isDataReady ? (
 				<Box>
+					
 					<Flex
 						flexDirection={{ sm: 'column', lg: 'row' }}
 						my="1rem"
-						justifyContent="space-between">
+						justifyContent="space-around">
 						<Box
 							display={'flex'}
 							justifyContent="space-between"
 							height="16rem"
 							p="0.8rem"
-							border={'3px solid #252525'}
+							// border={'3px solid #252525'}
 							mb={{ sm: '1rem', lg: '0' }}
 							width={{ sm: '100%', lg: '59.5%' }}
-							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
-							borderRadius={'10px'}>
+							// bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
+							// borderRadius={'10px'}
+							>
 							<Box w="70%">
 								<Box w="7rem" h="0.3rem" bg="#36a2eb" rounded={100}></Box>
 								<Text fontSize={'sm'}>Collateral Balance</Text>
@@ -81,30 +85,23 @@ function App() {
 								<Text fontSize={'sm'}>Available to Borrow</Text>
 								<Text fontSize={'lg'} fontWeight="bold">
 									${' '}
-									{(
-										totalCollateral / 1.5 -
-										totalDebt
-									).toFixed(2)}
+									{availableToBorrow().toFixed(2)}
 								</Text>
 							</Box>
 
-							<Chart
-								available_to_Borrow={
-									totalCollateral / 1.5 - totalDebt
-								}
-								CollateralBalance={totalCollateral}
-								BorrowBalance={totalDebt}
-							/>
+							<Chart />
 						</Box>
 
 						<Box
 							mt={{ sm: '1rem', md: '0' }}
 							height="16rem"
 							p="1rem"
-							border={'3px solid #252525'}
+							// border={'3px solid #252525'}
 							width={{ sm: '100%', lg: '39.5%' }}
-							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
-							borderRadius={'10px'}>
+							// bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
+							// borderRadius={'10px'}
+							textAlign="right"
+							>
 							<Text fontSize={'sm'}>Stability Rate</Text>
 							<Text fontSize={'lg'} fontWeight="bold">
 								1.01%
@@ -136,10 +133,7 @@ function App() {
 							width={{ sm: '100%', lg: '44.2%' }}
 							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
 							borderRadius={'10px'}>
-							<CollateralTable
-								collaterals={collaterals}
-								cRatio={totalCollateral / totalDebt}
-							/>
+							<CollateralTable/>
 						</Box>
 
 						<Box
@@ -149,29 +143,15 @@ function App() {
 							width={{ sm: '100%', lg: '54.2%' }}
 							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
 							borderRadius={'10px'}>
-							<IssuanceTable
-								debts={synths}
-								minCRatio={minCRatio}
-								collateralBalance={totalCollateral / 1e18}
-								cRatio={totalCollateral / totalDebt}
-							/>
+							<IssuanceTable/>
 						</Box>
 					</Flex>
 				</Box>
-			) : (
-				<Progress size='xs' isIndeterminate colorScheme={"whatsapp"}></Progress>
-			) : <Flex justify={"center"}>
-				<Box width="400px" height={200} textAlign={"center"} p={5} rounded={10}>
-				<Text fontSize={"md"} mb={5}>Please connect your wallet to continue</Text>
-				</Box>
-				</Flex>: 
-				<Flex justify={"center"}>
-				<Box width="400px" height={200} textAlign={"center"} p={5} rounded={10}>
-					<BiErrorAlt size={"sm"} color="red.600"/>
-					<Text fontSize={"lg"} mb={5} color='red.600'>Error: {connectionError}</Text>
-				</Box>
-				</Flex>
-				}
+			// ) : (
+			// 	<Progress size='xs' isIndeterminate colorScheme={"whatsapp"}></Progress>
+			// ) 
+}
+				
 		</>
 	);
 }

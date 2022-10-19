@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   Table,
   Thead,
@@ -18,12 +18,19 @@ import { FiMinusCircle } from 'react-icons/fi';
 import Image from 'next/image';
 import { getContract } from '../src/utils';
 import {useState} from 'react';
+import { WalletContext } from './WalletContextProvider';
 
 
-const CollateralTable = ({collaterals, cRatio}: any) => {
+const CollateralTable = ({}: any) => {
   const { colorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [claimLoading, setClaimLoading] = useState(false);
+
+  const {
+		isConnected,
+    collaterals
+	} = useContext(WalletContext);
+
 
   const claim = async () => {
     setClaimLoading(true)
@@ -68,8 +75,10 @@ const CollateralTable = ({collaterals, cRatio}: any) => {
             </Td>
             <Td>
               <Box>
-                  <Text fontSize='sm' fontWeight="bold" textAlign={"left"}>{(collateral['amount']/10**collateral['decimal']).toFixed(3)} {collateral['symbol']}</Text>
-                  {collateral['symbol'] == "WTRX" ? 
+                  <Text fontSize='sm' fontWeight="bold" textAlign={"left"}>{isConnected ? (collateral['amount']/10**collateral['decimal']).toFixed(3): '-'} {collateral['symbol']}</Text>
+
+
+                  {collateral['symbol'] == "WTRX" && isConnected ? 
                     <Button mt={2} isLoading={claimLoading} size={"xs"} rounded="100" colorScheme="whatsapp" onClick={claim}>Get WTRX Tokens</Button> 
                   : <></>}
                   {/* <Text fontSize='xs' fontWeight="light" textAlign={"left"}>{(collateral['walletBalance']/10**collateral['asset']['decimals']).toFixed(4)} {collateral['asset']['symbol']}</Text> */}

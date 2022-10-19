@@ -84,9 +84,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				break;
 			}
 		}
-        
-        console.log(activeAssetIndex,  assets[activeAssetIndex]);
-        console.log(poolIndex, assets[activeAssetIndex]['synth_id'], value)
+    
 		system.methods.exitPool(poolIndex, assets[activeAssetIndex]['synth_id'], value)
 		.send(
 			{
@@ -128,7 +126,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		<>{assets[0] ? <Box>
             {/* <Flex justifyContent="space-between" alignItems="center" mb="20px" gap={5}> */}
 
-			<Button my={2} size="lg" onClick={onOpen} aria-label={''} width={"100%"} variant="outline">
+			<Button my={2} size="md" onClick={onOpen} aria-label={''} width={"100%"} variant="outline" disabled={!isConnected}>
                 Exit Pool
 			</Button>
             {/* <Button size="lg" bgColor={"#AF7E18"} onClick={onOpen} aria-label={''} width={"50%"}>
@@ -153,8 +151,9 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Box>
 
                         <Flex>
-						<InputGroup size="md" >
+						<InputGroup size="md"  >
 							<Input
+							// disabled={!isConnected}
 								type="number"
 								placeholder={`Enter ${assets[activeAssetIndex]['symbol']} amount`}
 								onChange={changeAmount}
@@ -163,6 +162,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
+								disabled={!isConnected}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -199,11 +199,13 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
+						disabled={!isConnected}
+						isLoading={loader}
 							colorScheme={'red'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							Exit Pool 
+							{isConnected? <>Exit Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{loader && (
@@ -215,7 +217,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
                         rounded={8}
                         py={4}
                         >
-						<Box>
+						{/* <Box>
 							<Spinner
 								thickness="10px"
 								speed="0.65s"
@@ -224,23 +226,12 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 								size="xl"
                                 mr={4}
 							/>
-						</Box>
+						</Box> */}
 
-						<Box ml="0.5rem">
-							<Text fontFamily={'Roboto'} fontSize="sm">
-								{' '}
-								Waiting for the blockchain to confirm your
-								transaction...{' '}
-							</Text>
-							<Link
-								color="blue.200"
-								fontSize={'xs'}
-								href={`https://nile.tronscan.org/#/transaction/${hash}`}
-								target="_blank"
-								rel="noreferrer">
-								View on Tronscan
-							</Link>
-						</Box>
+						<Box >
+								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
+								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>
+							</Box>
 					</Flex>
 				)}
 				{depositerror && (

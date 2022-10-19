@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
 	Button,
 	Box,
@@ -25,6 +25,7 @@ import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract } from '../../src/utils';
+import { WalletContext } from '../WalletContextProvider';
 
 
 const WithdrawModal = ({ asset, balance }: any) => {
@@ -51,8 +52,10 @@ const WithdrawModal = ({ asset, balance }: any) => {
 		setwithdrawerror("");
 		setwithdrawconfirm(false);
 		system.methods.withdraw(asset['coll_address'], value)
-		.send({value, 
+		.send({
+			value, 
 			// shouldPollResponse:true
+			feeLimit: 1000000000
 		}, (error: any, hash: any) => {
 			if(error){
 				if(error.output) {
@@ -76,13 +79,15 @@ const WithdrawModal = ({ asset, balance }: any) => {
 			}
 		})
 	}
+	const {isConnected} = useContext(WalletContext)
 
 	return (
 		<Box>
-			<IconButton variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={37} />} aria-label={''} isRound={true}>
+			<IconButton disabled={!isConnected} variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={37} />} aria-label={''} isRound={true}>
 			</IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={onClose}>
-				<ModalOverlay />
+				<ModalOverlay bg='blackAlpha.100'
+                    backdropFilter='blur(30px)' />
 				<ModalContent width={'30rem'} height="30rem">
 					<ModalCloseButton />
                     <ModalHeader>Withdraw {asset['symbol']}</ModalHeader>
@@ -105,7 +110,7 @@ const WithdrawModal = ({ asset, balance }: any) => {
                         </Flex>
                         <Button colorScheme={"whatsapp"} width="100%" mt={4} onClick={issue}>Withdraw</Button>
 					
-						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1rem">
+						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
 							<Box>
 							<Spinner
 								thickness='4px'
@@ -116,9 +121,9 @@ const WithdrawModal = ({ asset, balance }: any) => {
 							/>
 							</Box>
 							
-							<Box ml="0.5rem">
-								<Text fontFamily={"Roboto"}> Waiting for the blockchain to confirm your transaction... </Text>
-								<Link color="blue.200" href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">View on Tronscan</Link >
+							<Box >
+								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
+								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>
 							</Box>
 						</Flex>}
 						{withdrawerror && <Text textAlign={"center"} color="red">{withdrawerror}</Text>}

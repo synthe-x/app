@@ -86,8 +86,8 @@ const PoolPie = ({data}: any) => {
 				<Pie
 					activeIndex={activeIndex}
 					activeShape={renderActiveShape}
-                    startAngle={90}
-                    endAngle={90 + 360}
+                    // startAngle={90}
+                    // endAngle={90 + 360}
 					data={data}
 					cx="50%"
 					cy="50%"

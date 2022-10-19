@@ -20,28 +20,37 @@ interface WalletValue {
 	synths: any[], totalDebt: number, pools: any[], poolUserData: null[],
     fetchData: (_tronWeb?: any, _address?: null) => void;
 	tradingPool: number; setTradingPool: (_:number) => void;
-	connectionError: string;
-	dollarFormatter: any, tokenFormatter: any
+	connectionError: string|null;
+	dollarFormatter: any, tokenFormatter: any,
+	tradingBalanceOf: (_:string) => number,
+	minCRatio: number, safeCRatio: number,
+	availableToBorrow: () => number,
+	cRatio: () => number,
+	isFetchingData: boolean,
 }
 
 function WalletContextProvider({children}: any) {
-    const [address, setAddress] = React.useState<null|string>(null);
+    const [address, setAddress] = React.useState<null|string>("TU6nPbkDzMfhtg13nUnTMbuVFFMpLSs3P3");
     const [tronWeb, setTronWeb] = React.useState({});
     const [isConnected, setIsConnected] = React.useState(false);
     const [isConnecting, setIsConnecting] = React.useState(false);
     const [isDisconnected, setIsDisconnected] = React.useState(false);
-	const [connectionError, setConnectionError] = React.useState('');
+	const [connectionError, setConnectionError] = React.useState<null|string>(null);
     const [chain, setChain] = React.useState(null);
-    const [collaterals, setCollaterals] = React.useState([null]);
+    const [collaterals, setCollaterals] = React.useState([]);
     const [totalCollateral, setTotalCollateral] = React.useState(-1);
-    const [synths, setSynths] = React.useState([null]);
+    const [synths, setSynths] = React.useState<any[]>([]);
     const [totalDebt, setTotalDebt] = React.useState(-1);
     const [isDataReady, setIsDataReady] = React.useState(false);
-	const [pools, setPools] = React.useState([null]);
-	const [poolUserData, setPoolUserData] = React.useState([null]);
+    const [isFetchingData, setIsFetchingData] = React.useState(false);
+
+	const [pools, setPools] = React.useState([]);
+	const [poolUserData, setPoolUserData] = React.useState([]);
 	const [tradingPool, setTradingPool] = React.useState(0);
 	const [dollarFormatter, setDollarFormatter] = React.useState({});
 	const [tokenFormatter, setTokenFormatter] = React.useState({});
+	const [minCRatio, setMinCRatio] = React.useState(130);
+	const [safeCRatio, setSafeCRatio] = React.useState(200);
 
 
 	React.useEffect(() => {
@@ -78,7 +87,17 @@ function WalletContextProvider({children}: any) {
         }
     }
 
+	const tradingBalanceOf = (_s: string) => {
+		for(let i in synths){
+			if(synths[i].synth_id == _s){
+					return synths[i].amount[tradingPool];
+				}
+			}
+	}
+
     const fetchData = (_tronWeb: any = tronWeb, _address = address) => {
+		setIsFetchingData(true)
+		console.log("Fetching")
 		Promise.all([
 			axios.get("https://api.synthex.finance/assets/synths"), 
 			axios.get("https://api.synthex.finance/assets/collaterals"),
@@ -98,7 +117,7 @@ function WalletContextProvider({children}: any) {
 
 	const _setCollaterals = (_collaterals: any, contract: any, _tronWeb = tronWeb, _address = address) => {
 		let tokens = []
-		console.log(_collaterals)
+		// console.log(_collaterals)
 		for(let i in _collaterals){
 			tokens.push(_collaterals[i].coll_address)
 			tokens.push(_collaterals[i].cAsset)
@@ -132,24 +151,22 @@ function WalletContextProvider({children}: any) {
 
 
 		// console.log(JSON.stringify(tokens));
-
 		Promise.all([contract.balanceOf(tokens, _address).call(), contract.debtBalanceOf(tokens, _address).call()])
 		.then((res: any) => {
 			let walletBalances = res[0];
 			let debtBalances = res[1];
 
+			let totalDebt = 0
+
 			for(let i = 0; i < walletBalances.length; i++){
 				_synths[i]['walletBalance'] = (walletBalances[i]).toString();
 			}
 
-			let borrowBalance = 0;
 			for(let i = 0; i < debtBalances.length; i++){
 				_synths[i]['amount'] = [(debtBalances[i]).toString()];
-				borrowBalance += Number(debtBalances[i]/1e18)*_synths[i].price;
+				totalDebt += Number(debtBalances[i]/1e18)*_synths[i].price;
 			}
-			setTotalDebt(borrowBalance);
 			
-
 			let tradingPoolAddresses: string[] = []
 			for(let i in _tradingPools){
 				tradingPoolAddresses.push(_tradingPools[i].pool_address)
@@ -173,10 +190,14 @@ function WalletContextProvider({children}: any) {
 				for(let i in res){
 					for(let j = 0; j < res[i].length; j++){
 						_synths[j]['amount'].push((res[i][j]).toString());
+						totalDebt+=Number(res[i][j]/1e18)*_synths[j].price;
 					}
 				}
+				setTotalDebt(totalDebt);
+
 				setSynths(_synths);
 				setIsDataReady(true)
+				setIsFetchingData(false)
 			})
 			.catch((err: any) => {
 				console.log("Error:", err);
@@ -187,12 +208,22 @@ function WalletContextProvider({children}: any) {
 			})
 	}
 
+	const availableToBorrow = () => {
+		return 100 * totalCollateral / safeCRatio - totalDebt
+	}
+
+	const cRatio = () => {
+		return totalCollateral / totalDebt
+	}
+
     const value: WalletValue = {
         address, tronWeb, isConnected, isConnecting, isDisconnected, chain, 
         connect,
         isDataReady, collaterals, totalCollateral, synths, totalDebt, pools, poolUserData, tradingPool, setTradingPool,
         fetchData, connectionError,
-		dollarFormatter, tokenFormatter
+		dollarFormatter, tokenFormatter,
+		tradingBalanceOf, minCRatio, safeCRatio, availableToBorrow, cRatio,
+		isFetchingData
     };
 
     return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>

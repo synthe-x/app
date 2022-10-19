@@ -57,9 +57,7 @@ function App() {
 
 	return (
 		<>
-			{connectionError.length == 0 ? (
-				isConnected ? (
-					isDataReady ? (
+			
 						<Box>
 							<Heading size={'md'} fontWeight="bold" mt={10}>
 								Trading Pools
@@ -70,41 +68,7 @@ function App() {
 								);
 							})}
 						</Box>
-					) : (
-						<Progress
-							size="xs"
-							isIndeterminate
-							colorScheme={'whatsapp'}></Progress>
-					)
-				) : (
-					<Flex justify={'center'}>
-						<Box
-							width="400px"
-							height={200}
-							textAlign={'center'}
-							p={5}
-							rounded={10}>
-							<Text fontSize={'md'} mb={5}>
-								Please connect your wallet to continue
-							</Text>
-						</Box>
-					</Flex>
-				)
-			) : (
-				<Flex justify={'center'}>
-					<Box
-						width="400px"
-						height={200}
-						textAlign={'center'}
-						p={5}
-						rounded={10}>
-						<BiErrorAlt size={'sm'} color="red.600" />
-						<Text fontSize={'lg'} mb={5} color="red.600">
-							Error: {connectionError}
-						</Text>
-					</Box>
-				</Flex>
-			)}
+					
 		</>
 	);
 }

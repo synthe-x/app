@@ -61,44 +61,13 @@ function Exchange() {
 
 	return (
 		<>
-			{connectionError.length == 0? isConnected ? (
-				isDataReady ? (
-					<Flex justifyContent={"space-between"} gap={20} wrap="wrap-reverse">
-						<Box width={'35%'}>
-							<ExchangeSideBar />
-						</Box>
-						<Box mt={10} width='50%' mr={"0"}>
-							<Swap />
-						</Box>
-					</Flex>
-				) : (
-					<Progress
-						size="xs"
-						isIndeterminate
-						colorScheme={'whatsapp'}></Progress>
-				)
-			) : (
-				<Flex justify={'center'}>
-					<Box
-						width="400px"
-						height={200}
-						textAlign={'center'}
-						p={5}
-						rounded={10}>
-						{isConnecting ? <Text fontSize={'md'} mb={5}>
-							Open your wallet to connect
-						</Text> : <Text fontSize={'md'} mb={5}>
-							Please connect your wallet to continue
-						</Text>
-						}
-					</Box>
-				</Flex>
-			): 
-			<Flex justify={"center"}>
-			<Box width="400px" height={200} textAlign={"center"} p={5} rounded={10}>
-				<BiErrorAlt size={"sm"} color="red.600"/>
-				<Text fontSize={"lg"} mb={5} color='red.600'>Error: {connectionError}</Text>
-			</Box>
+			{pools.length > 0 && <Flex justifyContent={"space-between"} gap={20} wrap="wrap-reverse">
+				<Box width={'35%'}>
+					<ExchangeSideBar />
+				</Box>
+				<Box mt={10} width='50%' mr={"0"}>
+					<Swap />
+				</Box>
 			</Flex>}
 		</>
 	);

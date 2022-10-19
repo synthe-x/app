@@ -38,7 +38,7 @@ import TransferModal from './modals/TransferModal';
 import { MdOpenInNew } from 'react-icons/md';
 import Link from 'next/link';
 
-function ExchangeSideBar() {
+function ExchangeSideBar({}) {
 	const { colorMode } = useColorMode();
 
 	const {
@@ -53,11 +53,14 @@ function ExchangeSideBar() {
 		setTradingPool,
 		pools,
 		poolUserData,
+		tradingBalanceOf
 	} = useContext(WalletContext);
 
 	const updatePoolIndex = (e: any) => {
 		setTradingPool(e.target.value);
 	};
+
+	console.log(pools, tradingPool)
 
 	return (
 		<>
@@ -72,8 +75,8 @@ function ExchangeSideBar() {
                     >
 					{pools.map((pool: any, index: number) => {
 						return (
-							<option key={pool['symbol']} value={index}>
-								<Text>{pool['name']}</Text>
+							<option key={pool?.symbol} value={index}>
+								<Text>{pool?.name}</Text>
 							</option>
 						);
 					})}
@@ -88,7 +91,7 @@ function ExchangeSideBar() {
 							</Tr>
 						</Thead>
 						<Tbody>
-							{synths.map((_synth: any, index: number) => {
+							{((pools[tradingPool] && pools[tradingPool].poolSynth_ids) ?? synths).map((_synth: any, index: number) => {
 								return (
 									<Tr key={index}>
 										<Td>
@@ -98,7 +101,7 @@ function ExchangeSideBar() {
 												.join(' ')}
 										</Td>
 										<Td>
-											{(_synth.amount[tradingPool]/10**_synth.decimal).toFixed(2)}{' '}
+											{(tradingBalanceOf(_synth.synth_id)/10**(_synth.decimal ?? 18)).toFixed(2)}{' '}
 											{_synth.symbol}
 										</Td>
 										<Td>

@@ -10,6 +10,7 @@ import { extendTheme, type ThemeConfig } from '@chakra-ui/react'
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import { WalletContextProvider } from '../components/WalletContextProvider';
+import Index from "./_index"
 
 const config: ThemeConfig = {
   initialColorMode: 'dark',
@@ -21,7 +22,9 @@ const styles = {
   global: (props: Record<string, any>) => ({
     body: {
       color: mode('gray.800', 'whiteAlpha.900')(props),
-      bg: mode('gray.100', '#111111')(props),
+      bg: mode('white', '#000')(props),
+      margin: 0,
+      padding: 0,
     },
   }),
 };
@@ -51,13 +54,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
     <WalletContextProvider>
-        <Flex justify={"center"} flexDirection={{sm:"column",md:"row"}}>
-        <Box maxWidth={"1300px"} minW={"1200px"}>
-        <Navbar />
-        <Component {...pageProps} />
-        </Box>
-        </Flex>
-        <Footer/>
+        <Index Component={Component} pageProps={pageProps}/>
     </WalletContextProvider>
     </ChakraProvider>
   );

@@ -65,8 +65,8 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				break;
 			}
 		}
-		console.log(assets[assetIndex])
-		console.log(assets[assetIndex].amount[inputPoolIndex], assets[assetIndex].walletBalance);
+		// console.log(assets[assetIndex])
+		// console.log(assets[assetIndex].amount[inputPoolIndex], assets[assetIndex].walletBalance);
 		let _amount = assets[assetIndex].amount[inputPoolIndex] > assets[assetIndex].walletBalance ? assets[assetIndex].walletBalance : assets[assetIndex].amount[inputPoolIndex];
 		setAmount(_amount / 10 ** assets[assetIndex].decimal);
 	};
@@ -76,7 +76,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	const transfer = async () => {
 		if (!amount) return;
 		let system = await getContract('System');
-		console.log(pool.poolSynth_ids[activeAssetIndex])
+		// console.log(pool.poolSynth_ids[activeAssetIndex])
 		let value = BigInt(amount * 10 ** (pool.poolSynth_ids[activeAssetIndex]['decimal'] ?? 18)).toString();
 		setloader(true);
 		setdepositerror('');
@@ -94,6 +94,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		.send({
 				value,
 				// shouldPollResponse:true
+				feeLimit: 1000000000
 			}, (error: any, hash: any) => {
 				if (error) {
 					if (error.output) {
@@ -125,10 +126,11 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 
 	return (
-		<>{pool.poolSynth_ids[0] ? <Box>
+		<>{
+		pool.poolSynth_ids ? <Box>
             {/* <Flex justifyContent="space-between" alignItems="center" mb="20px" gap={5}> */}
 
-			<Button my={2} size="lg" bgColor={"#0CAD4B"} onClick={onOpen} aria-label={''} width={"100%"}>
+			<Button my={2} size="md" bgColor={"#0CAD4B"} onClick={onOpen} aria-label={''} width={"100%"} disabled={!isConnected}>
                 Enter Pool
 			</Button>
             {/* <Button size="lg" bgColor={"#AF7E18"} onClick={onOpen} aria-label={''} width={"50%"}>
@@ -160,6 +162,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
+									disabled={!isConnected}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -196,11 +199,13 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
+							disabled={!isConnected}
+							isLoading={loader}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							Enter Pool 
+							{isConnected? <>Enter Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{loader && (
@@ -208,11 +213,11 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						alignItems={'center'}
 						flexDirection={'row'}
 						justifyContent="center"
-						mt="1rem"
+						mt="1.5rem"
                         rounded={8}
                         py={4}
                         >
-						<Box>
+						{/* <Box>
 							<Spinner
 								thickness="10px"
 								speed="0.65s"
@@ -221,23 +226,12 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 								size="xl"
                                 mr={4}
 							/>
-						</Box>
+						</Box> */}
 
-						<Box ml="0.5rem">
-							<Text fontFamily={'Roboto'} fontSize="sm">
-								{' '}
-								Waiting for the blockchain to confirm your
-								transaction...{' '}
-							</Text>
-							<Link
-								color="blue.200"
-								fontSize={'xs'}
-								href={`https://nile.tronscan.org/#/transaction/${hash}`}
-								target="_blank"
-								rel="noreferrer">
-								View on Tronscan
-							</Link>
-						</Box>
+						<Box >
+								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
+								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>
+							</Box>
 					</Flex>
 				)}
 				{depositerror && (

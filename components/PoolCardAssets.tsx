@@ -7,7 +7,6 @@ let dummyValues = ['100', '120', '50', '30', '75'];
 export default function PoolCardAssets({
 	assets = dummyAssets,
 }: any) {
-	console.log(assets)
 	return (
 		<>
 			<Flex>

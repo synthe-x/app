@@ -68,12 +68,24 @@ const TransferModal = ({ asset }: any) => {
 		setloader(true);
 		setdepositerror('');
 		setdepositconfirm(false);
-		let tx = inputPoolIndex == 0? system.methods.enterPool(outputPoolIndex, asset['synth_id'], value) : system.methods.exitPool(outputPoolIndex, asset['synth_id'], value);
-		
+		let tx =
+			inputPoolIndex == 0
+				? system.methods.enterPool(
+						outputPoolIndex,
+						asset['synth_id'],
+						value
+				  )
+				: system.methods.exitPool(
+						outputPoolIndex,
+						asset['synth_id'],
+						value
+				  );
+
 		tx.send(
 			{
 				value,
 				// shouldPollResponse:true
+				feeLimit: 1000000000,
 			},
 			(error: any, hash: any) => {
 				if (error) {
@@ -105,28 +117,30 @@ const TransferModal = ({ asset }: any) => {
 	};
 
 	const inputPoolChange = (event: any) => {
-		if(outputPoolIndex == event.target.value){
+		if (outputPoolIndex == event.target.value) {
 			setOutputPoolIndex(inputPoolIndex);
 		}
-		if(inputPoolIndex != 0){
+		if (inputPoolIndex != 0) {
 			setOutputPoolIndex(0);
 		}
 		setInputPoolIndex(event.target.value);
-	}
+	};
 
 	const outputPoolChange = (event: any) => {
-		if(inputPoolIndex == event.target.value){
+		if (inputPoolIndex == event.target.value) {
 			setInputPoolIndex(outputPoolIndex);
 		}
-		if(outputPoolIndex != 0){
+		if (outputPoolIndex != 0) {
 			setInputPoolIndex(0);
 		}
 		setOutputPoolIndex(event.target.value);
-	}
+	};
+
 
 	return (
 		<Box>
 			<IconButton
+			disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
 				icon={<AiOutlineSwap />}
@@ -135,12 +149,15 @@ const TransferModal = ({ asset }: any) => {
 				mr={-3}
 				height={'24px'}></IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={onClose}>
-				<ModalOverlay />
+				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
 				<ModalContent width={'30rem'} height="30rem">
 					<ModalCloseButton />
 					<ModalHeader>Transfer {asset['symbol']}</ModalHeader>
 					<ModalBody>
-						<Select value={inputPoolIndex} onChange={inputPoolChange}>
+						<Select
+							value={inputPoolIndex}
+							onChange={inputPoolChange}
+							disabled={!isConnected}>
 							{pools.map((pool: any, index) => {
 								return (
 									<option key={index} value={index}>
@@ -151,6 +168,7 @@ const TransferModal = ({ asset }: any) => {
 						</Select>
 						<InputGroup size="md">
 							<Input
+							disabled={!isConnected}
 								type="number"
 								placeholder={`Enter ${asset['symbol']} amount`}
 								onChange={changeAmount}
@@ -159,6 +177,7 @@ const TransferModal = ({ asset }: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
+								disabled={!isConnected}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -172,7 +191,10 @@ const TransferModal = ({ asset }: any) => {
 							<BsArrowDown />
 						</Box>
 
-						<Select value={outputPoolIndex} onChange={outputPoolChange}>
+						<Select
+						disabled={!isConnected}
+							value={outputPoolIndex}
+							onChange={outputPoolChange}>
 							{pools.map((pool: any, index) => {
 								return (
 									<option key={index} value={index}>
@@ -189,23 +211,23 @@ const TransferModal = ({ asset }: any) => {
 						</Flex>
 
 						<Button
+						disabled={!isConnected}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							Transfer <AiOutlineSwap /> 
+							{isConnected? <>Transfer<AiOutlineSwap /></> : <>Please connect your wallet</>} 
 						</Button>
 
 						{loader && (
-					<Flex
-						alignItems={'center'}
-						flexDirection={'row'}
-						justifyContent="center"
-						mt="1rem"
-                        rounded={8}
-                        py={4}
-                        >
-						<Box>
+							<Flex
+								alignItems={'center'}
+								flexDirection={'row'}
+								justifyContent="center"
+								mt="1.5rem"
+								rounded={8}
+								py={4}>
+								{/* <Box>
 							<Spinner
 								thickness="10px"
 								speed="0.65s"
@@ -214,56 +236,61 @@ const TransferModal = ({ asset }: any) => {
 								size="xl"
                                 mr={4}
 							/>
-						</Box>
+						</Box> */}
 
-						<Box ml="0.5rem">
-							<Text fontFamily={'Roboto'} fontSize="sm">
-								{' '}
-								Waiting for the blockchain to confirm your
-								transaction...{' '}
+								<Box>
+									<Text fontFamily={'Roboto'} fontSize="md">
+										{' '}
+										Waiting for the blockchain to confirm
+										your transaction.
+										<Link
+											color="blue.200"
+											fontSize={'sm'}
+											href={`https://nile.tronscan.org/#/transaction/${hash}`}
+											target="_blank"
+											rel="noreferrer">
+											{' '}
+											View on Tronscan
+										</Link>
+									</Text>
+								</Box>
+							</Flex>
+						)}
+						{depositerror && (
+							<Text
+								textAlign={'center'}
+								color="red"
+								rounded={8}
+								py={4}>
+								{depositerror}
 							</Text>
-							<Link
-								color="blue.200"
-								fontSize={'xs'}
-								href={`https://nile.tronscan.org/#/transaction/${hash}`}
-								target="_blank"
-								rel="noreferrer">
-								View on Tronscan
-							</Link>
-						</Box>
-					</Flex>
-				)}
-				{depositerror && (
-					<Text textAlign={'center'} color="red"
-                        rounded={8}
-                        py={4}>
-						{depositerror}
-					</Text>
-				)}
-				{depositconfirm && (
-					<Flex
-						flexDirection={'column'}
-						mt="1rem"
-						justifyContent="center"
-						alignItems="center"
-                        rounded={8}
-                        py={4}
-                        >
-						<Text fontFamily={'Roboto'} textAlign={'center'} fontSize="sm">
-							Transaction Submitted
-						</Text>
-						<Box>
-							<Link
-								fontSize={'xs'}
-								color="blue.200"
-								href={`https://nile.tronscan.org/#/transaction/${hash}`}
-								target="_blank"
-								rel="noreferrer">
-								View on Tronscan
-							</Link>
-						</Box>
-					</Flex>
-				)}
+						)}
+						{depositconfirm && (
+							<Flex
+								flexDirection={'column'}
+								mt="1rem"
+								justifyContent="center"
+								alignItems="center"
+								rounded={8}
+								py={4}>
+								<Text
+									fontFamily={'Roboto'}
+									textAlign={'center'}
+									fontSize="sm">
+									Transaction Submitted
+								</Text>
+								<Box>
+									<Link
+										fontSize={'xs'}
+										color="blue.200"
+										href={`https://nile.tronscan.org/#/transaction/${hash}`}
+										target="_blank"
+										rel="noreferrer">
+										View on Tronscan
+									</Link>
+								</Box>
+							</Flex>
+						)}
 					</ModalBody>
 					<ModalFooter>
 						<AiOutlineInfoCircle size={20} />

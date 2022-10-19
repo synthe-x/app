@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
 	Table,
 	Thead,
@@ -17,8 +17,9 @@ import {
 import Image from 'next/image';
 import IssueModel from './modals/IssueModal';
 import RepayModel from './modals/RepayModal';
+import { WalletContext } from './WalletContextProvider';
 
-const IssuanceTable = ({ debts, minCRatio, collateralBalance, cRatio }: any) => {
+const IssuanceTable = ({}: any) => {
 	const { colorMode } = useColorMode();
 	const tknholdingImg = {
 		width: '30px',
@@ -26,6 +27,12 @@ const IssuanceTable = ({ debts, minCRatio, collateralBalance, cRatio }: any) => 
 		marginRight: '0.5rem',
 		borderRadius: '100px',
 	};
+
+	const {
+		synths: debts,
+		isConnected
+	} = useContext(WalletContext);
+
 
 	return (
 		<>
@@ -110,7 +117,7 @@ const IssuanceTable = ({ debts, minCRatio, collateralBalance, cRatio }: any) => 
 												fontSize="sm"
 												fontWeight="bold"
 												textAlign={'left'}>
-												{(debt['amount'][0]/1e18).toFixed(4)}{' '}
+												{isConnected ? (debt['amount'][0]/1e18).toFixed(4) : '-'}{' '}
 												{debt['symbol']}
 											</Text>
 											{/* <Text
@@ -130,8 +137,8 @@ const IssuanceTable = ({ debts, minCRatio, collateralBalance, cRatio }: any) => 
 									</Td> */}
 									<Td>
 										<Flex alignItems={'center'}>
-											<IssueModel asset={debt} minCRatio={minCRatio} collateralBalance={collateralBalance} cRatio={cRatio} />
-											<RepayModel asset={debt} balance={debt['walletBalance']/1e18} />
+											<IssueModel asset={debt} />
+											<RepayModel asset={debt} />
 										</Flex>
 									</Td>
 								</Tr>

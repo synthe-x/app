@@ -116,7 +116,9 @@ function Swap() {
 				web3.utils.toWei(inputAmount.toString()),
 				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex].synth_id
 			)
-			.send({}, (error: any, hash: any) => {
+			.send({
+				feeLimit: 1000000000
+			}, (error: any, hash: any) => {
 				if (error) {
 					if (error.output) {
 						if (error.output.contractResult) {
@@ -157,6 +159,7 @@ function Swap() {
 		tradingPool,
 		pools,
 		poolUserData,
+		tradingBalanceOf
 	} = useContext(WalletContext);
 
 	useEffect(() => {
@@ -170,13 +173,13 @@ function Swap() {
 
 
 	const handleMax = () => {
-        // let _inputAmount = synths[inputAssetIndex].amount[tradingPool] /
-        //     10 ** synths[inputAssetIndex].decimal
-		// setInputAmount(_inputAmount);
-        // let _outputAmount =
-		// 	(_inputAmount * synths[inputAssetIndex]!.price) /
-		// 	synths[outputAssetIndex]!.price;
-		// setOutputAmount(_outputAmount);
+		let _inputAsset = (pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]
+        let _inputAmount = tradingBalanceOf(_inputAsset.synth_id)/(10**(_inputAsset.decimal ?? 18))
+		setInputAmount(_inputAmount);
+        let _outputAmount =
+			(_inputAmount * (pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]!.price) /
+			(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]!.price;
+		setOutputAmount(_outputAmount);
 	};
 
 	return (
@@ -281,8 +284,11 @@ function Swap() {
 					size="lg"
 					width={'100%'}
 					bgColor={'#0CAD4B'}
-					onClick={exchange}>
-					Exchange
+					onClick={exchange}
+					disabled={!isConnected}
+					>
+					{isConnected? <>Exchange</> : <>Please connect your wallet</>} 
+
 				</Button>
 
 				{loader && (

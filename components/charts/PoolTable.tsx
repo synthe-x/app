@@ -29,7 +29,6 @@ const dollarFormatter = (new Intl.NumberFormat('en-US', { style: 'currency', cur
 const tokenFormatter = (new Intl.NumberFormat('en-US'));
 
 export default function PoolTable({pool}: any) {
-    console.log(pool);
   return (
     <>
         {pool && pool.poolSynth_ids? <TableContainer

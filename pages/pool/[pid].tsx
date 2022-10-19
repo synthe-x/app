@@ -53,6 +53,7 @@ const Pool = () => {
 	} = useContext(WalletContext);
 
 	const [volume, setVolume] = React.useState<{}[]>([]);
+	const [_24h, set24h] = React.useState(0);
 
 	useEffect(() => {
 		let _pool;
@@ -91,9 +92,24 @@ const Pool = () => {
 			}
 
 			axios.get('https://api.synthex.finance/pool/volume/'+_poolIndex).then((resp)=>{
+				const dayId = Math.round(Date.now()/(1000*60*60*24))+1;
+				let volume = 0;
+				for(let i in resp.data.data){
+					if(resp.data.data[i].dayId == dayId){
+						for(let j in _pool.poolSynth_ids){
+							volume += (resp.data.data[i][_pool.poolSynth_ids[j].symbol])*(_pool.poolSynth_ids[j].price);
+						}
+					}
+					for(let j in _pool.poolSynth_ids){
+						resp.data.data[i][_pool.poolSynth_ids[j].symbol] = ((resp.data.data[i][_pool.poolSynth_ids[j].symbol])*(_pool.poolSynth_ids[j].price)).toFixed(2);
+					}
+				}
+
+				set24h(volume);
+				
 				for(let i in resp.data.data){
 					resp.data.data[i].dayId = (new Date(resp.data.data[i].dayId * 24*60*60*1000).toDateString()).split(" ").slice(1).join(" ")
-				  }
+				}
 				setVolume(resp.data.data);
 			});
 
@@ -137,15 +153,34 @@ const Pool = () => {
 								mt={5}>
 								24H VOLUME
 							</Text>
-							<Text fontSize={'xl'}>$ 120,812,394.93</Text>
+							<Text fontSize={'xl'}>{dollarFormatter.format(_24h)}</Text>
 						</Box>
 					</Flex>
 
 					{/* <Text fontSize={"md"} my={2}>Total Collateral: {pool?.totalCollateral}</Text> */}
 					<Flex gap={20}>
-						<Box width={'60%'}>
+						<Flex flexDirection={"column"} justify="space-between" width={'60%'}>
+							<Box height={"500px"}>
 							<PoolPie data={pieData} />
-						</Box>
+							</Box>
+							<Flex gap={5}>
+							<Box width={'50%'}>
+								<EnterPool
+								assets={synths}
+								pool={pool}
+								/>
+							</Box>
+
+							<Box width={"50%"}>
+
+							<ExitPool
+								assets={synths}
+								pool={pool}
+								width={'100%'}
+								/>
+							</Box>
+						</Flex>
+						</Flex>
 						<PoolTable pool={pool}/>
 					</Flex>
 					<Box
@@ -158,23 +193,7 @@ const Pool = () => {
 							<Text>Total Volume</Text>
 							<Text>Some Other Text XYZ</Text>
 						</Box>
-						<Flex gap={5}>
-							<Box width={'50%'}>
-								{/* <EnterPool
-								assets={synths}
-								pool={pool}
-								/>
-							</Box>
-
-							<Box width={"50%"}>
-
-							<ExitPool
-								assets={synths}
-								pool={pool}
-								width={'100%'}
-								/> */}
-							</Box>
-						</Flex>
+						
 					</Box>
 				</Box>
 			) : (
