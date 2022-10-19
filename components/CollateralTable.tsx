@@ -54,7 +54,7 @@ const CollateralTable = ({collaterals, cRatio}: any) => {
           return <Tr key={collateral['symbol']}  bg={colorMode == "dark" ?"#171717" : "#ededed"}>
             <Td >
               <Box display="flex" alignItems="center" >
-                <Image src={`/${collateral.symbol}.png`} 
+                <Image src={`/${collateral?.symbol}.png`} 
                 width={35} height={35} 
                 // layout="fill"
                 // style={tknholdingImg} 

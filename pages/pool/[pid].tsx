@@ -90,7 +90,7 @@ const Pool = () => {
 				});
 			}
 
-			axios.get('http://127.0.0.1:3030/pool/volume/'+_poolIndex).then((resp)=>{
+			axios.get('https://api.synthex.finance/pool/volume/'+_poolIndex).then((resp)=>{
 				for(let i in resp.data.data){
 					resp.data.data[i].dayId = (new Date(resp.data.data[i].dayId * 24*60*60*1000).toDateString()).split(" ").slice(1).join(" ")
 				  }

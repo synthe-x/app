@@ -36,7 +36,7 @@ function App() {
 
 	function getUserData(_address: string | null = address) {
 		axios
-			.get('http://127.0.0.1:3030/user/' + _address + '/all')
+			.get('https://api.synthex.finance/user/' + _address + '/all')
 			.then((res) => {
 				setMinCRatio(res.data.data.minCRatio);
 			});

@@ -80,9 +80,9 @@ function WalletContextProvider({children}: any) {
 
     const fetchData = (_tronWeb: any = tronWeb, _address = address) => {
 		Promise.all([
-			axios.get("http://127.0.0.1:3030/assets/synths"), 
-			axios.get("http://127.0.0.1:3030/assets/collaterals"),
-			axios.get("http://127.0.0.1:3030/pool/all")
+			axios.get("https://api.synthex.finance/assets/synths"), 
+			axios.get("https://api.synthex.finance/assets/collaterals"),
+			axios.get("https://api.synthex.finance/pool/all")
 		]).then(async (res)=>{
 			let contract = await _tronWeb.contract().at("TY7KLZkopABnjy4x8SSbsaK9viV9bqxCvE");
 			_setSynths(res[2].data.data, res[0].data.data, contract, _tronWeb, _address);
