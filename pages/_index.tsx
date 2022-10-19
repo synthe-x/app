@@ -6,7 +6,7 @@ import { WalletContext } from '../components/WalletContextProvider';
 import {useEffect} from 'react';
 import { id } from 'ethers/lib/utils';
 
-export default function _index({ Component, pageProps }: any) {
+export default function _index({children}: any) {
 
     const {
 		isConnected,
@@ -40,7 +40,7 @@ export default function _index({ Component, pageProps }: any) {
                 flexDirection={{ sm: 'column', md: 'row' }}>
                 <Box maxWidth={'1300px'} minW={'1200px'}>
                     <Navbar />
-                    <Component {...pageProps} />
+                    {children}
                 </Box>
             </Flex>
            }

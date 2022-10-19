@@ -42,7 +42,7 @@ function WalletContextProvider({children}: any) {
     const [synths, setSynths] = React.useState<any[]>([]);
     const [totalDebt, setTotalDebt] = React.useState(-1);
     const [isDataReady, setIsDataReady] = React.useState(false);
-    const [isFetchingData, setIsFetchingData] = React.useState(false);
+    const [isFetchingData, setIsFetchingData] = React.useState(true);
 
 	const [pools, setPools] = React.useState([]);
 	const [poolUserData, setPoolUserData] = React.useState([]);

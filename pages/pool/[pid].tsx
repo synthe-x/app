@@ -56,7 +56,7 @@ const Pool = () => {
 	const [_24h, set24h] = React.useState(0);
 
 	useEffect(() => {
-		let _pool;
+		let _pool: any;
 		let _poolIndex = 0;
 		for (let i in pools) {
 			// 	pools.find(

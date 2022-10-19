@@ -54,7 +54,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
     <WalletContextProvider>
-        <Index Component={Component} pageProps={pageProps}/>
+        <Index>
+          <Component {...pageProps} />
+        </Index>
     </WalletContextProvider>
     </ChakraProvider>
   );
