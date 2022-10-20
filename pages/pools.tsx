@@ -58,7 +58,7 @@ function App() {
 	return (
 		<>
 			
-						<Box>
+						<Box mb={20}>
 							<Heading size={'md'} fontWeight="bold" mt={10} color="whiteAlpha.800">
 								Trading Pools
 							</Heading>

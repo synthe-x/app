@@ -106,6 +106,8 @@ function WalletContextProvider({children}: any) {
         } else {
 			// setTronWeb(_tronWeb)
 			setConnectionError('Please install TronLink wallet extension');
+			localStorage.removeItem("address")
+			// setAddress(address)
 		}
     }
 

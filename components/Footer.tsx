@@ -7,7 +7,7 @@ export default function Footer(){
     
     return (
         <Flex
-        // position={'fixed'}
+        position={'fixed'}
         bottom={0}
         mt={10}
         height={8}

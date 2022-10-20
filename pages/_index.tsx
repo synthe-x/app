@@ -42,6 +42,7 @@ export default function _index({children}: any) {
             <Flex
                 justify={'center'}
                 flexDirection={{ sm: 'column', md: 'row' }}
+                minH="100vh"
                 >
                 <Box maxWidth={'1300px'} minW={'1200px'}>
                     <Navbar />
