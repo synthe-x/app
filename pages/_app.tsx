@@ -12,9 +12,10 @@ import Navbar from '../components/Navbar';
 import { WalletContextProvider } from '../components/WalletContextProvider';
 import Index from "./_index"
 
-// const config: ThemeConfig = {
-//   initialColorMode: 'dark',
-// }
+const config: ThemeConfig = {
+  initialColorMode: 'light',
+  useSystemColorMode: true
+}
 
 import { mode, StyleFunctionProps } from '@chakra-ui/theme-tools';
 
@@ -48,7 +49,7 @@ const breakpoints ={
   xl: "1440px",
   "2xl": "1680px"
 };
-const theme = extendTheme({ components, styles, // config,
+const theme = extendTheme({ components, styles, config,
   breakpoints })
 
 function MyApp({ Component, pageProps }: AppProps) {
