@@ -61,7 +61,7 @@ function App() {
 	return (
 		<>
 			{
-				<Box>	
+				<Box mt={10}>	
 					<Flex
 						flexDirection={{ sm: 'column', lg: 'row' }}
 						my="1rem"

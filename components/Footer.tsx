@@ -3,9 +3,11 @@ import { useRouter } from "next/router";
 
 export default function Footer(){
 
-    const router = useRouter();
+    // const router = useRouter();
     
     return (
+        <>
+
         <Flex
         position={'fixed'}
         bottom={0}
@@ -17,17 +19,22 @@ export default function Footer(){
         justify="space-between"
         align={"center"}
         wrap="wrap"
-        px={5}
+        // px={5}
+        // maxW={"1200px"}
+        // mx="100px"
         >
-            <Divider/>
-            <Flex gap={2} >
+            {/* <Divider/>
 
-            {/* <Text fontSize={"sm"}>ChainScore Limited</Text> */}
+            <Flex gap={2} justify="space-between">
+
+            <Text fontSize={"sm"}>ChainScore Limited</Text>
             <Text fontSize={"sm"}>hello@chainscore.finance</Text>
             </Flex>
 
-            <Text fontSize={"sm"}>Build on Tron</Text>
+            <Text fontSize={"sm"}>Build on Tron</Text> */}
+
 
         </Flex>
+        </>
     )
 }

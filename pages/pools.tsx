@@ -57,23 +57,21 @@ function App() {
 
 	return (
 		<>
-			
-						<Box mb={20}>
-							<Heading size={'md'} fontWeight="bold" mt={10} color="whiteAlpha.800">
-								Trading Pools
-							</Heading>
-							<Text color={"whiteAlpha.700"}>
-								Trade without frictions
-							</Text>
-							<Flex flexDirection={"column"} gap={10} my={6}>
-							{pools.slice(1).map((pool: any, index: number) => {
-								return (
-									<PoolCard key={index} pool={pool} />
-								);
-							})}
-							</Flex>
-						</Box>
-					
+			<Box mb={20}>
+				<Text fontSize={'xl'} fontWeight="bold" mt={10} color="whiteAlpha.800">
+					TRADING POOLS
+				</Text>
+				{/* <Text color={"whiteAlpha.700"}>
+					Trade without frictions
+				</Text> */}
+				<Flex flexDirection={"column"} gap={10} my={6}>
+				{pools.slice(1).map((pool: any, index: number) => {
+					return (
+						<PoolCard key={index} pool={pool} />
+					);
+				})}
+				</Flex>
+			</Box>
 		</>
 	);
 }

@@ -25,7 +25,6 @@ import {
 
 import { BsPlusCircle } from 'react-icons/bs';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../src/utils';
 
 import { WalletContext } from './WalletContextProvider';
 

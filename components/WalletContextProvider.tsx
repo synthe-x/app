@@ -16,7 +16,7 @@ const privateKey = '52641f54dc5e1951657523c8e7a1c44ac76229a4b14db076dce6a6ce9ae9
 const tronWebObject = new TronWeb(fullNode,solidityNode,eventServer,privateKey);
 
 interface WalletValue {
-    address: null|string;
+    address: string;
     tronWeb: {};
     isConnected: boolean;
     isConnecting: boolean;
@@ -27,7 +27,7 @@ interface WalletValue {
     collaterals: any[];
     totalCollateral: number;
 	synths: any[], totalDebt: number, pools: any[], poolUserData: null[],
-    fetchData: (_tronWeb?: any, _address?: null) => void;
+    fetchData: (_tronWeb?: any, _address?: string) => void;
 	tradingPool: number; setTradingPool: (_:number) => void;
 	connectionError: string|null;
 	dollarFormatter: any, tokenFormatter: any,
@@ -39,7 +39,7 @@ interface WalletValue {
 }
 
 function WalletContextProvider({children}: any) {
-    const [address, setAddress] = React.useState<null|string>("TU6nPbkDzMfhtg13nUnTMbuVFFMpLSs3P3");
+    const [address, setAddress] = React.useState<string>("TU6nPbkDzMfhtg13nUnTMbuVFFMpLSs3P3");
     const [tronWeb, setTronWeb] = React.useState({});
     const [isConnected, setIsConnected] = React.useState(false);
     const [isConnecting, setIsConnecting] = React.useState(false);
@@ -61,14 +61,18 @@ function WalletContextProvider({children}: any) {
 	const [minCRatio, setMinCRatio] = React.useState(130);
 	const [safeCRatio, setSafeCRatio] = React.useState(200);
 
+	const [errRetryCount, setErrRetryCount] = React.useState(0);
+
 
 	React.useEffect(() => {
 		setDollarFormatter(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }));
 		setTokenFormatter(new Intl.NumberFormat('en-US'));
-		if(localStorage.getItem("address")){
-			connect()
-		} else {
-			if(typeof window !== 'undefined'){
+		
+		if(typeof window !== 'undefined'){
+			if(localStorage.getItem("address")){
+				connect()
+			} else {
+			
 				let __tronWeb = (window as any).tronWeb
 				if(!__tronWeb){
 					setTronWeb(tronWebObject)
@@ -90,7 +94,7 @@ function WalletContextProvider({children}: any) {
 				} else {
 					_addr = (window as any).tronWeb.address.fromHex(account.address);
 				}
-				console.log(_addr);
+				console.log("Setting address", _addr);
 				setAddress(_addr)
                 setIsConnected(true);
                 setIsConnecting(false);
@@ -103,10 +107,21 @@ function WalletContextProvider({children}: any) {
 				}
 				localStorage.setItem("address", _addr)
             })
+			.catch((err: any) => {
+				console.log("Error connecting", err);
+				setTimeout(connect, 1000);
+				setErrRetryCount(errRetryCount + 1);
+			})
         } else {
+			if(typeof window !== 'undefined'){
+				setTimeout(connect, 1000);
+				setErrRetryCount(errRetryCount + 1);
+				if(errRetryCount > 5){
+					setConnectionError('Please install TronLink wallet extension');
+				}
+			} 
 			// setTronWeb(_tronWeb)
-			setConnectionError('Please install TronLink wallet extension');
-			localStorage.removeItem("address")
+			// localStorage.removeItem("address")
 			// setAddress(address)
 		}
     }
@@ -132,6 +147,9 @@ function WalletContextProvider({children}: any) {
 			_setSynths(res[2].data.data, res[0].data.data, contract, _tronWeb, _address);
 			_setCollaterals(res[1].data.data, contract, _tronWeb, _address)
 		})
+		.catch((err) => {
+			setConnectionError("Failed to fetch data. Please refresh the page.")
+		})
     }
 
 	const fetchDataLocal = async (_tronWeb: any = tronWeb, _address = address) => {
@@ -148,6 +166,7 @@ function WalletContextProvider({children}: any) {
 			tokens.push(_collaterals[i].cAsset)
 		}
 		
+		console.log("Checking collateral balance", _address);
 		contract.balanceOf(tokens, _address).call()
 		.then((res: any) => {
 			res = (res[0])
@@ -177,6 +196,7 @@ function WalletContextProvider({children}: any) {
 		}
 
 
+		console.log("Checking synth balance", _address);
 		// console.log(JSON.stringify(tokens));
 		Promise.all([contract.balanceOf(tokens, _address).call(), contract.debtBalanceOf(tokens, _address).call()])
 		.then((res: any) => {
@@ -222,7 +242,7 @@ function WalletContextProvider({children}: any) {
 					}
 				}
 				setTotalDebt(totalDebt);
-
+				setConnectionError(null)
 				setSynths(_synths);
 				setIsDataReady(true)
 				setIsFetchingData(false)
@@ -230,10 +250,10 @@ function WalletContextProvider({children}: any) {
 			.catch((err: any) => {
 				console.log("Error:", err);
 			})
-			})
-			.catch((err: any) => {
-				console.log("Error:", err);
-			})
+		})
+		.catch((err: any) => {
+			console.log("Error:", err);
+		})
 	}
 
 	const availableToBorrow = () => {

@@ -20,23 +20,9 @@ import {
 	TableCaption,
 	TableContainer,
 } from '@chakra-ui/react';
-import Navbar from '../components/Navbar';
-import IssuanceTable from '../components/IssuanceTable';
-import CollateralTable from '../components/CollateralTable';
-import { useContext, useEffect, useState } from 'react';
-import { getContract } from '../src/utils';
-import { useAccount } from 'wagmi';
-import web3 from 'web3';
-import Chart from '../components/DonutChart';
-import axios from 'axios';
+import { useContext } from 'react';
 import { WalletContext } from '../components/WalletContextProvider';
-import ConnectButton from '../components/ConnectButton';
-import Swap from '../components/Swap';
-import { AiOutlineEnter } from 'react-icons/ai';
-import { BiExit } from 'react-icons/bi';
 import TransferModal from './modals/TransferModal';
-import { MdOpenInNew } from 'react-icons/md';
-import Link from 'next/link';
 
 function ExchangeSideBar({}) {
 	const { colorMode } = useColorMode();

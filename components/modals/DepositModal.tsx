@@ -131,6 +131,7 @@ const DepositModal = ({ asset, balance }: any) => {
 	};
 
 	const allowanceCheck = async () => {
+		if(!(tronWeb as any).contract) return;
 		let collateral = await getContract(
 			tronWeb,
 			'CollateralERC20',

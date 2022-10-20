@@ -29,7 +29,7 @@ export default function _index({children}: any) {
     const backgroundStyle = {
         backgroundColor: "#000",
         backgroundRepeat: "no-repeat",
-        height: (router.pathname === '/' || router.pathname.includes("pool/")) ? "420px" : "100%",
+        height: (router.pathname === '/' || router.pathname.includes("pool/")) ? "440px" : "100%",
         backgroundSize: "contain",
         backgroundPosition: "top",
         minW: "100%",
