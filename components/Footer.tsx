@@ -1,17 +1,33 @@
-import { Text, Box } from "@chakra-ui/react";
+import { Text, Box, Flex, Divider } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
 export default function Footer(){
-    return (
-        <Box style={{
-            // position: "fixed",
-            // bottom: 0,
-            // width: "100%",
-            // height: "30px",
-            // background: "white",
-            // marginLeft: "-30px"
-            marginBottom: "30px"
-        }}>
 
-        </Box>
+    const router = useRouter();
+    
+    return (
+        <Flex
+        // position={'fixed'}
+        bottom={0}
+        mt={10}
+        height={8}
+        width={"100%"}
+        // bgColor="#fff"
+        textAlign={"center"}
+        justify="space-between"
+        align={"center"}
+        wrap="wrap"
+        px={5}
+        >
+            <Divider/>
+            <Flex gap={2} >
+
+            {/* <Text fontSize={"sm"}>ChainScore Limited</Text> */}
+            <Text fontSize={"sm"}>hello@chainscore.finance</Text>
+            </Flex>
+
+            <Text fontSize={"sm"}>Build on Tron</Text>
+
+        </Flex>
     )
 }

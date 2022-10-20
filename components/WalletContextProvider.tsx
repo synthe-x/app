@@ -6,6 +6,15 @@ const collateralsConfig = require('../artifacts/collaterals.json');
 const synthsConfig = require('../artifacts/synths.json');
 const tradingPoolsConfig = require('../artifacts/tradingPools.json');
 
+const TronWeb = require('tronweb')
+const HttpProvider = TronWeb.providers.HttpProvider;
+const node = "https://nile.trongrid.io";
+const fullNode = new HttpProvider(node);
+const solidityNode = new HttpProvider(node);
+const eventServer = new HttpProvider(node);
+const privateKey = '52641f54dc5e1951657523c8e7a1c44ac76229a4b14db076dce6a6ce9ae9293d';
+const tronWebObject = new TronWeb(fullNode,solidityNode,eventServer,privateKey);
+
 interface WalletValue {
     address: null|string;
     tronWeb: {};
@@ -38,11 +47,11 @@ function WalletContextProvider({children}: any) {
 	const [connectionError, setConnectionError] = React.useState<null|string>(null);
     const [chain, setChain] = React.useState(null);
     const [collaterals, setCollaterals] = React.useState([]);
-    const [totalCollateral, setTotalCollateral] = React.useState(-1);
+    const [totalCollateral, setTotalCollateral] = React.useState(0);
     const [synths, setSynths] = React.useState<any[]>([]);
-    const [totalDebt, setTotalDebt] = React.useState(-1);
+    const [totalDebt, setTotalDebt] = React.useState(0);
     const [isDataReady, setIsDataReady] = React.useState(false);
-    const [isFetchingData, setIsFetchingData] = React.useState(true);
+    const [isFetchingData, setIsFetchingData] = React.useState(false);
 
 	const [pools, setPools] = React.useState([]);
 	const [poolUserData, setPoolUserData] = React.useState([]);
@@ -54,12 +63,21 @@ function WalletContextProvider({children}: any) {
 
 
 	React.useEffect(() => {
-		if(localStorage.getItem("address")){
-			connect()
-		}
 		setDollarFormatter(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }));
 		setTokenFormatter(new Intl.NumberFormat('en-US'));
-	}, []);
+		if(localStorage.getItem("address")){
+			connect()
+		} else {
+			if(typeof window !== 'undefined'){
+				let __tronWeb = (window as any).tronWeb
+				if(!__tronWeb){
+					setTronWeb(tronWebObject)
+				}
+				console.log("first run...")
+				if(!isFetchingData && !isDataReady) fetchData();
+			}
+		}
+	}, [isDataReady, isFetchingData, tronWeb]);
 
     const connect = () => {
         if((window as any).tronWeb){
@@ -79,25 +97,29 @@ function WalletContextProvider({children}: any) {
 					setConnectionError('Please connect to Nile Testnet');
 				} else {
 					setChain((window as any).tronWeb.fullNode.host)
-					fetchData((window as any).tronWeb, _addr)
+					if(!isFetchingData && !isDataReady) fetchData(tronWebObject, _addr)
 					// fetchDataLocal((window as any).tronWeb, _addr)
 				}
 				localStorage.setItem("address", _addr)
             })
-        }
+        } else {
+			// setTronWeb(_tronWeb)
+			setConnectionError('Please install TronLink wallet extension');
+		}
     }
 
 	const tradingBalanceOf = (_s: string) => {
 		for(let i in synths){
 			if(synths[i].synth_id == _s){
+				console.log(synths[i], tradingPool)
 					return synths[i].amount[tradingPool];
 				}
 			}
 	}
 
-    const fetchData = (_tronWeb: any = tronWeb, _address = address) => {
+    const fetchData = (_tronWeb: any = tronWebObject, _address = address) => {
 		setIsFetchingData(true)
-		console.log("Fetching")
+		console.log("Fetching data...")
 		Promise.all([
 			axios.get("https://api.synthex.finance/assets/synths"), 
 			axios.get("https://api.synthex.finance/assets/collaterals"),
@@ -125,6 +147,7 @@ function WalletContextProvider({children}: any) {
 		
 		contract.balanceOf(tokens, _address).call()
 		.then((res: any) => {
+			res = (res[0])
 			let collateralBalance = 0;
 			for(let i = 0; i < res.length; i+=2){
 				_collaterals[i/2]['walletBalance'] = (res[i]).toString();
@@ -141,6 +164,7 @@ function WalletContextProvider({children}: any) {
 
 	const _setSynths = (_tradingPools: any, _synths: any, contract: any, _tronWeb = tronWeb, _address = address) => {
 		let tokens: string[] = []
+		// console.log(_synths);
 		// let tokenWeNeed = ["AUXX", "CLXX"]
 		for(let i in _synths){
 			tokens.push(_synths[i].synth_id)
@@ -153,8 +177,8 @@ function WalletContextProvider({children}: any) {
 		// console.log(JSON.stringify(tokens));
 		Promise.all([contract.balanceOf(tokens, _address).call(), contract.debtBalanceOf(tokens, _address).call()])
 		.then((res: any) => {
-			let walletBalances = res[0];
-			let debtBalances = res[1];
+			let walletBalances = res[0][0];
+			let debtBalances = res[1][0];
 
 			let totalDebt = 0
 
@@ -188,9 +212,10 @@ function WalletContextProvider({children}: any) {
 			Promise.all(poolUserDataRequests)
 			.then((res: any) => {
 				for(let i in res){
-					for(let j = 0; j < res[i].length; j++){
-						_synths[j]['amount'].push((res[i][j]).toString());
-						totalDebt+=Number(res[i][j]/1e18)*_synths[j].price;
+					for(let j = 0; j < res[i][0].length; j++){
+						if(!_synths[j].amount) _synths[j]['amount'] = [];
+						_synths[j]['amount'].push((res[i][0][j]).toString());
+						totalDebt+=Number(res[i][0][j]/1e18)*_synths[j].price;
 					}
 				}
 				setTotalDebt(totalDebt);

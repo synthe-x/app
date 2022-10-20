@@ -26,8 +26,11 @@ import PoolPie from '../../components/charts/PoolPie';
 import axios from 'axios';
 import PoolTable from '../../components/charts/PoolTable';
 
-const dollarFormatter = (new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }));
-const tokenFormatter = (new Intl.NumberFormat('en-US'));
+const dollarFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+});
+const tokenFormatter = new Intl.NumberFormat('en-US');
 
 const Pool = () => {
 	const router = useRouter();
@@ -54,6 +57,8 @@ const Pool = () => {
 
 	const [volume, setVolume] = React.useState<{}[]>([]);
 	const [_24h, set24h] = React.useState(0);
+	const [totalVolume, setTotalVolume] = React.useState(0);
+
 
 	useEffect(() => {
 		let _pool: any;
@@ -91,29 +96,51 @@ const Pool = () => {
 				});
 			}
 
-			axios.get('https://api.synthex.finance/pool/volume/'+_poolIndex).then((resp)=>{
-				const dayId = Math.round(Date.now()/(1000*60*60*24))+1;
-				let volume = 0;
-				for(let i in resp.data.data){
-					if(resp.data.data[i].dayId == dayId){
-						for(let j in _pool.poolSynth_ids){
-							volume += (resp.data.data[i][_pool.poolSynth_ids[j].symbol])*(_pool.poolSynth_ids[j].price);
+			axios
+				.get('https://api.synthex.finance/pool/volume/' + _poolIndex)
+				.then((resp) => {
+					const dayId =
+						Math.round(Date.now() / (1000 * 60 * 60 * 24)) + 1;
+					let _24hvolume = 0;
+					let _totalVolume = 0
+					for (let i in resp.data.data) {
+						for (let j in _pool.poolSynth_ids) {
+							if (resp.data.data[i].dayId == dayId) {
+								_24hvolume +=
+								resp.data.data[i][
+									_pool.poolSynth_ids[j].symbol
+								] * _pool.poolSynth_ids[j].price;
+							}
+							_totalVolume += resp.data.data[i][
+								_pool.poolSynth_ids[j].symbol
+							] * _pool.poolSynth_ids[j].price;
+						}
+						
+						for (let j in _pool.poolSynth_ids) {
+							resp.data.data[i][_pool.poolSynth_ids[j].symbol] = (
+								resp.data.data[i][
+									_pool.poolSynth_ids[j].symbol
+								] * _pool.poolSynth_ids[j].price
+							).toFixed(2);
 						}
 					}
-					for(let j in _pool.poolSynth_ids){
-						resp.data.data[i][_pool.poolSynth_ids[j].symbol] = ((resp.data.data[i][_pool.poolSynth_ids[j].symbol])*(_pool.poolSynth_ids[j].price)).toFixed(2);
+
+					set24h(_24hvolume);
+					setTotalVolume(_totalVolume)
+
+					for (let i in resp.data.data) {
+						resp.data.data[i].dayId = new Date(
+							resp.data.data[i].dayId * 24 * 60 * 60 * 1000
+						)
+							.toDateString()
+							.split(' ')
+							.slice(1)
+							.join(' ');
 					}
-				}
+					setVolume(resp.data.data);
+				});
 
-				set24h(volume);
-				
-				for(let i in resp.data.data){
-					resp.data.data[i].dayId = (new Date(resp.data.data[i].dayId * 24*60*60*1000).toDateString()).split(" ").slice(1).join(" ")
-				}
-				setVolume(resp.data.data);
-			});
-
-			setPieData((_pieData) as []);
+			setPieData(_pieData as []);
 		}
 	}, [pid, pools]);
 
@@ -122,13 +149,14 @@ const Pool = () => {
 			{pool && synths ? (
 				<Box mt={5}>
 					<Link
+						color={'whiteAlpha.700'}
 						display={'flex'}
 						alignItems="center"
 						mb={5}
 						href="/pools">
 						<MdArrowBackIos /> Back
 					</Link>
-					<Flex justify={'space-between'} mb={10}>
+					<Flex justify={'space-between'} mb={10} color="white">
 						<Box>
 							<Heading size={'lg'}>{pool?.name}</Heading>
 							<Text fontSize={'md'} my={2}>
@@ -153,47 +181,59 @@ const Pool = () => {
 								mt={5}>
 								24H VOLUME
 							</Text>
-							<Text fontSize={'xl'}>{dollarFormatter.format(_24h)}</Text>
+							<Text fontSize={'xl'}>
+								{dollarFormatter.format(_24h)}
+							</Text>
 						</Box>
 					</Flex>
 
 					{/* <Text fontSize={"md"} my={2}>Total Collateral: {pool?.totalCollateral}</Text> */}
-					<Flex gap={20}>
-						<Flex flexDirection={"column"} justify="space-between" width={'60%'}>
-							<Box height={"500px"}>
-							<PoolPie data={pieData} />
+					<Flex gap={10}>
+						<Flex
+							flexDirection={'column'}
+							justify="space-evenly"
+							width={'60%'}
+							bgColor="white"
+							rounded={20}
+							px={10}
+							boxShadow={'lg'}
+							pb={5}
+							>
+							<Box height={'500px'}>
+								<PoolPie data={pieData} />
 							</Box>
 							<Flex gap={5}>
-							<Box width={'50%'}>
-								<EnterPool
-								assets={synths}
-								pool={pool}
-								/>
-							</Box>
+								<Box width={'50%'}>
+									<EnterPool assets={synths} pool={pool} />
+								</Box>
 
-							<Box width={"50%"}>
-
-							<ExitPool
-								assets={synths}
-								pool={pool}
-								width={'100%'}
-								/>
-							</Box>
+								<Box width={'50%'}>
+									<ExitPool
+										assets={synths}
+										pool={pool}
+										width={'100%'}
+									/>
+								</Box>
+							</Flex>
 						</Flex>
-						</Flex>
-						<PoolTable pool={pool}/>
+						<Box boxShadow={'xl'} rounded={10}>
+							<PoolTable pool={pool} />
+						</Box>
 					</Flex>
 					<Box
 						width={'100%'}
-						height="500px"
+						height="550px"
 						my={10}
-						textAlign="center">
-						<Bar data={volume} poolSynths={pool.poolSynth_ids}/>
-						<Box my={2} color="gray">
-							<Text>Total Volume</Text>
-							<Text>Some Other Text XYZ</Text>
+						textAlign="center"
+						bgColor={'white'}
+						p={8}
+						rounded={20}
+						boxShadow={'lg'}>
+						<Bar data={volume} poolSynths={pool.poolSynth_ids} />
+						<Box mt={3} color="gray">
+							<Text fontSize={"sm"}>Total Volume</Text>
+							<Text>{dollarFormatter.format(totalVolume)}</Text>
 						</Box>
-						
 					</Box>
 				</Box>
 			) : (

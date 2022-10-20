@@ -31,6 +31,7 @@ import { getContract } from '../../src/utils';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { PropagateLoader, PacmanLoader } from 'react-spinners';
+import { BiPlusCircle } from 'react-icons/bi';
 
 const DepositModal = ({ asset }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -66,7 +67,7 @@ const DepositModal = ({ asset }: any) => {
 
 	const issue = async () => {
 		if (!amount) return;
-		let system = await getContract('System');
+		let system = await getContract(tronWeb, 'System');
 		let value = BigInt(amount * 10 ** asset['decimal']).toString();
 		setloader(true);
 		setissueerror('');
@@ -105,7 +106,7 @@ const DepositModal = ({ asset }: any) => {
 			}
 		);
 	};
-	const {isConnected} = useContext(WalletContext)
+	const {isConnected, tronWeb} = useContext(WalletContext)
 
 	return (
 		<Box>
@@ -113,7 +114,7 @@ const DepositModal = ({ asset }: any) => {
 			disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
-				icon={<BsPlusCircle size={30} />}
+				icon={<BiPlusCircle size={35} color="gray" />}
 				aria-label={''}
 				isRound={true}></IconButton>
 				<Modal isCentered isOpen={isOpen} onClose={_onClose}>

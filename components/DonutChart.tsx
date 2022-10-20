@@ -45,7 +45,7 @@ export default function DonutChart({}: any){
   }
   return (
     <>
-    <div style={{ width: "200px" }}>
+    <div style={{ width: "300px" }}>
       <Doughnut
         data={data}
         width={100}

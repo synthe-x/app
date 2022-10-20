@@ -33,7 +33,11 @@ function NavBar() {
         <Box mb={3}>
           <Image onClick={()=>{
             router.push("/")
-          }} src={colorMode == "dark" ? darklogo : lightlogo} alt="" width="100px" height="70px" />
+          }} src={
+            // colorMode == "dark" ? 
+            darklogo
+            //  : lightlogo
+            } alt="" width="100px" height="70px" />
         </Box>
 
 
@@ -43,7 +47,7 @@ function NavBar() {
             <ListItem mx="1rem">
               <Link href="/">
                 <Text my="1rem" 
-                color={router.pathname == "/" ? "green" : ""} 
+                color={router.pathname == "/" ? "green" : "white"} 
                 textDecoration={router.pathname == "/" ? "underline": ""} 
                 textUnderlineOffset={5} 
                 cursor={"pointer"} onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
@@ -55,7 +59,7 @@ function NavBar() {
             <ListItem mx="1rem">
               <Link href="/pools">
                 <Text my="1rem" 
-                color={router.pathname.includes("pool") ? "green" : ""} 
+                color={router.pathname.includes("pool") ? "green" : "gray.100"} 
                 textDecoration={router.pathname.includes("pool") ? "underline": ""} 
                 textUnderlineOffset={5} 
                 cursor={"pointer"} onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
@@ -67,7 +71,7 @@ function NavBar() {
             <ListItem mx="1rem">
               <Link href={"/exchange"}  >
                 <Text cursor={"pointer"} 
-                color={router.pathname == "/exchange" ? "green" : ""} 
+                color={router.pathname == "/exchange" ? "green" : "gray.100"} 
                 textDecoration={router.pathname == "/exchange" ? "underline": ""} 
                 textUnderlineOffset={5} 
                 my="1rem" onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
@@ -82,23 +86,23 @@ function NavBar() {
                 </Text>
               </Link>
             </ListItem> */}
-            <ListItem ml="1rem">
+            {/* <ListItem ml="1rem">
               <Button width={"3rem"} onClick={toggleColorMode} mr={5}> {colorMode == "dark" ? <BsMoonFill size={25} /> : <BsSunFill size={25} />}</Button>
-            </ListItem>
-            <ListItem mx="0rem">
+            </ListItem> */}
+            <ListItem mx="1rem">
               <ConnectButton />
             </ListItem>
           </UnorderedList>
         </Box>
 
 
-        <Box display={{ sm: "block", md: "none", lg: "none" }}>
+        {/* <Box display={{ sm: "block", md: "none", lg: "none" }}>
           <FaBars size={35} onClick={onOpen} />
-        </Box>
+        </Box> */}
 
 
       </Flex>
-      <Drawer placement={"right"} onClose={onClose} isOpen={isOpen}>
+      {/* <Drawer placement={"right"} onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
         <DrawerContent alignItems={"center"}>
           <DrawerHeader borderBottomWidth='1px'>
@@ -138,7 +142,7 @@ function NavBar() {
 
           </DrawerBody>
         </DrawerContent>
-      </Drawer>
+      </Drawer> */}
     </>
   )
 }

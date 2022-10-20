@@ -8,6 +8,7 @@ import {
 	Input,
 	Select,
 	Button,
+	Skeleton,
 } from '@chakra-ui/react';
 import {
 	Table,
@@ -35,6 +36,7 @@ import Swap from '../components/Swap';
 import { AiOutlineEnter } from 'react-icons/ai';
 import ExchangeSideBar from '../components/TradingSideBar';
 import { BiErrorAlt } from 'react-icons/bi';
+import TradingChart from '../components/charts/TradingChart';
 
 function Exchange() {
 	const { colorMode } = useColorMode();
@@ -61,11 +63,11 @@ function Exchange() {
 
 	return (
 		<>
-			{pools.length > 0 && <Flex justifyContent={"space-between"} gap={20} wrap="wrap-reverse">
+			{pools.length > 0 && <Flex justifyContent={"space-between"} gap={10} wrap="wrap-reverse">
 				<Box width={'35%'}>
 					<ExchangeSideBar />
 				</Box>
-				<Box mt={10} width='50%' mr={"0"}>
+				<Box mt={10} width='60%' color="white">
 					<Swap />
 				</Box>
 			</Flex>}

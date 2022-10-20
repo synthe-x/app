@@ -55,7 +55,7 @@ const RepayModal = ({ asset }: any) => {
 
 	const issue = async () => {
 		if(!amount) return
-		let system = await getContract('System');
+		let system = await getContract(tronWeb, 'System');
 		let value = BigInt(amount*10**asset['decimal']).toString();
 		setloader(true)
 		setrepayerror("");
@@ -88,11 +88,11 @@ const RepayModal = ({ asset }: any) => {
 			}
 		})
 	}
-	const {isConnected }= useContext(WalletContext);
+	const {isConnected, tronWeb }= useContext(WalletContext);
 
 	return (
 		<Box>
-			<IconButton disabled={!isConnected} variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={37} />} aria-label={''} isRound={true}>
+			<IconButton disabled={!isConnected} variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={35} color="gray"/>} aria-label={''} isRound={true}>
 			</IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg='blackAlpha.100'

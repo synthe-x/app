@@ -27,6 +27,7 @@ function App() {
 		totalCollateral,
 		totalDebt,
 		isDataReady,
+		isFetchingData,
 		connectionError,
 		availableToBorrow
 	} = useContext(WalletContext);
@@ -45,71 +46,78 @@ function App() {
 			});
 	}
 
+	const TableStyle = {
+		px: "1rem",
+		pt: "1rem",
+		mb: {sm: '1rem', md: '0' },
+		width: { sm: '100%', lg: '50%' },
+		flex: "1",
+		bg: colorMode == 'dark' ? '#171717' : '#FFFFFF',
+		borderRadius: '20px',
+		boxShadow: 'lg'
+	};
+
 	return (
 		<>
 			{
-			// isDataReady ? (
-				<Box>
-					
+				<Box>	
 					<Flex
 						flexDirection={{ sm: 'column', lg: 'row' }}
 						my="1rem"
-						justifyContent="space-around">
+						justifyContent="space-between"
+						color={"#fff"}
+						gap={5}>
 						<Box
 							display={'flex'}
 							justifyContent="space-between"
 							height="16rem"
-							p="0.8rem"
-							// border={'3px solid #252525'}
 							mb={{ sm: '1rem', lg: '0' }}
-							width={{ sm: '100%', lg: '59.5%' }}
-							// bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
-							// borderRadius={'10px'}
+							width={{ sm: '100%', md: '50%', lg: '50%' }}
 							>
-							<Box w="70%">
+							<Box w="100%">
 								<Box w="7rem" h="0.3rem" bg="#36a2eb" rounded={100}></Box>
 								<Text fontSize={'sm'}>Collateral Balance</Text>
-								<Text fontSize={'lg'} fontWeight="bold">
+								<Text fontSize={'xl'} fontWeight="bold">
 									$ {totalCollateral.toFixed(2)}
 								</Text>
 
 								<Divider my={4} />
 								<Box w="5rem" h="0.3rem" bg="#ffcd56" rounded={100}></Box>
 								<Text fontSize={'sm'}>Borrow Balance</Text>
-								<Text fontSize={'lg'} fontWeight="bold">
+								<Text fontSize={'xl'} fontWeight="bold">
 									$ {totalDebt.toFixed(2)}
 								</Text>
 
 								<Divider my={4} />
 								<Box w="7rem" h="0.3rem" bg="#ff6384" rounded={100}></Box>
 								<Text fontSize={'sm'}>Available to Borrow</Text>
-								<Text fontSize={'lg'} fontWeight="bold">
+								<Text fontSize={'xl'} fontWeight="bold">
 									${' '}
 									{availableToBorrow().toFixed(2)}
 								</Text>
 							</Box>
-
-							<Chart />
 						</Box>
+						
+						<Chart />
 
 						<Box
 							mt={{ sm: '1rem', md: '0' }}
 							height="16rem"
-							p="1rem"
+							pt="1rem"
 							// border={'3px solid #252525'}
-							width={{ sm: '100%', lg: '39.5%' }}
+							width={{ sm: '100%', md: '50%', lg: '50%' }}
 							// bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
 							// borderRadius={'10px'}
 							textAlign="right"
 							>
 							<Text fontSize={'sm'}>Stability Rate</Text>
-							<Text fontSize={'lg'} fontWeight="bold">
+							<Text fontSize={'xl'} fontWeight="bold">
 								1.01%
 							</Text>
 
 							<Divider my={4} />
 							<Text fontSize={'sm'}>Collateralisation Ratio</Text>
-							<Text fontSize={'lg'} fontWeight="bold">
+							<Text fontSize={'xl'} fontWeight="bold">
 								{((100 * totalCollateral) / totalDebt).toFixed(
 									2
 								)}{' '}
@@ -117,39 +125,26 @@ function App() {
 							</Text>
 							<Divider my={4} />
 							<Text fontSize={'sm'}>Minimum Required</Text>
-							<Text fontSize={'lg'} fontWeight="bold">
+							<Text fontSize={'xl'} fontWeight="bold">
 								{minCRatio} %
 							</Text>
 						</Box>
 					</Flex>
 					<Flex
-						flexDirection={{ sm: 'column', lg: 'row' }}
-						justifyContent="space-between">
-						<Box
-							mb={{ sm: '1rem', lg: '0' }}
-							border={'3px solid #252525'}
-							overflowX="auto"
-							px="0.5rem"
-							width={{ sm: '100%', lg: '44.2%' }}
-							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
-							borderRadius={'10px'}>
+						flexDirection={{ sm: 'column', md: 'column', lg: 'row' }}
+						justifyContent="space-between"
+						gap={10}
+						flexWrap="wrap"
+						>
+						<Box {...TableStyle}>
 							<CollateralTable/>
 						</Box>
 
-						<Box
-							px="0.5rem"
-							border={'3px solid #252525'}
-							mb={{ sm: '1rem', md: '0' }}
-							width={{ sm: '100%', lg: '54.2%' }}
-							bg={colorMode == 'dark' ? '#171717' : '#FFFFFF'}
-							borderRadius={'10px'}>
+						<Box {...TableStyle}>
 							<IssuanceTable/>
 						</Box>
 					</Flex>
 				</Box>
-			// ) : (
-			// 	<Progress size='xs' isIndeterminate colorScheme={"whatsapp"}></Progress>
-			// ) 
 }
 				
 		</>

@@ -39,6 +39,7 @@ import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getAddress, getContract } from '../../src/utils';
 import { useEffect, useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
+import { BiPlusCircle } from 'react-icons/bi';
 
 const DepositModal = ({ asset, balance }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -63,12 +64,14 @@ const DepositModal = ({ asset, balance }: any) => {
 	const changeAmount = (event: any) => {
 		setAmount(event.target.value);
 	};
+	
 	const setMax = () => {
 		setAmount(balance);
 	};
+
 	const issue = async () => {
 		if (!amount) return;
-		let system = await getContract('System');
+		let system = await getContract(tronWeb, 'System');
 		let value = BigInt(amount * 10 ** asset['decimal']).toString();
 		setloader(true);
 		setdepositerror('');
@@ -109,6 +112,7 @@ const DepositModal = ({ asset, balance }: any) => {
 
 	const approve = async () => {
 		let collateral = await getContract(
+			tronWeb,
 			'CollateralERC20',
 			asset['coll_address']
 		);
@@ -128,19 +132,20 @@ const DepositModal = ({ asset, balance }: any) => {
 
 	const allowanceCheck = async () => {
 		let collateral = await getContract(
+			tronWeb,
 			'CollateralERC20',
 			asset['coll_address']
 		);
 		let allowance = await collateral.methods
 			.allowance(
-				(window as any).tronWeb.defaultAddress.base58,
+				address,
 				getAddress('System')
 			)
 			.call();
 		allowance = allowance
 			.div((10 ** asset['decimal']).toString())
 			.toString();
-		console.log(allowance, balance);
+		// console.log(allowance, balance);
 		if (allowance.length < 10) {
 			if (parseInt(allowance) <= balance) {
 				setAmount(0);
@@ -167,7 +172,7 @@ const DepositModal = ({ asset, balance }: any) => {
 		fontSize: 'sm',
 	};
 
-	const {isConnected} = useContext(WalletContext)
+	const {isConnected, tronWeb, address} = useContext(WalletContext)
 
 	return (
 		<Box>
@@ -175,12 +180,14 @@ const DepositModal = ({ asset, balance }: any) => {
 			disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
-				icon={<BsPlusCircle size={30} />}
+				icon={<BiPlusCircle size={35} color="gray" />}
 				aria-label={''}
 				isRound={true}></IconButton>
-			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
+			<Modal isCentered isOpen={isOpen} onClose={_onClose} >
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'} height="30rem">
+				<ModalContent width={'30rem'} height="30rem" 
+				// bgColor="blackAlpha.800" color={"white"}
+				>
 					<ModalCloseButton />
 
 					<ModalHeader>

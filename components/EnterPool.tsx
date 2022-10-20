@@ -52,6 +52,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		setTradingPool,
 		pools,
 		poolUserData,
+		tronWeb
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
@@ -75,7 +76,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	}
 	const transfer = async () => {
 		if (!amount) return;
-		let system = await getContract('System');
+		let system = await getContract(tronWeb, 'System');
 		// console.log(pool.poolSynth_ids[activeAssetIndex])
 		let value = BigInt(amount * 10 ** (pool.poolSynth_ids[activeAssetIndex]['decimal'] ?? 18)).toString();
 		setloader(true);
@@ -130,7 +131,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		pool.poolSynth_ids ? <Box>
             {/* <Flex justifyContent="space-between" alignItems="center" mb="20px" gap={5}> */}
 
-			<Button my={2} size="md" bgColor={"#0CAD4B"} onClick={onOpen} aria-label={''} width={"100%"} disabled={!isConnected}>
+			<Button my={2} size="lg" bgColor={"#0CAD4B"} color="white" onClick={onOpen} aria-label={''} width={"100%"} disabled={!isConnected}>
                 Enter Pool
 			</Button>
             {/* <Button size="lg" bgColor={"#AF7E18"} onClick={onOpen} aria-label={''} width={"50%"}>

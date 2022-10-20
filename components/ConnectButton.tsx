@@ -40,13 +40,15 @@ const ConnectButton = ({}) => {
 		<Box>
 			{isConnected ? (
 				<Box>
-					<Button bgColor={"green"}>{address?.slice(0, 6) + "..." + address?.slice(-4)}</Button>
+					<Button bgColor={"#0CAD4B"} color="gray.100" size="sm">{address?.slice(0, 6) + "..." + address?.slice(-4)}</Button>
 				</Box>
 			) : (
 				<Button
 					bgColor={'#0CAD4B'}
+					color="gray.100"
 					onClick={connect}
 					isLoading={isConnecting}
+					size="sm"
           		>
 					Connect Wallet
 				</Button>

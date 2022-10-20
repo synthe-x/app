@@ -57,32 +57,35 @@ function PoolCard({ pool }: any) {
         <LinkBox>
 			<Box
 				width={'100%'}
-				bgColor="#181818"
-				height={'200px'}
-				rounded={10}
-				p={5}
-				my={5}
+				bgColor="white"
+				height={'250px'}
+				rounded={20}
+				border="1px"
+				borderColor="white"
                 onClick={()=>{}}
-                border="1px solid #2D2D2D"
+                // border="1px solid #2D2D2D"
                 >
-                <Flex direction='column' gap={"50px"}>
-				<Flex justify={'space-between'}>
-					<Box>
-                        <Heading size={'md'}>
-						<LinkOverlay href={"/pool/"+pool.pool_address}>
-							{pool.name}
-						</LinkOverlay>
-                        </Heading>
+					<Flex height={"75%"} 
+					bgColor="black" 
+					p={5} borderRadius={'19px 19px 0 0'} justify="end" flexDirection={"column"}
+					bgImage={"./cover.png"}
+					>
+						<PoolCardAssets assets={pool.poolSynth_ids}/>
+					</Flex>
 
-						<Text my={2}>{pool.symbol}</Text>
-					</Box>
+				<Flex justify={'space-between'} px={5} mt={2}>
+					<Flex align={"center"} gap={2}>
+                        <Text fontSize={'2xl'} fontWeight="bold">
+							<LinkOverlay href={"/pool/"+pool.pool_address}>
+								{pool.name}
+							</LinkOverlay>
+                        </Text>
+						<Text my={2} >({pool.symbol})</Text>
+					</Flex>
                     <Box textAlign={"right"}>
 						<Text fontWeight={"bold"} color="gray" fontSize={"sm"}>LIQUIDITY</Text>
-                        <Heading size={'md'} fontWeight={'bold'}>{dollarFormatter.format(totalLiquidity)}</Heading>
+                        <Heading size={'md'} fontWeight={'bold'} color="black">{dollarFormatter.format(totalLiquidity)}</Heading>
                     </Box>
-				</Flex>
-
-				<PoolCardAssets assets={pool.poolSynth_ids}/>
 
                 </Flex>
 			</Box>

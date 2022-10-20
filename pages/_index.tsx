@@ -5,9 +5,9 @@ import Navbar from '../components/Navbar';
 import { WalletContext } from '../components/WalletContextProvider';
 import {useEffect} from 'react';
 import { id } from 'ethers/lib/utils';
+import { useRouter } from "next/router";
 
 export default function _index({children}: any) {
-
     const {
 		isConnected,
 		isConnecting,
@@ -24,35 +24,33 @@ export default function _index({children}: any) {
         isFetchingData
 	} = useContext(WalletContext);
 
-    useEffect(() => {
-        if(typeof window !== 'undefined'){
-            if(!isFetchingData && !isDataReady) fetchData((window as any).tronWeb);
-        }
-    }, [fetchData, isFetchingData, isDataReady])
+    const router = useRouter();
+    
+    const backgroundStyle = {
+        backgroundColor: "#000",
+        backgroundRepeat: "no-repeat",
+        height: (router.pathname === '/' || router.pathname.includes("pool/")) ? "420px" : "100%",
+        backgroundSize: "contain",
+        backgroundPosition: "top",
+        minW: "100%",
+    }
 
 	return (
 		<Box>
-           {connectionError && <Text textAlign={"center"} width="100%" fontSize={"lg"}  p={2} bgColor="gray.800">{connectionError}</Text>}
-           {isFetchingData ? <Progress isIndeterminate/>: 
-           
+           {connectionError && <Text textAlign={"center"} width="100%" fontSize={"md"} fontWeight="bold" p={2} bgColor="gray.50">{connectionError}</Text>}
+            <Box {...backgroundStyle} >
             <Flex
                 justify={'center'}
-                flexDirection={{ sm: 'column', md: 'row' }}>
+                flexDirection={{ sm: 'column', md: 'row' }}
+                >
                 <Box maxWidth={'1300px'} minW={'1200px'}>
                     <Navbar />
                     {children}
                 </Box>
             </Flex>
-           }
-           {/* {!isConnected ?? <>
-            <Flex justify={"center"}>
-				<Box width="400px" height={200} textAlign={"center"} p={5} rounded={10}>
-				<Text fontSize={"md"} mb={5}>Please connect your wallet to continue</Text>
-				</Box>
-				</Flex>
-            <Text textAlign={"center"} width="100%" fontSize={"lg"}  p={2} bgColor="gray.800">Please connect your TronLink wallet</Text>
-           </>} */}
-			<Footer />
+            <Footer />
+            </Box>
+           
 		</Box>
 	);
 }

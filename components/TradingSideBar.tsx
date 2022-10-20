@@ -60,17 +60,16 @@ function ExchangeSideBar({}) {
 		setTradingPool(e.target.value);
 	};
 
-	console.log(pools, tradingPool)
-
 	return (
 		<>
 			<Box>
-                <Text mt={10} mb={2} fontSize={"xs"} fontWeight="bold" color={"#626262"} ml={1}>CHOOSE A POOL</Text>
+                <Text mt={10} mb={2} fontSize={"xs"} fontWeight="bold" color={"gray"} ml={1}>CHOOSE A POOL</Text>
 				<Select
 					mb={10}
 					onChange={updatePoolIndex}
 					value={tradingPool}
-					bgColor={'#171717'}
+					color="white"
+					// bgColor={'gray'}
 					// height="100"
                     >
 					{pools.map((pool: any, index: number) => {
@@ -81,12 +80,12 @@ function ExchangeSideBar({}) {
 						);
 					})}
 				</Select>
-				<TableContainer border={"1px solid #2C2C2C"} rounded={6} py={2} bgColor="#171717">
+				<TableContainer border={"1px solid #2C2C2C"} rounded={6} py={2} bgColor="#171717" color={"white"}>
 					<Table variant="simple" size="sm">
 						<Thead>
 							<Tr>
-								<Th>Asset</Th>
-								<Th>Balance</Th>
+								<Th color="#686868">Asset</Th>
+								<Th color="#686868">Balance</Th>
 								<Th></Th>
 							</Tr>
 						</Thead>

@@ -52,6 +52,7 @@ const TransferModal = ({ asset }: any) => {
 		setTradingPool,
 		pools,
 		poolUserData,
+		tronWeb
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
@@ -63,7 +64,7 @@ const TransferModal = ({ asset }: any) => {
 
 	const transfer = async () => {
 		if (!amount) return;
-		let system = await getContract('System');
+		let system = await getContract(tronWeb, 'System');
 		let value = BigInt(amount * 10 ** asset['decimal']).toString();
 		setloader(true);
 		setdepositerror('');
@@ -143,7 +144,7 @@ const TransferModal = ({ asset }: any) => {
 			disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
-				icon={<AiOutlineSwap />}
+				icon={<AiOutlineSwap color="gray" />}
 				aria-label={''}
 				isRound={true}
 				mr={-3}

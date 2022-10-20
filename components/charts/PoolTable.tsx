@@ -31,12 +31,12 @@ const tokenFormatter = (new Intl.NumberFormat('en-US'));
 export default function PoolTable({pool}: any) {
   return (
     <>
-        {pool && pool.poolSynth_ids? <TableContainer
-							width={'40%'}
-							border={'1px solid #2C2C2C'}
-							rounded={6}
-							py={2}
-							bgColor="#171717"
+        {pool && pool.poolSynth_ids? 
+				<TableContainer
+							rounded={10}
+							py={4}
+							px={4}
+							bgColor="white"
 							minH="700px">
 							<Table variant="simple" size={'sm'}>
 								<Thead>

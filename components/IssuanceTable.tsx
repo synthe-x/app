@@ -11,143 +11,201 @@ import {
 	Box,
 	Text,
 	Flex,
-	useDisclosure,useColorMode
+	useDisclosure,
+	useColorMode,
+	Skeleton,
 } from '@chakra-ui/react';
 
 import Image from 'next/image';
 import IssueModel from './modals/IssueModal';
 import RepayModel from './modals/RepayModal';
 import { WalletContext } from './WalletContextProvider';
+import {
+	MdArrowBackIos,
+	MdNavigateBefore,
+	MdNavigateNext,
+} from 'react-icons/md';
+
+import {
+	Pagination,
+	usePagination,
+	PaginationNext,
+	PaginationPage,
+	PaginationPrevious,
+	PaginationContainer,
+	PaginationPageGroup,
+} from '@ajna/pagination';
 
 const IssuanceTable = ({}: any) => {
+	const { currentPage, setCurrentPage, pagesCount, pages, pageSize } =
+		usePagination({
+			pagesCount: 2,
+			initialState: { currentPage: 1 },
+		});
+
 	const { colorMode } = useColorMode();
-	const tknholdingImg = {
-		width: '30px',
-		marginLeft: '1rem',
-		marginRight: '0.5rem',
-		borderRadius: '100px',
-	};
 
 	const {
 		synths: debts,
-		isConnected
+		isConnected,
+		tokenFormatter,
+		dollarFormatter,
+		isDataReady,
 	} = useContext(WalletContext);
 
-
 	return (
-		<>
+		<Skeleton isLoaded={debts.length > 0}>
 			<TableContainer>
-				<Table  overflow={"auto"}
-					variant="simple"
-					style={{
-						borderCollapse: 'separate',
-						borderSpacing: '0 15px',
-					}}>
+				<Table overflow={'auto'} variant="simple">
 					<Thead>
-						<Tr  bg={colorMode == "dark" ?"#171717" : "#ededed"}>
-							<Th
-								fontSize={'xs'}
-								fontFamily="Poppins"
-								color={colorMode == "dark" ?"#858585" : "#171717"}
-								>
+						<Tr>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
 								Issuance Assets
 							</Th>
-							<Th
-								fontSize={'xs'}
-								fontFamily="Poppins"
-								color={colorMode == "dark" ?"#858585" : "#171717"}
-								>
-								Price
-							</Th>
-							<Th
-								fontSize={'xs'}
-								fontFamily="Poppins"
-								color={colorMode == "dark" ?"#858585" : "#171717"}
-								>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
 								Protocol Debt
 							</Th>
-							{/* <Th
-								fontSize={'sm'}
-								fontFamily="Poppins"
-								className="borrow_table_Head">
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
 								Liquidity
-							</Th> */}
+							</Th>
+
 							<Th
+								isNumeric
 								fontSize={'xs'}
 								fontFamily="Poppins"
-								id="borrow_table_HeadingRightBorderRadius"
-								className="borrow_table_Head"></Th>
+								color={'gray.500'}
+								></Th>
 						</Tr>
 					</Thead>
 					<Tbody>
-						{debts.map((debt: any) => {
-							return (
-								<Tr key={debt['symbol']}  bg={colorMode == "dark" ?"#171717" : "#ededed"}>
-									<Td
-										>
-										<Box
-											display="flex"
-											alignItems="center"
-											cursor="pointer">
-											<Image src={`/${debt.symbol}.png`} 
-                                            width={"35px"} height={35} 
-                                            style={tknholdingImg} alt="..." />
-											<Box ml={2}>
+						{debts
+							.slice((currentPage - 1) * 8, currentPage * 8)
+							.map((debt: any) => {
+								return (
+									<Tr key={debt['symbol']}>
+										<Td minW={'190px'}>
+											<Flex align={'center'} gap={2}>
+												<Image
+													src={`/${debt.symbol}.png`}
+													width={35}
+													height={35}
+													// style={tknholdingImg}
+													alt="..."
+												/>
+												<Box>
+													<Text
+														fontSize="sm"
+														fontWeight="bold"
+														textAlign={'left'}>
+														{debt['name']
+															.split(' ')
+															.slice(1)
+															.join(' ')}
+													</Text>
+													<Text
+														fontSize="xs"
+														fontWeight="light"
+														textAlign={'left'}>
+														{debt['symbol']}
+													</Text>
+												</Box>
+											</Flex>
+										</Td>
+
+										<Td maxW={'110px'}>
+											<Box>
 												<Text
 													fontSize="sm"
-													fontWeight="bold"
+													// fontWeight="bold"
 													textAlign={'left'}>
-													{debt['name'].split(" ").slice(1).join(" ")}
+													{isConnected
+														? tokenFormatter.format(
+																debt[
+																	'amount'
+																][0] / 1e18
+														  )
+														: '-'}{' '}
+													{debt['symbol']}
 												</Text>
 												<Text
 													fontSize="xs"
-													fontWeight="light"
+													// fontWeight="bold"
 													textAlign={'left'}>
-													{debt['symbol']}
+													{isConnected
+														? dollarFormatter.format(
+																(debt[
+																	'amount'
+																][0] *
+																	debt[
+																		'price'
+																	]) /
+																	1e18
+														  )
+														: '-'}{' '}
 												</Text>
-											</Box>
-										</Box>
-									</Td>
-									<Td>
-										${' '}{(debt['price']*1).toFixed(2)}
-									</Td>
-									<Td>
-										<Box>
-											<Text
-												fontSize="sm"
-												fontWeight="bold"
-												textAlign={'left'}>
-												{isConnected ? (debt['amount'][0]/1e18).toFixed(4) : '-'}{' '}
-												{debt['symbol']}
-											</Text>
-											{/* <Text
+												{/* <Text
 												fontSize="xs"
 												fontWeight="light"
 												textAlign={'left'}>
 												{debt['walletBalance']}{' '}
 												{debt['asset']['symbol']}
 											</Text> */}
-										</Box>
-									</Td>
-									{/* <Td className="borrow_table_data">
+											</Box>
+										</Td>
+										<Td>
+											<Text fontSize={'sm'}>
+												{dollarFormatter.format(
+													(debt['totalBorrowed'] ??
+														0) / 1e18
+												)}
+											</Text>
+										</Td>
+										{/* <Td className="borrow_table_data">
 										{debt['asset'][
 											'totalLiquidity'
 										].toString()}{' '}
 										{debt['asset']['symbol']}
 									</Td> */}
-									<Td>
-										<Flex alignItems={'center'}>
-											<IssueModel asset={debt} />
-											<RepayModel asset={debt} />
-										</Flex>
-									</Td>
-								</Tr>
-							);
-						})}
+										<Td isNumeric maxW={'110px'}>
+											<Flex alignItems={'center'}>
+												<IssueModel asset={debt} />
+												<RepayModel asset={debt} />
+											</Flex>
+										</Td>
+									</Tr>
+								);
+							})}
 					</Tbody>
 				</Table>
 			</TableContainer>
-		</>
+
+			<Flex justify={'center'}>
+				<Pagination
+					pagesCount={pagesCount}
+					currentPage={currentPage}
+					onPageChange={setCurrentPage}>
+					<PaginationContainer my={4}>
+						<PaginationPrevious variant={'none'}>
+							<MdNavigateBefore />
+						</PaginationPrevious>
+						<PaginationPageGroup>
+							{pages.map((page: number) => (
+								<PaginationPage
+									key={`pagination_page_${page}`}
+									page={page}
+									width={10}
+									rounded={'full'}
+								/>
+							))}
+						</PaginationPageGroup>
+						<PaginationNext variant={'none'}>
+							{' '}
+							<MdNavigateNext />{' '}
+						</PaginationNext>
+					</PaginationContainer>
+				</Pagination>
+			</Flex>
+		</Skeleton>
 	);
 };
 
