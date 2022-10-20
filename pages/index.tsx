@@ -52,6 +52,7 @@ function App() {
 		mb: {sm: '1rem', md: '0' },
 		width: { sm: '100%', lg: '50%' },
 		flex: "1",
+		minH: "200px",
 		bg: colorMode == 'dark' ? '#171717' : '#FFFFFF',
 		borderRadius: '20px',
 		boxShadow: 'lg'
@@ -135,6 +136,7 @@ function App() {
 						justifyContent="space-between"
 						gap={10}
 						flexWrap="wrap"
+						
 						>
 						<Box {...TableStyle}>
 							<CollateralTable/>

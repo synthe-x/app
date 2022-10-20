@@ -19,27 +19,27 @@ const config: ThemeConfig = {
 
 import { mode, StyleFunctionProps } from '@chakra-ui/theme-tools';
 
-const styles = {
-  global: (props: Record<string, any>) => ({
-    body: {
-      color: mode('gray.800', 'whiteAlpha.900')(props),
-      bg: mode('gray.50', '#000')(props),
-      margin: 0,
-      padding: 0,
-    },
-  }),
-};
+// const styles = {
+//   global: (props: Record<string, any>) => ({
+//     body: {
+//       color: mode('gray.800', 'whiteAlpha.900')(props),
+//       bg: mode('gray.50', '#000')(props),
+//       margin: 0,
+//       padding: 0,
+//     },
+//   }),
+// };
 
-const components = {
-  Drawer: {
-    // setup light/dark mode component defaults
-    baseStyle: (props: StyleFunctionProps | Record<string, any>) => ({
-      dialog: {
-        bg: mode('white', '#141214')(props),
-      },
-    }),
-  },
-};
+// const components = {
+//   Drawer: {
+//     // setup light/dark mode component defaults
+//     baseStyle: (props: StyleFunctionProps | Record<string, any>) => ({
+//       dialog: {
+//         bg: mode('white', '#141214')(props),
+//       },
+//     }),
+//   },
+// };
 
 
 const breakpoints ={
@@ -49,7 +49,10 @@ const breakpoints ={
   xl: "1440px",
   "2xl": "1680px"
 };
-const theme = extendTheme({ components, styles, config,
+const theme = extendTheme({ 
+  //components, 
+  // styles, 
+  config,
   breakpoints })
 
 function MyApp({ Component, pageProps }: AppProps) {

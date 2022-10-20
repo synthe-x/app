@@ -90,6 +90,7 @@ function WalletContextProvider({children}: any) {
 				} else {
 					_addr = (window as any).tronWeb.address.fromHex(account.address);
 				}
+				console.log(_addr);
 				setAddress(_addr)
                 setIsConnected(true);
                 setIsConnecting(false);

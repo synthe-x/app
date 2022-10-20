@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import Contract from "web3-eth-contract";
 
-const config = require("../config.json");
+// const config = require("../config.json");
 let data = require(`../artifacts/deployments.json`)
 
 export async function getContract(tronweb: any, name: string, address: (string|null) = null, mock: boolean = false) {
