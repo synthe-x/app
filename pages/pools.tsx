@@ -25,35 +25,9 @@ import { BiError, BiErrorAlt } from 'react-icons/bi';
 import PoolCard from '../components/PoolCard';
 
 function App() {
-	const { colorMode } = useColorMode();
-	const [minCRatio, setMinCRatio] = useState(0);
-
 	const {
-		isConnected,
-		isConnecting,
-		address,
-		connect,
-		collaterals,
-		synths,
-		totalCollateral,
-		totalDebt,
-		isDataReady,
-		connectionError,
 		pools,
 	} = useContext(WalletContext);
-
-	useEffect(() => {
-		// getUserData();
-		setMinCRatio(130);
-	}, []);
-
-	function getUserData(_address: string | null = address) {
-		axios
-			.get('https://api.synthex.finance/user/' + _address + '/all')
-			.then((res) => {
-				setMinCRatio(res.data.data.minCRatio);
-			});
-	}
 
 	return (
 		<>

@@ -14,37 +14,15 @@ import { BiError, BiErrorAlt } from 'react-icons/bi';
 
 function App() {
 	const { colorMode } = useColorMode();
-	const [minCRatio, setMinCRatio] = useState(0);
-	const [safeCRatio, setSafeCRatio] = useState(0);
-
+	
 	const {
-		isConnected,
-		isConnecting,
-		address,
-		connect,
-		collaterals,
-		synths,
 		totalCollateral,
 		totalDebt,
-		isDataReady,
-		isFetchingData,
-		connectionError,
-		availableToBorrow
+		availableToBorrow,
+		minCRatio,
+		safeCRatio,
+		dollarFormatter
 	} = useContext(WalletContext);
-
-	useEffect(() => {
-		// getUserData();
-		setMinCRatio(130);
-		setSafeCRatio(200);
-	}, []);
-
-	function getUserData(_address: string | null = address) {
-		axios
-			.get('https://api.synthex.finance/user/' + _address + '/all')
-			.then((res) => {
-				setMinCRatio(res.data.data.minCRatio);
-			});
-	}
 
 	const TableStyle = {
 		px: "1rem",
@@ -79,22 +57,21 @@ function App() {
 								<Box w="7rem" h="0.3rem" bg="#36a2eb" rounded={100}></Box>
 								<Text fontSize={'sm'}>Collateral Balance</Text>
 								<Text fontSize={'xl'} fontWeight="bold">
-									$ {totalCollateral.toFixed(2)}
+									{dollarFormatter?.format(totalCollateral)}
 								</Text>
 
 								<Divider my={4} />
 								<Box w="5rem" h="0.3rem" bg="#ffcd56" rounded={100}></Box>
 								<Text fontSize={'sm'}>Borrow Balance</Text>
 								<Text fontSize={'xl'} fontWeight="bold">
-									$ {totalDebt.toFixed(2)}
+									{dollarFormatter?.format(totalDebt)}
 								</Text>
 
 								<Divider my={4} />
 								<Box w="7rem" h="0.3rem" bg="#ff6384" rounded={100}></Box>
 								<Text fontSize={'sm'}>Available to Borrow</Text>
 								<Text fontSize={'xl'} fontWeight="bold">
-									${' '}
-									{availableToBorrow().toFixed(2)}
+									{dollarFormatter?.format(availableToBorrow())}
 								</Text>
 							</Box>
 						</Box>

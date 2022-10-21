@@ -34,14 +34,16 @@ import {
 	SliderMark,
 } from '@chakra-ui/react';
 
-import { BsPlusCircle } from 'react-icons/bs';
+const Big = require('big.js');
+
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getAddress, getContract } from '../../src/utils';
 import { useEffect, useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
 
-const DepositModal = ({ asset, balance }: any) => {
+const DepositModal = ({ asset, handleDeposit }: any) => {
+	const balance = asset.walletBalance / (10**asset.decimal)
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(balance * 0.3);
 	const [loader, setloader] = React.useState(false);
@@ -68,7 +70,7 @@ const DepositModal = ({ asset, balance }: any) => {
 	const issue = async () => {
 		if (!amount) return;
 		let system = await getContract(tronWeb, 'System');
-		let value = BigInt(0.999 * amount * 10 ** asset['decimal']).toString();
+		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
 		setloader(true);
 		setdepositerror('');
 		setdepositconfirm(false);
@@ -100,6 +102,7 @@ const DepositModal = ({ asset, balance }: any) => {
 					if (hash) {
 						setloader(false);
 						setdepositconfirm(true);
+						handleDeposit(asset['coll_address'], value);
 					}
 				}
 			}
@@ -163,7 +166,7 @@ const DepositModal = ({ asset, balance }: any) => {
 		setAmount((balance * e) / 100);
 	};
 
-	const {isConnected, tronWeb, address} = useContext(WalletContext)
+	const {isConnected, tronWeb, address, updateCollateralWalletBalance, updateCollateralAmount} = useContext(WalletContext)
 
 	return (
 		<Box>

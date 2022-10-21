@@ -69,7 +69,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				break;
 			}
 		}
-		let _amount = assets[assetIndex].amount[inputPoolIndex] > assets[assetIndex].walletBalance ? assets[assetIndex].walletBalance : assets[assetIndex].amount[inputPoolIndex];
+		let _amount = Math.min(assets[assetIndex].amount[inputPoolIndex], assets[assetIndex].walletBalance);
 		setAmount(0.999 * _amount / 10 ** assets[assetIndex].decimal);
 	};
 

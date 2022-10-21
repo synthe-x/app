@@ -21,16 +21,14 @@ import {
 import DepositModal from './modals/DepositModal';
 import WithdrawModal from './modals/WithdrawModal';
 
-import { FiMinusCircle } from 'react-icons/fi';
 import Image from 'next/image';
 import { getContract } from '../src/utils';
 import { useState } from 'react';
 import { WalletContext } from './WalletContextProvider';
 
 const CollateralTable = ({}: any) => {
-	const { colorMode } = useColorMode();
-	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [claimLoading, setClaimLoading] = useState(false);
+	const [nullValue, setNullValue] = useState(false);
 
 	const {
 		isConnected,
@@ -38,7 +36,8 @@ const CollateralTable = ({}: any) => {
 		tronWeb,
 		tokenFormatter,
 		dollarFormatter,
-		isDataReady,
+		updateCollateralWalletBalance,
+		updateCollateralAmount
 	} = useContext(WalletContext);
 
 	const claim = async () => {
@@ -55,6 +54,20 @@ const CollateralTable = ({}: any) => {
 			}
 		});
 	};
+
+	const handleDeposit = (collateral: string, value: string) => {
+		updateCollateralWalletBalance(collateral, value, true)
+		updateCollateralAmount(collateral, value, false)
+		setNullValue(!nullValue);
+	}
+
+	const handleWithdraw = (collateral: string, value: string) => {
+		updateCollateralWalletBalance(collateral, value, false)
+		updateCollateralAmount(collateral, value, true)
+		setNullValue(!nullValue);
+	}
+
+	// console.log(collaterals);
 
 	return (
 		<Skeleton isLoaded={collaterals.length > 0}>
@@ -106,9 +119,9 @@ const CollateralTable = ({}: any) => {
 													textAlign={'left'}>
 													{collateral['symbol']}
 												</Text>
-										{collateral['symbol'] == "WTRX" && isConnected ? 
-                    <Button mt={1} isLoading={claimLoading} size={"xs"} rounded="100" colorScheme="whatsapp" onClick={claim}>Get WTRX Tokens</Button> 
-                  : <></>}
+												{collateral['symbol'] == "WTRX" && isConnected ? 
+													<Button mt={1} isLoading={claimLoading} size={"xs"} rounded="100" colorScheme="whatsapp" onClick={claim}>Get WTRX Tokens</Button> 
+												: <></>}
 											</Box>
 										</Box>
 									</Td>
@@ -146,12 +159,7 @@ const CollateralTable = ({}: any) => {
 										<Flex alignItems={'center'}>
 											<DepositModal
 												asset={collateral}
-												balance={
-													collateral[
-														'walletBalance'
-													] /
-													10 ** collateral['decimal']
-												}
+												handleDeposit={handleDeposit}
 											/>
 											<WithdrawModal
 												asset={collateral}
@@ -159,6 +167,7 @@ const CollateralTable = ({}: any) => {
 													collateral['amount'] /
 													10 ** collateral['decimal']
 												}
+												handleWithdraw={handleWithdraw}
 											/>
 										</Flex>
 									</Td>

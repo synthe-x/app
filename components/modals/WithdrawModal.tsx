@@ -26,15 +26,17 @@ import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract } from '../../src/utils';
 import { WalletContext } from '../WalletContextProvider';
+const { Big } = require("big.js");
 
-
-const WithdrawModal = ({ asset, balance }: any) => {
+const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(0);
 	const [loader, setloader] = React.useState(false)
 	const [hash, sethash] =  React.useState("")
 	const [withdrawerror,setwithdrawerror] = React.useState("")
 	const [withdrawconfirm, setwithdrawconfirm] = React.useState(false)
+
+	const {isConnected, tronWeb, safeCRatio, totalCollateral, totalDebt} = useContext(WalletContext)
 
 	const _onClose = () => {
 		setwithdrawerror("")
@@ -45,18 +47,22 @@ const WithdrawModal = ({ asset, balance }: any) => {
 		onClose()
 	}
 
+	const max = () => {
+		return (0.999 * (totalCollateral * 100 / safeCRatio) - totalDebt)/asset.price;
+	} 
+
 	const changeAmount = (event: any) =>{
 		setAmount(event.target.value);
 	}
 
 	const setMax = () =>{
-		setAmount(0.999 * balance);
+		setAmount(max());
 	}
 
 	const issue = async () => {
 		if(!amount) return
 		let system = await getContract(tronWeb, 'System');
-		let value = BigInt(amount*10**asset['decimal']).toString();
+		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
 		setloader(true)
 		setwithdrawerror("");
 		setwithdrawconfirm(false);
@@ -84,11 +90,11 @@ const WithdrawModal = ({ asset, balance }: any) => {
 				if(hash){
 					setloader(false)
 					setwithdrawconfirm(true)
+					handleWithdraw(asset['coll_address'], value)
 				}
 			}
 		})
 	}
-	const {isConnected, tronWeb} = useContext(WalletContext)
 
 	return (
 		<Box>
@@ -120,27 +126,31 @@ const WithdrawModal = ({ asset, balance }: any) => {
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
                         <Button 
-							disabled={!isConnected || !amount || amount == 0 || amount > balance}
+							disabled={!isConnected || !amount || amount == 0 || amount > max()}
 							colorScheme={"red"} width="100%" mt={4} onClick={issue}
 						>
-							{isConnected? (amount > balance) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
+							{isConnected? (amount > max()) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
 						</Button>
 					
 						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
-							<Box>
-							<Spinner
-								thickness='4px'
-								speed='0.65s'
-								emptyColor='gray.200'
-								color='blue.500'
-								size='xl'
-							/>
-							</Box>
 							
-							<Box >
-								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
-								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>
-							</Box>
+							
+						<Box>
+									<Text fontFamily={'Roboto'} fontSize="md">
+										{' '}
+										Waiting for the blockchain to confirm
+										your transaction.
+										<Link
+											color="blue.200"
+											fontSize={'sm'}
+											href={`https://nile.tronscan.org/#/transaction/${hash}`}
+											target="_blank"
+											rel="noreferrer">
+											{' '}
+											View on Tronscan
+										</Link>
+									</Text>
+								</Box>
 						</Flex>}
 						{withdrawerror && <Text textAlign={"center"} color="red">{withdrawerror}</Text>}
 							{withdrawconfirm && <Flex flexDirection={"column"} mt="1rem" justifyContent="center" alignItems="center">
