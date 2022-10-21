@@ -46,6 +46,10 @@ function ExchangeSideBar({}) {
 		setTradingPool(e.target.value);
 	};
 
+	const getSynth = (address: string) => {
+		return synths.find((s: any) => s.synth_id === address);
+	}
+
 	return (
 		<>
 			<Box>
@@ -90,7 +94,7 @@ function ExchangeSideBar({}) {
 											{_synth.symbol}
 										</Td>
 										<Td>
-                                            <TransferModal asset={_synth} />
+                                            <TransferModal asset={getSynth(_synth.synth_id)} />
 										</Td>
 									</Tr>
 								);

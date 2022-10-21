@@ -52,7 +52,8 @@ const TransferModal = ({ asset }: any) => {
 		setTradingPool,
 		pools,
 		poolUserData,
-		tronWeb
+		tronWeb,
+		tradingBalanceOf
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
@@ -63,8 +64,13 @@ const TransferModal = ({ asset }: any) => {
 	};
 
 	const max = () => {
-		if(asset.amount) return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
-		return 0.999 * asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
+		// if(inputPoolIndex == 0){
+		return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
+		// } else {
+		// 	return 0.999 * tradingBalanceOf(asset.synth_id) / 10 ** (asset.decimal ?? 18)
+		// }
+		// if(asset.amount) return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
+		// return 0.999 * asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
 	} 
 
 	const transfer = async () => {
@@ -74,7 +80,6 @@ const TransferModal = ({ asset }: any) => {
 		setloader(true);
 		setdepositerror('');
 		setdepositconfirm(false);
-		console.log(inputPoolIndex, outputPoolIndex);
 		let tx =
 			inputPoolIndex == 0
 				? system.methods.enterPool(
@@ -88,7 +93,6 @@ const TransferModal = ({ asset }: any) => {
 						value
 				  );
 				
-		
 		tx.send(
 			{
 				value,
