@@ -156,7 +156,7 @@ const IssuanceTable = ({handleChange}: any) => {
 										<Td>
 											<Text fontSize={'sm'}>
 												{dollarFormatter.format(
-													((debt.totalBorrowed ??
+													((debt.liquidity ??
 														0) * debt.price) / 1e18
 												)}
 											</Text>
