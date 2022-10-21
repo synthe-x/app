@@ -134,7 +134,6 @@ function WalletContextProvider({children}: any) {
 	const tradingBalanceOf = (_s: string) => {
 		for(let i in synths){
 			if(synths[i].synth_id == _s){
-				console.log(synths[i], tradingPool)
 					return synths[i].amount[tradingPool];
 				}
 			}

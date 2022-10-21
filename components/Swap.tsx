@@ -46,20 +46,10 @@ function Swap() {
 	};
 
 	const updateInputAssetIndex = (e: any) => {
-		setInputAssetIndex(e.target.value);
 		if (outputAssetIndex == e.target.value) {
-			let i = 0;
-			if (e.target.value == synths.length) {
-				i = e.target.value + 1;
-			} else {
-				if (e.target.value == 0) {
-					i = e.target.value + 1;
-				} else {
-					i = e.target.value - 1;
-				}
-			}
-			setOutputAssetIndex(i);
+			setOutputAssetIndex(inputAssetIndex);
 		}
+		setInputAssetIndex(e.target.value);
 		// calculate output amount
 		let _outputAmount = inputAmount * inputToken(e.target.value).price / outputToken().price;
 		setOutputAmount(_outputAmount);
@@ -76,23 +66,10 @@ function Swap() {
 	};
 
 	const updateOutputAssetIndex = (e: any) => {
-		setOutputAssetIndex(e.target.value);
 		if (inputAssetIndex == e.target.value) {
-			let i = 0;
-			if (
-				e.target.value ==
-				(pools[tradingPool].poolSynth_ids ?? synths).length
-			) {
-				i = e.target.value + 1;
-			} else {
-				if (e.target.value == 0) {
-					i = e.target.value + 1;
-				} else {
-					i = e.target.value - 1;
-				}
-			}
-			setInputAssetIndex(i);
+			setInputAssetIndex(outputAssetIndex);
 		}
+		setOutputAssetIndex(e.target.value);
 		// calculate input amount
 		let _inputAmount = outputAmount * outputToken(e.target.value).price / inputToken().price;
 		setInputAmount(_inputAmount);

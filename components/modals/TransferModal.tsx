@@ -132,10 +132,9 @@ const TransferModal = ({ asset }: any) => {
 		if (outputPoolIndex == event.target.value) {
 			setOutputPoolIndex(inputPoolIndex);
 		}
-		if (inputPoolIndex != 0) {
+		if (outputPoolIndex != 0 && event.target.value != 0) {
 			setOutputPoolIndex(0);
 		}
-		console.log(event.target.value);
 		setInputPoolIndex(event.target.value);
 	};
 
@@ -143,7 +142,7 @@ const TransferModal = ({ asset }: any) => {
 		if (inputPoolIndex == event.target.value) {
 			setInputPoolIndex(outputPoolIndex);
 		}
-		if (outputPoolIndex != 0) {
+		if (inputPoolIndex != 0 && event.target.value != 0) {
 			setInputPoolIndex(0);
 		}
 		setOutputPoolIndex(event.target.value);
