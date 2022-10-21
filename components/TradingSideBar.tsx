@@ -60,7 +60,7 @@ function ExchangeSideBar({}) {
                     >
 					{pools.map((pool: any, index: number) => {
 						return (
-							<option key={pool?.symbol} value={index}>
+							<option key={pool?.symbol} value={index} >
 								<Text>{pool?.name}</Text>
 							</option>
 						);
