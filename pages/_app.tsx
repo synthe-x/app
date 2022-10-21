@@ -18,6 +18,7 @@ const config: ThemeConfig = {
 }
 
 import { mode, StyleFunctionProps } from '@chakra-ui/theme-tools';
+import {useEffect} from 'react';
 
 // const styles = {
 //   global: (props: Record<string, any>) => ({
@@ -53,9 +54,15 @@ const theme = extendTheme({
   //components, 
   // styles, 
   config,
-  breakpoints })
+  breakpoints 
+})
 
 function MyApp({ Component, pageProps }: AppProps) {
+
+  useEffect(() => {
+    localStorage.setItem("chakra-ui-color-mode", "light");
+  })
+  
   return (
     <ChakraProvider theme={theme}>
     <WalletContextProvider>
