@@ -132,9 +132,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		<>{
 		pool.poolSynth_ids ? <Box>
 
-			<Button my={2} size="lg" bgColor={"#0CAD4B"} color="white" onClick={onOpen} aria-label={''} width={"100%"} 
-			// disabled={!isConnected} 
-			_hover={{bg: "gray.600"}}>
+			<Button my={2} size="md" bgColor={"#053300"} color="white" onClick={onOpen} aria-label={''} width={"100%"} _hover={{bg: "gray.600"}}>
                 Enter Pool
 			</Button>
             

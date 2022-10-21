@@ -137,9 +137,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	return (
 		<>{assets[0] ? <Box>
             
-			<Button my={2} size="lg" onClick={onOpen} aria-label={''} width={"100%"} variant="outline" 
-			// disabled={!isConnected} 
-			_hover={{bg: "gray.100"}}>
+			<Button my={2} size="md" onClick={onOpen} aria-label={''} width={"100%"} variant="outline" _hover={{bg: "gray.100"}}>
                 Exit Pool
 			</Button>
             

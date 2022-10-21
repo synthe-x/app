@@ -43,8 +43,7 @@ const IssuanceTable = ({handleChange}: any) => {
 			pagesCount: 2,
 			initialState: { currentPage: 1 },
 		});
-
-
+	
 	const {
 		synths: debts,
 		isConnected,
@@ -83,13 +82,12 @@ const IssuanceTable = ({handleChange}: any) => {
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
 								Liquidity
 							</Th>
-
 							<Th
 								isNumeric
 								fontSize={'xs'}
 								fontFamily="Poppins"
 								color={'gray.500'}
-								></Th>
+							></Th>
 						</Tr>
 					</Thead>
 					<Tbody>
@@ -190,6 +188,7 @@ const IssuanceTable = ({handleChange}: any) => {
 									page={page}
 									width={10}
 									rounded={'full'}
+									bgColor={page === currentPage ? 'gray.200' : 'white'}
 								/>
 							))}
 						</PaginationPageGroup>

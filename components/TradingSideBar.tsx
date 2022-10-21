@@ -20,12 +20,12 @@ import {
 	TableCaption,
 	TableContainer,
 } from '@chakra-ui/react';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { WalletContext } from '../components/WalletContextProvider';
 import TransferModal from './modals/TransferModal';
 
 function ExchangeSideBar({}) {
-	const { colorMode } = useColorMode();
+	const [nullValue, setNullValue] = useState(false);
 
 	const {
 		isConnected,
@@ -48,6 +48,10 @@ function ExchangeSideBar({}) {
 
 	const getSynth = (address: string) => {
 		return synths.find((s: any) => s.synth_id === address);
+	}
+
+	const handleUpdate = () => {
+		setNullValue(!nullValue);
 	}
 
 	return (
@@ -94,7 +98,7 @@ function ExchangeSideBar({}) {
 											{_synth.symbol}
 										</Td>
 										<Td>
-                                            <TransferModal asset={getSynth(_synth.synth_id)} />
+                                            <TransferModal asset={getSynth(_synth.synth_id)} handleUpdate={handleUpdate} />
 										</Td>
 									</Tr>
 								);

@@ -204,7 +204,7 @@ const Pool = () => {
 							<Box height={'80%'} >
 								<PoolPie data={pieData} />
 							</Box>
-							<Flex gap={5} height="20%" align={"end"}
+							<Flex gap={4} height="20%" align={"end"}
 							>
 								<Box width={'50%'}>
 									<EnterPool assets={synths} pool={pool} />

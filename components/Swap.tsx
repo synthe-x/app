@@ -135,17 +135,9 @@ function Swap() {
 
 	const {
 		isConnected,
-		isConnecting,
-		address,
-		connect,
-		collaterals,
 		synths,
-		totalCollateral,
-		totalDebt,
-		isDataReady,
 		tradingPool,
 		pools,
-		poolUserData,
 		tradingBalanceOf,
 		tronWeb,
 		tokenFormatter,
@@ -351,7 +343,7 @@ function Swap() {
 							flexDirection={'row'}
 							justifyContent="center"
 							mt="1rem"
-							bgColor={'#2C2C2C'}
+							// bgColor={'#2C2C2C'}
 							rounded={8}
 							py={4}>
 							<Box>
@@ -386,7 +378,7 @@ function Swap() {
 						<Text
 							textAlign={'center'}
 							color="red"
-							bgColor={'#2C2C2C'}
+							// bgColor={'#2C2C2C'}
 							rounded={8}
 							py={4}>
 							{depositerror}
@@ -398,7 +390,7 @@ function Swap() {
 							mt="1rem"
 							justifyContent="center"
 							alignItems="center"
-							bgColor={'#2C2C2C'}
+							// bgColor={'#2C2C2C'}
 							rounded={8}
 							py={4}>
 							<Text

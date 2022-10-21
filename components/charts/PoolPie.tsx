@@ -106,7 +106,7 @@ const PoolPie = ({data}: any) => {
 					data={data}
 					cx="50%"
 					cy="50%"
-					innerRadius={130}
+					innerRadius={140}
 					outerRadius={180}
 					fill="#053300"
 					dataKey="value"

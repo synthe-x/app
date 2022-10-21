@@ -51,6 +51,8 @@ const CollateralTable = ({handleChange}: any) => {
 			if (hash) {
 				console.log(hash);
 				setClaimLoading(false);
+				updateCollateralWalletBalance(wtrx.address, "100000000000", false)
+				handleChange()
 			}
 		});
 	};

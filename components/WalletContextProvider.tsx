@@ -171,6 +171,7 @@ function WalletContextProvider({children}: any) {
 
 	const updateCollateralWalletBalance = (collateralAddress: string, value: string, isMinus: boolean = false) => {
 		let _collaterals = collaterals;
+		console.log(collaterals, collateralAddress, value);
 		for(let i in _collaterals){
 			if(_collaterals[i].coll_address == collateralAddress){
 				_collaterals[i].walletBalance = (isMinus ? Big(_collaterals[i].walletBalance).minus(Big(value)) : Big(_collaterals[i].walletBalance).plus(value)).toString();
