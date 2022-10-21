@@ -25,12 +25,10 @@ import {
 	ModalCloseButton,
 } from '@chakra-ui/react';
 
-import { BsPlusCircle } from 'react-icons/bs';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract } from '../../src/utils';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
-import { PropagateLoader, PacmanLoader } from 'react-spinners';
 import { BiPlusCircle } from 'react-icons/bi';
 
 const DepositModal = ({ asset }: any) => {
@@ -59,12 +57,14 @@ const DepositModal = ({ asset }: any) => {
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt
-		console.log('maxxing', (0.999 * availableToBorrow()) / asset.price);
-		setAmount((0.999 * availableToBorrow()) / asset.price);
+		setAmount(max());
 	};
 
-	// 1/1.69 - 1/1.5 = 0.58823529411764705882352941176471 - 0.66666666666666666666666666666667 = -0.07843137254901960784313725490196
+	const max = () => {
+		return (0.999 * availableToBorrow()) / asset.price
+	}
 
+	// 1/1.69 - 1/1.5 = 0.58823529411764705882352941176471 - 0.66666666666666666666666666666667 = -0.07843137254901960784313725490196
 	const issue = async () => {
 		if (!amount) return;
 		let system = await getContract(tronWeb, 'System');
@@ -111,7 +111,7 @@ const DepositModal = ({ asset }: any) => {
 	return (
 		<Box>
 			<IconButton
-			disabled={!isConnected}
+			// disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
 				icon={<BiPlusCircle size={35} color="gray" />}
@@ -119,7 +119,7 @@ const DepositModal = ({ asset }: any) => {
 				isRound={true}></IconButton>
 				<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'} height="30rem" bgColor="">
+				<ModalContent width={'30rem'} bgColor="">
 					<ModalCloseButton />
 					<ModalHeader>Issue {asset['symbol']}</ModalHeader>
 					<ModalBody>
@@ -158,12 +158,13 @@ const DepositModal = ({ asset }: any) => {
 							</Text>
 						</Flex>
 						<Button
+							disabled={!isConnected || !amount || amount == 0 || amount > max()}
 							isLoading={loader}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={issue}>
-							Issue
+							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Issue</> : <>Please connect your wallet</>} 
 						</Button>
 						{loader && (
 							<Flex
@@ -172,16 +173,7 @@ const DepositModal = ({ asset }: any) => {
 								justifyContent="center"
 								mt="1.5rem"
 								gap={8}>
-								{/* <Box>
-							<Spinner
-								thickness='4px'
-								speed='0.65s'
-								emptyColor='gray.200'
-								color='blue.500'
-								size='xl'
-							/>
-								<PropagateLoader color='#36d7b7' />
-							</Box> */}
+								
 								<Box ml="0.5rem">
 									<Text fontFamily={'Roboto'} fontSize="md">
 										{' '}

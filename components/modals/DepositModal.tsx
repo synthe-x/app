@@ -64,10 +64,6 @@ const DepositModal = ({ asset, balance }: any) => {
 	const changeAmount = (event: any) => {
 		setAmount(event.target.value);
 	};
-	
-	const setMax = () => {
-		setAmount(balance);
-	};
 
 	const issue = async () => {
 		if (!amount) return;
@@ -160,17 +156,11 @@ const DepositModal = ({ asset, balance }: any) => {
 	};
 
 	useEffect(() => {
-		if (tryApprove == 'null') allowanceCheck();
+		if (tryApprove == 'null' && isConnected) allowanceCheck();
 	});
 
 	const updateSlider = (e: any) => {
 		setAmount((balance * e) / 100);
-	};
-
-	const labelStyles = {
-		mt: '2',
-		ml: '-3.5',
-		fontSize: 'sm',
 	};
 
 	const {isConnected, tronWeb, address} = useContext(WalletContext)
@@ -178,7 +168,7 @@ const DepositModal = ({ asset, balance }: any) => {
 	return (
 		<Box>
 			<IconButton
-			disabled={!isConnected}
+			// disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
 				icon={<BiPlusCircle size={35} color="gray" />}
@@ -186,7 +176,7 @@ const DepositModal = ({ asset, balance }: any) => {
 				isRound={true}></IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={_onClose} >
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'} height="30rem" 
+				<ModalContent width={'30rem'}
 				// bgColor="blackAlpha.800" color={"white"}
 				>
 					<ModalCloseButton />
@@ -199,7 +189,6 @@ const DepositModal = ({ asset, balance }: any) => {
 						{!tryApprove ? (
 							<Box>
 								<InputGroup size="md" alignItems={'center'}>
-									{/* <InputLeftAddon width={"35"} bgColor="transparent"> */}
 									<Image
 										src={`/${asset.symbol}.png`}
 										alt=""
@@ -207,7 +196,6 @@ const DepositModal = ({ asset, balance }: any) => {
 										height={35}
 										mr={2}
 									/>
-									{/* </InputLeftAddon> */}
 									<Input
 										type="number"
 										placeholder="Enter amount"
@@ -215,21 +203,6 @@ const DepositModal = ({ asset, balance }: any) => {
 										value={amount}
 										disabled={tryApprove as boolean}
 									/>
-										{/* <InputRightElement width="4.8rem">
-											<Button
-												// h="1.75rem"
-												rounded={0}
-												size="sm"
-												py={3}
-												// mr={1}
-												variant="text"
-												onClick={setMax}
-												disabled={
-													tryApprove as boolean
-												}>
-												Set Max
-											</Button>
-										</InputRightElement> */}
 									<InputRightAddon>
 									{asset['symbol']}
 									</InputRightAddon>
@@ -240,9 +213,11 @@ const DepositModal = ({ asset, balance }: any) => {
 									defaultValue={30}
 									onChange={updateSlider}
 									mt={4}
+									// mx="13%"
+									// width={"74%"}
 								>
 									<SliderTrack>
-										<SliderFilledTrack />
+										<SliderFilledTrack bgColor="#276220" />
 									</SliderTrack>
 									<SliderThumb />
 								</Slider>
@@ -269,23 +244,25 @@ const DepositModal = ({ asset, balance }: any) => {
 							</Flex>
 						)}
 
-						{!tryApprove ? (
+						{(!tryApprove) ? (
 							<Button
 								isLoading={loader}
+								disabled={!isConnected || !amount || amount == 0 || amount > balance}
 								colorScheme={'whatsapp'}
 								width="100%"
 								mt={4}
 								onClick={issue}>
-								Deposit
+								{isConnected? (amount > balance) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Deposit</> : <>Please connect your wallet</>} 
 							</Button>
 						) : (
 							<Button
+								disabled={!isConnected}
 								isLoading={loader}
 								colorScheme={'orange'}
 								width="100%"
 								mt={4}
 								onClick={approve}>
-								Approve {asset['symbol']}
+								{isConnected? <>Approve {asset['symbol']}</> : <>Please connect your wallet</>}
 							</Button>
 						)}
 
@@ -295,15 +272,6 @@ const DepositModal = ({ asset, balance }: any) => {
 								flexDirection={'row'}
 								justifyContent="center"
 								mt="1.5rem">
-								{/* <Box>
-								<Spinner
-									thickness='4px'
-									speed='0.65s'
-									emptyColor='gray.200'
-									color='blue.500'
-									size='xl'
-								/>
-							</Box> */}
 
 								<Box>
 									<Text fontFamily={'Roboto'} fontSize="md">

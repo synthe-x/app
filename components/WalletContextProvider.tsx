@@ -61,9 +61,6 @@ function WalletContextProvider({children}: any) {
 	const [minCRatio, setMinCRatio] = React.useState(130);
 	const [safeCRatio, setSafeCRatio] = React.useState(200);
 
-	const [errRetryCount, setErrRetryCount] = React.useState(0);
-
-
 	React.useEffect(() => {
 		setDollarFormatter(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }));
 		setTokenFormatter(new Intl.NumberFormat('en-US'));
@@ -72,21 +69,19 @@ function WalletContextProvider({children}: any) {
 			if(localStorage.getItem("address")){
 				connect()
 			} else {
-			
 				let __tronWeb = (window as any).tronWeb
 				if(!__tronWeb){
 					setTronWeb(tronWebObject)
 				}
-				console.log("first run...")
 				if(!isFetchingData && !isDataReady) fetchData();
 			}
 		}
 	}, [isDataReady, isFetchingData, tronWeb]);
 
-    const connect = () => {
+    const connect = (_errRetryCount: number = 0) => {
+		setIsConnecting(true);
         if((window as any).tronWeb){
             setTronWeb((window as any).tronWeb);
-            setIsConnecting(true);
             (window as any).tronWeb.trx.getAccount((window as any).tronWeb.defaultAddress.base58).then((account: any) => {
                 let _addr = '';
 				if(!account.address){
@@ -94,7 +89,6 @@ function WalletContextProvider({children}: any) {
 				} else {
 					_addr = (window as any).tronWeb.address.fromHex(account.address);
 				}
-				console.log("Setting address", _addr);
 				setAddress(_addr)
                 setIsConnected(true);
                 setIsConnecting(false);
@@ -108,21 +102,32 @@ function WalletContextProvider({children}: any) {
 				localStorage.setItem("address", _addr)
             })
 			.catch((err: any) => {
-				console.log("Error connecting", err);
-				setTimeout(connect, 1000);
-				setErrRetryCount(errRetryCount + 1);
+				if(_errRetryCount >= 5){
+					setConnectionError('Unlock your TronLink wallet to connect');
+					setIsConnecting(false);
+					let __tronWeb = (window as any).tronWeb
+					if(!__tronWeb){
+						setTronWeb(tronWebObject)
+					}
+					if(!isFetchingData && !isDataReady) fetchData();
+				} else {
+					setTimeout(() => {connect(_errRetryCount + 1)}, 1000);
+				}
 			})
         } else {
 			if(typeof window !== 'undefined'){
-				setTimeout(connect, 1000);
-				setErrRetryCount(errRetryCount + 1);
-				if(errRetryCount > 5){
+				if(_errRetryCount >= 5){
 					setConnectionError('Please install TronLink wallet extension');
+					setIsConnecting(false);
+					let __tronWeb = (window as any).tronWeb
+					if(!__tronWeb){
+						setTronWeb(tronWebObject)
+					}
+					if(!isFetchingData && !isDataReady) fetchData();
+				} else  {
+					setTimeout(() => {connect(_errRetryCount + 1)}, 1000);
 				}
-			} 
-			// setTronWeb(_tronWeb)
-			// localStorage.removeItem("address")
-			// setAddress(address)
+			}
 		}
     }
 
@@ -166,7 +171,6 @@ function WalletContextProvider({children}: any) {
 			tokens.push(_collaterals[i].cAsset)
 		}
 		
-		console.log("Checking collateral balance", _address);
 		contract.balanceOf(tokens, _address).call()
 		.then((res: any) => {
 			res = (res[0])
@@ -196,8 +200,6 @@ function WalletContextProvider({children}: any) {
 		}
 
 
-		console.log("Checking synth balance", _address);
-		// console.log(JSON.stringify(tokens));
 		Promise.all([contract.balanceOf(tokens, _address).call(), contract.debtBalanceOf(tokens, _address).call()])
 		.then((res: any) => {
 			let walletBalances = res[0][0];

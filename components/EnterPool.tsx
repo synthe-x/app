@@ -40,24 +40,27 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	const [outputPoolIndex, setOutputPoolIndex] = React.useState(1);
     const [activeAssetIndex, setActiveAssetIndex] = React.useState(0);
 
+	const _onClose = () => {
+		setAmount(0);
+		sethash('');
+		setdepositerror('');
+		setdepositconfirm(false);
+		onClose();
+	}
+
 	const {
 		isConnected,
-		isConnecting,
-		address,
-		connect,
-		synths,
-		totalDebt,
-		isDataReady,
-		tradingPool,
-		setTradingPool,
 		pools,
-		poolUserData,
 		tronWeb
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
+		if(event.target.value < 0) {
+			return;
+		}
 		setAmount(event.target.value);
 	};
+	
 	const setMax = () => {
 		let assetIndex = 0;
 		for(let i in assets){
@@ -66,18 +69,17 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				break;
 			}
 		}
-		// console.log(assets[assetIndex])
-		// console.log(assets[assetIndex].amount[inputPoolIndex], assets[assetIndex].walletBalance);
 		let _amount = assets[assetIndex].amount[inputPoolIndex] > assets[assetIndex].walletBalance ? assets[assetIndex].walletBalance : assets[assetIndex].amount[inputPoolIndex];
 		setAmount(_amount / 10 ** assets[assetIndex].decimal);
 	};
+
 	const changeAsset = (event: any) => {
 		setActiveAssetIndex(event.target.value);
 	}
+	
 	const transfer = async () => {
 		if (!amount) return;
 		let system = await getContract(tronWeb, 'System');
-		// console.log(pool.poolSynth_ids[activeAssetIndex])
 		let value = BigInt(amount * 10 ** (pool.poolSynth_ids[activeAssetIndex]['decimal'] ?? 18)).toString();
 		setloader(true);
 		setdepositerror('');
@@ -129,16 +131,14 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	return (
 		<>{
 		pool.poolSynth_ids ? <Box>
-            {/* <Flex justifyContent="space-between" alignItems="center" mb="20px" gap={5}> */}
 
-			<Button my={2} size="lg" bgColor={"#0CAD4B"} color="white" onClick={onOpen} aria-label={''} width={"100%"} disabled={!isConnected}>
+			<Button my={2} size="lg" bgColor={"#0CAD4B"} color="white" onClick={onOpen} aria-label={''} width={"100%"} 
+			// disabled={!isConnected} 
+			_hover={{bg: "gray.600"}}>
                 Enter Pool
 			</Button>
-            {/* <Button size="lg" bgColor={"#AF7E18"} onClick={onOpen} aria-label={''} width={"50%"}>
-                Exit
-			</Button> */}
-            {/* </Flex> */}
-			<Modal isCentered isOpen={isOpen} onClose={onClose}>
+            
+			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
                 <ModalOverlay
                     bg='blackAlpha.100'
                     backdropFilter='blur(30px)'
@@ -187,7 +187,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 							<BsArrowDown />
 						</Box>
 
-						<Box width={"100%"} border="1px" px="3" py={2} rounded={5} borderColor="gray.600">
+						<Box width={"100%"} border="1px" px="3" py={2} rounded={5} borderColor="gray.100">
 									<Text color={"gray"}>
 										{pool.name}
 									</Text>
@@ -200,13 +200,15 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
-							disabled={!isConnected}
+							disabled={!isConnected || !amount || amount == 0}
 							isLoading={loader}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
-							onClick={transfer}>
-							{isConnected? <>Enter Pool</> : <>Please connect your wallet</>} 
+							onClick={transfer}
+							
+							>
+							{isConnected? (!amount || amount == 0) ? <>Enter amount</> : <>Enter Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{loader && (
@@ -218,16 +220,6 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
                         rounded={8}
                         py={4}
                         >
-						{/* <Box>
-							<Spinner
-								thickness="10px"
-								speed="0.65s"
-								emptyColor="gray.200"
-								color="green.500"
-								size="xl"
-                                mr={4}
-							/>
-						</Box> */}
 
 						<Box >
 								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 

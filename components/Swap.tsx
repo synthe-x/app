@@ -30,8 +30,8 @@ import TradingChart from './charts/TradingChart';
 
 function Swap() {
 	const { colorMode } = useColorMode();
-	const [inputAssetIndex, setInputAssetIndex] = useState(0);
-	const [outputAssetIndex, setOutputAssetIndex] = useState(1);
+	const [inputAssetIndex, setInputAssetIndex] = useState(1);
+	const [outputAssetIndex, setOutputAssetIndex] = useState(0);
 	const [inputAmount, setInputAmount] = useState(0);
 	const [outputAmount, setOutputAmount] = useState(0);
 	const [loader, setloader] = useState(false);
@@ -41,12 +41,7 @@ function Swap() {
 
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
-		let outputAmount =
-			(e.target.value *
-				(pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]
-					.price) /
-			(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]
-				.price;
+		let outputAmount = (e.target.value * inputToken().price) / outputToken().price;
 		setOutputAmount(outputAmount);
 	};
 
@@ -65,8 +60,9 @@ function Swap() {
 			}
 			setOutputAssetIndex(i);
 		}
-		setInputAmount(0);
-		setOutputAmount(0);
+		// calculate output amount
+		let _outputAmount = inputAmount * inputToken(e.target.value).price / outputToken().price;
+		setOutputAmount(_outputAmount);
 	};
 
 	const updateOutputAmount = (e: any) => {
@@ -97,8 +93,9 @@ function Swap() {
 			}
 			setInputAssetIndex(i);
 		}
-		setInputAmount(0);
-		setOutputAmount(0);
+		// calculate input amount
+		let _inputAmount = outputAmount * outputToken(e.target.value).price / inputToken().price;
+		setInputAmount(_inputAmount);
 	};
 
 	const switchTokens = () => {
@@ -179,13 +176,13 @@ function Swap() {
 
 	useEffect(() => {
 		if (
-			(pools[tradingPool].poolSynth_ids ?? synths).length <
+			inputAssetIndex > 1 && (pools[tradingPool].poolSynth_ids ?? synths).length <
 			inputAssetIndex
 		) {
 			setInputAssetIndex(0);
 		}
 		if (
-			(pools[tradingPool].poolSynth_ids ?? synths).length <
+			outputAssetIndex > 1 && (pools[tradingPool].poolSynth_ids ?? synths).length <
 			outputAssetIndex
 		) {
 			setOutputAssetIndex(
@@ -211,6 +208,22 @@ function Swap() {
 		setOutputAmount(_outputAmount);
 	};
 
+	const inputToken = (_inputAssetIndex = inputAssetIndex) => {
+		if (pools[tradingPool].poolSynth_ids) {
+			return pools[tradingPool].poolSynth_ids[_inputAssetIndex];
+		} else {
+			return synths[_inputAssetIndex];
+		}
+	}
+
+	const outputToken = (_outputAssetIndex = outputAssetIndex) => {
+		if (pools[tradingPool].poolSynth_ids) {
+			return pools[tradingPool].poolSynth_ids[_outputAssetIndex];
+		} else {
+			return synths[_outputAssetIndex];
+		}
+	}
+
 	return (
 		<>
 			{pools[tradingPool] && (
@@ -225,40 +238,27 @@ function Swap() {
 					<Flex justify={'space-between'} mb={5}>
 						{/* Asset Name */}
 						<Text mb={3} fontSize="3xl" fontWeight={'bold'}>
-							{
-								(pools[tradingPool].poolSynth_ids ?? synths)[
-									inputAssetIndex
-								]?.symbol
-							}
+							{inputToken()?.symbol}
 							/
-							{
-								(pools[tradingPool].poolSynth_ids ?? synths)[
-									outputAssetIndex
-								]?.symbol
-							}
+							{outputToken()?.symbol}
 						</Text>
 						{/* Asset Price */}
 						<Box>
 							<Flex align={'center'} gap={1}>
 								<Text fontSize={'2xl'} fontWeight="bold">
 									{tokenFormatter.format(
-										(pools[tradingPool].poolSynth_ids ??
-											synths)[inputAssetIndex]?.price /
-											(pools[tradingPool].poolSynth_ids ??
-												synths)[outputAssetIndex]?.price
+										inputToken()?.price / outputToken()?.price
 									)}
 								</Text>
 								<Text fontSize={'sm'}>
 									{
-										(pools[tradingPool].poolSynth_ids ??
-											synths)[outputAssetIndex]?.symbol
+										outputToken()?.symbol
 									}
 								</Text>
 								<Text fontSize={'sm'}>
 									/{' '}
 									{
-										(pools[tradingPool].poolSynth_ids ??
-											synths)[inputAssetIndex]?.symbol
+										inputToken()?.symbol
 									}
 								</Text>
 							</Flex>

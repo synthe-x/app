@@ -5,7 +5,6 @@ import Contract from "web3-eth-contract";
 let data = require(`../artifacts/deployments.json`)
 
 export async function getContract(tronweb: any, name: string, address: (string|null) = null, mock: boolean = false) {
-    console.log(name, tronweb)
     if(!address) address = data["contracts"][name]["address"]
     const abi = data["sources"][name];
     const contractInstance = await tronweb.contract(abi, address);

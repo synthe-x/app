@@ -27,7 +27,6 @@ import { getContract } from '../../src/utils';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 
-
 const RepayModal = ({ asset }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [loader, setloader] = React.useState(false)
@@ -50,7 +49,11 @@ const RepayModal = ({ asset }: any) => {
 	}
 
 	const setMax = () =>{
-		setAmount(asset['walletBalance']/1e18);
+		setAmount(max());
+	}
+
+	const max = () => {
+		return asset['walletBalance']/1e18;
 	}
 
 	const issue = async () => {
@@ -92,12 +95,14 @@ const RepayModal = ({ asset }: any) => {
 
 	return (
 		<Box>
-			<IconButton disabled={!isConnected} variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={35} color="gray"/>} aria-label={''} isRound={true}>
+			<IconButton 
+			// disabled={!isConnected} 
+			variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={35} color="gray"/>} aria-label={''} isRound={true}>
 			</IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg='blackAlpha.100'
                     backdropFilter='blur(30px)' />
-				<ModalContent width={'30rem'} height="30rem">
+				<ModalContent width={'30rem'}>
 					<ModalCloseButton />
                     <ModalHeader>Repay {asset['symbol']}</ModalHeader>
 					<ModalBody>
@@ -117,17 +122,14 @@ const RepayModal = ({ asset }: any) => {
                         <Flex mt={4} justify="space-between">
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
-                        <Button isLoading={loader} colorScheme={"whatsapp"} width="100%" mt={4} onClick={issue}>Repay</Button>
+                        <Button 
+							disabled={!isConnected || !amount || amount == 0 || amount > max()}
+							isLoading={loader} colorScheme={"red"} width="100%" mt={4} onClick={issue}
+						>
+							{isConnected? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 
+						</Button>
 						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
-							{/* <Box>
-							<Spinner
-								thickness='4px'
-								speed='0.65s'
-								emptyColor='gray.200'
-								color='blue.500'
-								size='xl'
-							/>
-							</Box> */}
+							
 							<Box >
 								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
 								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>

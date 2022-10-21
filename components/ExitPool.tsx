@@ -40,6 +40,14 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	const [outputPoolIndex, setOutputPoolIndex] = React.useState(1);
     const [activeAssetIndex, setActiveAssetIndex] = React.useState(0);
 
+	const _onClose = () => {
+		setAmount(0);
+		sethash('');
+		setdepositerror('');
+		setdepositconfirm(false);
+		onClose();
+	}
+
 	const {
 		isConnected,
 		isConnecting,
@@ -56,6 +64,9 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
+		if(event.target.value < 0) {
+			return;
+		}
 		setAmount(event.target.value);
 	};
 	const setMax = () => {
@@ -125,16 +136,14 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 	return (
 		<>{assets[0] ? <Box>
-            {/* <Flex justifyContent="space-between" alignItems="center" mb="20px" gap={5}> */}
-
-			<Button my={2} size="lg" onClick={onOpen} aria-label={''} width={"100%"} variant="outline" disabled={!isConnected}>
+            
+			<Button my={2} size="lg" onClick={onOpen} aria-label={''} width={"100%"} variant="outline" 
+			// disabled={!isConnected} 
+			_hover={{bg: "gray.100"}}>
                 Exit Pool
 			</Button>
-            {/* <Button size="lg" bgColor={"#AF7E18"} onClick={onOpen} aria-label={''} width={"50%"}>
-                Exit
-			</Button> */}
-            {/* </Flex> */}
-			<Modal isCentered isOpen={isOpen} onClose={onClose}>
+            
+			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
                 <ModalOverlay
                     bg='blackAlpha.100'
                     backdropFilter='blur(30px)'
@@ -200,13 +209,13 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
-						disabled={!isConnected}
+						disabled={!isConnected || !amount || amount == 0}
 						isLoading={loader}
 							colorScheme={'red'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							{isConnected? <>Exit Pool</> : <>Please connect your wallet</>} 
+							{isConnected? (!amount || amount == 0) ? <>Enter amount</> : <>Exit Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{loader && (
@@ -218,16 +227,6 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
                         rounded={8}
                         py={4}
                         >
-						{/* <Box>
-							<Spinner
-								thickness="10px"
-								speed="0.65s"
-								emptyColor="gray.200"
-								color="green.500"
-								size="xl"
-                                mr={4}
-							/>
-						</Box> */}
 
 						<Box >
 								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 

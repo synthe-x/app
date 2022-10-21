@@ -1,6 +1,18 @@
 import React, { PureComponent } from 'react';
 import { PieChart, Pie, Sector, ResponsiveContainer } from 'recharts';
 
+const COLORS = [
+	'#CDE7CA',
+	'#5CB450',
+	'#228B22',
+	'#50C878',
+	'#454B1B',
+	'#7FFFD4',
+	'#00A36C',
+	'#E4D00A',
+];
+
+const dollarFormatter = new Intl.NumberFormat('en-US', {currency:"USD", style: "currency"});
 const renderActiveShape = (props: any) => {
 	const RADIAN = Math.PI / 180;
 	const {
@@ -11,7 +23,7 @@ const renderActiveShape = (props: any) => {
 		outerRadius,
 		startAngle,
 		endAngle,
-		fill,
+		// fill,
 		payload,
 		percent,
 		value,
@@ -26,9 +38,12 @@ const renderActiveShape = (props: any) => {
 	const ey = my;
 	const textAnchor = cos >= 0 ? 'start' : 'end';
 
+	// random color
+	const fill = "#5CB450"
+
 	return (
 		<g>
-			<text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+			<text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill} style={{fontSize: "20px", fontWeight: "bolder"}}>
 				{payload.name}
 			</text>
 			<Sector
@@ -59,13 +74,13 @@ const renderActiveShape = (props: any) => {
 				x={ex + (cos >= 0 ? 1 : -1) * 12}
 				y={ey}
 				textAnchor={textAnchor}
-				fill="#fff">{`$ ${value}`}</text>
+				fill='#fff'>{`${dollarFormatter.format(value)}`}</text>
 			<text
 				x={ex + (cos >= 0 ? 1 : -1) * 12}
 				y={ey}
 				dy={18}
 				textAnchor={textAnchor}
-				fill="#999"
+				fill='#999'
                 style={{"fontSize": "12px"}}>
 				{`${(percent * 100).toFixed(2)}%`}
 			</text>
@@ -91,9 +106,9 @@ const PoolPie = ({data}: any) => {
 					data={data}
 					cx="50%"
 					cy="50%"
-					innerRadius={140}
+					innerRadius={130}
 					outerRadius={180}
-					fill="#8884d8"
+					fill="#053300"
 					dataKey="value"
 					onMouseEnter={onPieEnter}
 				/>

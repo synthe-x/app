@@ -192,17 +192,20 @@ const Pool = () => {
 						<Flex
 							flexDirection={'column'}
 							justify="space-evenly"
-							width={'60%'}
+							width={'75%'}
+							minH="200px"
 							bgColor="white"
 							rounded={20}
 							px={10}
 							boxShadow={'lg'}
 							pb={5}
+							flex="1"
 							>
-							<Box height={'500px'}>
+							<Box height={'80%'} >
 								<PoolPie data={pieData} />
 							</Box>
-							<Flex gap={5}>
+							<Flex gap={5} height="20%" align={"end"}
+							>
 								<Box width={'50%'}>
 									<EnterPool assets={synths} pool={pool} />
 								</Box>
@@ -216,7 +219,7 @@ const Pool = () => {
 								</Box>
 							</Flex>
 						</Flex>
-						<Box boxShadow={'xl'} rounded={10}>
+						<Box boxShadow={'lg'} rounded={10} minH="200px" width={"20%"} flex="0.75">
 							<PoolTable pool={pool} />
 						</Box>
 					</Flex>

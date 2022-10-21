@@ -36,6 +36,15 @@ const WithdrawModal = ({ asset, balance }: any) => {
 	const [withdrawerror,setwithdrawerror] = React.useState("")
 	const [withdrawconfirm, setwithdrawconfirm] = React.useState(false)
 
+	const _onClose = () => {
+		setwithdrawerror("")
+		setwithdrawconfirm(false)
+		setAmount(0)
+		sethash("")
+		setloader(false)
+		onClose()
+	}
+
 	const changeAmount = (event: any) =>{
 		setAmount(event.target.value);
 	}
@@ -83,12 +92,14 @@ const WithdrawModal = ({ asset, balance }: any) => {
 
 	return (
 		<Box>
-			<IconButton disabled={!isConnected} variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={37} color="gray" />} aria-label={''} isRound={true}>
+			<IconButton 
+			// disabled={!isConnected} 
+			variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={37} color="gray" />} aria-label={''} isRound={true}>
 			</IconButton>
-			<Modal isCentered isOpen={isOpen} onClose={onClose}>
+			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg='blackAlpha.100'
                     backdropFilter='blur(30px)' />
-				<ModalContent width={'30rem'} height="30rem">
+				<ModalContent width={'30rem'}>
 					<ModalCloseButton />
                     <ModalHeader>Withdraw {asset['symbol']}</ModalHeader>
 					<ModalBody>
@@ -108,7 +119,12 @@ const WithdrawModal = ({ asset, balance }: any) => {
                         <Flex mt={4} justify="space-between">
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
-                        <Button colorScheme={"whatsapp"} width="100%" mt={4} onClick={issue}>Withdraw</Button>
+                        <Button 
+							disabled={!isConnected || !amount || amount == 0 || amount > balance}
+							colorScheme={"red"} width="100%" mt={4} onClick={issue}
+						>
+							{isConnected? (amount > balance) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
+						</Button>
 					
 						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
 							<Box>
