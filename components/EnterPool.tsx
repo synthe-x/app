@@ -70,7 +70,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 			}
 		}
 		let _amount = assets[assetIndex].amount[inputPoolIndex] > assets[assetIndex].walletBalance ? assets[assetIndex].walletBalance : assets[assetIndex].amount[inputPoolIndex];
-		setAmount(_amount / 10 ** assets[assetIndex].decimal);
+		setAmount(0.999 * _amount / 10 ** assets[assetIndex].decimal);
 	};
 
 	const changeAsset = (event: any) => {

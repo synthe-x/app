@@ -63,8 +63,8 @@ const TransferModal = ({ asset }: any) => {
 	};
 
 	const max = () => {
-		if(asset.amount) return asset.amount[inputPoolIndex] / 10 ** asset.decimal
-		return asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
+		if(asset.amount) return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
+		return 0.999 * asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
 	} 
 
 	const transfer = async () => {

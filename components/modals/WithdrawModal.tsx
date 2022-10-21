@@ -50,7 +50,7 @@ const WithdrawModal = ({ asset, balance }: any) => {
 	}
 
 	const setMax = () =>{
-		setAmount(balance);
+		setAmount(0.999 * balance);
 	}
 
 	const issue = async () => {

@@ -53,7 +53,7 @@ const RepayModal = ({ asset }: any) => {
 	}
 
 	const max = () => {
-		return asset['walletBalance']/1e18;
+		return 0.999 * asset['walletBalance']/1e18;
 	}
 
 	const issue = async () => {

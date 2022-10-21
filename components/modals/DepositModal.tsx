@@ -68,7 +68,7 @@ const DepositModal = ({ asset, balance }: any) => {
 	const issue = async () => {
 		if (!amount) return;
 		let system = await getContract(tronWeb, 'System');
-		let value = BigInt(amount * 10 ** asset['decimal']).toString();
+		let value = BigInt(0.999 * amount * 10 ** asset['decimal']).toString();
 		setloader(true);
 		setdepositerror('');
 		setdepositconfirm(false);

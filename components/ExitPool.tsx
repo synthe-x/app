@@ -76,7 +76,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				break;
 			}
 		}
-		setAmount(assets[activeAssetIndex].amount[poolIndex] / 10 ** assets[activeAssetIndex].decimal);
+		setAmount(0.999 * assets[activeAssetIndex].amount[poolIndex] / 10 ** assets[activeAssetIndex].decimal);
 	};
 	const changeAsset = (event: any) => {
 		setActiveAssetIndex(event.target.value);
