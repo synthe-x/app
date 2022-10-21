@@ -59,8 +59,13 @@ const TransferModal = ({ asset }: any) => {
 		setAmount(event.target.value);
 	};
 	const setMax = () => {
-		setAmount(asset.amount[inputPoolIndex] / 10 ** asset.decimal);
+		setAmount(max());
 	};
+
+	const max = () => {
+		if(asset.amount) return asset.amount[inputPoolIndex] / 10 ** asset.decimal
+		return asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
+	} 
 
 	const transfer = async () => {
 		if (!amount) return;
@@ -69,6 +74,7 @@ const TransferModal = ({ asset }: any) => {
 		setloader(true);
 		setdepositerror('');
 		setdepositconfirm(false);
+		console.log(inputPoolIndex, outputPoolIndex);
 		let tx =
 			inputPoolIndex == 0
 				? system.methods.enterPool(
@@ -77,11 +83,12 @@ const TransferModal = ({ asset }: any) => {
 						value
 				  )
 				: system.methods.exitPool(
-						outputPoolIndex,
+						inputPoolIndex,
 						asset['synth_id'],
 						value
 				  );
-
+				
+		
 		tx.send(
 			{
 				value,
@@ -124,6 +131,7 @@ const TransferModal = ({ asset }: any) => {
 		if (inputPoolIndex != 0) {
 			setOutputPoolIndex(0);
 		}
+		console.log(event.target.value);
 		setInputPoolIndex(event.target.value);
 	};
 
@@ -151,7 +159,7 @@ const TransferModal = ({ asset }: any) => {
 				height={'24px'}></IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'} height="30rem">
+				<ModalContent width={'30rem'}>
 					<ModalCloseButton />
 					<ModalHeader>Transfer {asset['symbol']}</ModalHeader>
 					<ModalBody>
@@ -212,12 +220,12 @@ const TransferModal = ({ asset }: any) => {
 						</Flex>
 
 						<Button
-						disabled={!isConnected}
+							disabled={!isConnected || !amount || amount == 0 || amount > max()}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							{isConnected? <>Transfer<AiOutlineSwap /></> : <>Please connect your wallet</>} 
+							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Transfer<AiOutlineSwap /></> : <>Please connect your wallet</>}
 						</Button>
 
 						{loader && (
