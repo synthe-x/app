@@ -196,7 +196,7 @@ function Swap() {
 			inputAssetIndex
 		];
 		let _inputAmount =
-			tradingBalanceOf(_inputAsset.synth_id) /
+			0.999 * tradingBalanceOf(_inputAsset.synth_id) /
 			10 ** (_inputAsset.decimal ?? 18);
 		setInputAmount(_inputAmount);
 		let _outputAmount =
