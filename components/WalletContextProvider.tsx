@@ -183,9 +183,9 @@ function WalletContextProvider({children}: any) {
 		let _collaterals = collaterals;
 		for(let i in _collaterals){
 			if(_collaterals[i].coll_address == collateralAddress){
-				console.log(_collaterals[i].amount);
 				_collaterals[i].amount = (isMinus ? Big(_collaterals[i].amount).minus(value) : Big(_collaterals[i].amount).plus(value)).toString();
-				console.log(_collaterals[i].amount);
+				// update total collateral
+				isMinus ? setTotalCollateral(Big(totalCollateral).minus(Big(value)*_collaterals[i].price/10**_collaterals[i].decimal).toString()) : setTotalCollateral(Big(totalCollateral).plus(Big(value)*_collaterals[i].price/10**_collaterals[i].decimal).toString());
 			}
 		}
 		setCollaterals(_collaterals);
@@ -271,6 +271,8 @@ function WalletContextProvider({children}: any) {
 		for(let i in _synths){
 			if(_synths[i].synth_id == synthAddress){
 				_synths[i].amount[poolId] = (isMinus ? Big(_synths[i].amount[poolId]).minus(value) : Big(_synths[i].amount[poolId]).plus(value)).toString();
+				// update total debt
+				isMinus ? setTotalDebt(Big(totalDebt).minus(Big(value)*_synths[i].price/10**_synths[i].decimal).toString()) : setTotalDebt(Big(totalDebt).plus(Big(value)*_synths[i].price/10**_synths[i].decimal).toString());
 			}
 		}
 		setSynths(_synths);

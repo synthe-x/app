@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
 	Table,
 	Thead,
@@ -36,14 +36,14 @@ import {
 	PaginationPageGroup,
 } from '@ajna/pagination';
 
-const IssuanceTable = ({}: any) => {
+const IssuanceTable = ({handleChange}: any) => {
+	const [nullValue, setNullValue] = useState(false);
 	const { currentPage, setCurrentPage, pagesCount, pages, pageSize } =
 		usePagination({
 			pagesCount: 2,
 			initialState: { currentPage: 1 },
 		});
 
-	const { colorMode } = useColorMode();
 
 	const {
 		synths: debts,
@@ -51,7 +51,22 @@ const IssuanceTable = ({}: any) => {
 		tokenFormatter,
 		dollarFormatter,
 		isDataReady,
+		updateSynthWalletBalance, updateSynthAmount
 	} = useContext(WalletContext);
+
+	const handleIssue = (synthId: string, value: string) => {
+		updateSynthWalletBalance(synthId, value, true)
+		updateSynthAmount(synthId, 0, value, false)
+		setNullValue(!nullValue)
+		handleChange()
+	}
+
+	const handleRepay = (synthId: string, value: string) => {
+		updateSynthWalletBalance(synthId, value, false)
+		updateSynthAmount(synthId, 0, value, true)
+		setNullValue(!nullValue)
+		handleChange()
+	}
 
 	return (
 		<Skeleton isLoaded={debts.length > 0}>
@@ -120,9 +135,7 @@ const IssuanceTable = ({}: any) => {
 													textAlign={'left'}>
 													{isConnected
 														? tokenFormatter.format(
-																debt[
-																	'amount'
-																][0] / 1e18
+																debt.amount[0] / 1e18
 														  )
 														: '-'}{' '}
 													{debt['symbol']}
@@ -133,43 +146,25 @@ const IssuanceTable = ({}: any) => {
 													textAlign={'left'}>
 													{isConnected
 														? dollarFormatter.format(
-																(debt[
-																	'amount'
-																][0] *
-																	debt[
-																		'price'
-																	]) /
+																(debt.amount[0] * debt.price) /
 																	1e18
 														  )
 														: '-'}{' '}
 												</Text>
-												{/* <Text
-												fontSize="xs"
-												fontWeight="light"
-												textAlign={'left'}>
-												{debt['walletBalance']}{' '}
-												{debt['asset']['symbol']}
-											</Text> */}
 											</Box>
 										</Td>
 										<Td>
 											<Text fontSize={'sm'}>
 												{dollarFormatter.format(
-													(debt['totalBorrowed'] ??
-														0) / 1e18
+													((debt.totalBorrowed ??
+														0) * debt.price) / 1e18
 												)}
 											</Text>
 										</Td>
-										{/* <Td className="borrow_table_data">
-										{debt['asset'][
-											'totalLiquidity'
-										].toString()}{' '}
-										{debt['asset']['symbol']}
-									</Td> */}
 										<Td isNumeric maxW={'110px'}>
 											<Flex alignItems={'center'}>
-												<IssueModel asset={debt} />
-												<RepayModel asset={debt} />
+												<IssueModel asset={debt} handleIssue={handleIssue} />
+												<RepayModel asset={debt} handleRepay={handleRepay} />
 											</Flex>
 										</Td>
 									</Tr>

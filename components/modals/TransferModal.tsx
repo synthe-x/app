@@ -30,7 +30,7 @@ import { getAddress, getContract } from '../../src/utils';
 import { useEffect } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 
-const TransferModal = ({ asset }: any) => {
+const TransferModal = ({ asset, handleUpdate }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(0);
 	const [loader, setloader] = React.useState(false);
@@ -53,7 +53,8 @@ const TransferModal = ({ asset }: any) => {
 		pools,
 		poolUserData,
 		tronWeb,
-		tradingBalanceOf
+		tradingBalanceOf,
+		updateSynthAmount
 	} = useContext(WalletContext);
 
 	const changeAmount = (event: any) => {
@@ -64,14 +65,8 @@ const TransferModal = ({ asset }: any) => {
 	};
 
 	const max = () => {
-		// if(inputPoolIndex == 0){
-		return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
-		// } else {
-		// 	return 0.999 * tradingBalanceOf(asset.synth_id) / 10 ** (asset.decimal ?? 18)
-		// }
-		// if(asset.amount) return 0.999 * asset.amount[inputPoolIndex] / 10 ** asset.decimal
-		// return 0.999 * asset.balance / 10 ** (asset.decimal ?? 18) ?? 0
-	} 
+		return (0.999 * asset.amount[inputPoolIndex]) / 10 ** asset.decimal;
+	};
 
 	const transfer = async () => {
 		if (!amount) return;
@@ -92,7 +87,7 @@ const TransferModal = ({ asset }: any) => {
 						asset['synth_id'],
 						value
 				  );
-				
+
 		tx.send(
 			{
 				value,
@@ -122,6 +117,9 @@ const TransferModal = ({ asset }: any) => {
 					if (hash) {
 						setloader(false);
 						setdepositconfirm(true);
+						updateSynthAmount(asset['synth_id'], inputPoolIndex, value, true);
+						updateSynthAmount(asset['synth_id'], outputPoolIndex, value, false);
+						handleUpdate()
 					}
 				}
 			}
@@ -148,14 +146,14 @@ const TransferModal = ({ asset }: any) => {
 		setOutputPoolIndex(event.target.value);
 	};
 
-
 	return (
 		<Box>
 			<IconButton
-			disabled={!isConnected}
+				disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
-				icon={<AiOutlineSwap color="gray" />}
+				icon={<AiOutlineSwap color="gray.100" />}
+				_hover={{ bg: 'none' }}
 				aria-label={''}
 				isRound={true}
 				mr={-3}
@@ -180,7 +178,7 @@ const TransferModal = ({ asset }: any) => {
 						</Select>
 						<InputGroup size="md">
 							<Input
-							disabled={!isConnected}
+								disabled={!isConnected}
 								type="number"
 								placeholder={`Enter ${asset['symbol']} amount`}
 								onChange={changeAmount}
@@ -189,7 +187,7 @@ const TransferModal = ({ asset }: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
-								disabled={!isConnected}
+									disabled={!isConnected}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -204,7 +202,7 @@ const TransferModal = ({ asset }: any) => {
 						</Box>
 
 						<Select
-						disabled={!isConnected}
+							disabled={!isConnected}
 							value={outputPoolIndex}
 							onChange={outputPoolChange}>
 							{pools.map((pool: any, index) => {
@@ -223,12 +221,30 @@ const TransferModal = ({ asset }: any) => {
 						</Flex>
 
 						<Button
-							disabled={!isConnected || !amount || amount == 0 || amount > max()}
+							disabled={
+								!isConnected ||
+								!amount ||
+								amount == 0 ||
+								amount > max()
+							}
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Transfer<AiOutlineSwap /></> : <>Please connect your wallet</>}
+							{isConnected ? (
+								amount > max() ? (
+									<>Insufficient Collateral</>
+								) : !amount || amount == 0 ? (
+									<>Enter amount</>
+								) : (
+									<>
+										Transfer
+										<AiOutlineSwap />
+									</>
+								)
+							) : (
+								<>Please connect your wallet</>
+							)}
 						</Button>
 
 						{loader && (

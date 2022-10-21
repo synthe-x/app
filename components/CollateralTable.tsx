@@ -26,7 +26,7 @@ import { getContract } from '../src/utils';
 import { useState } from 'react';
 import { WalletContext } from './WalletContextProvider';
 
-const CollateralTable = ({}: any) => {
+const CollateralTable = ({handleChange}: any) => {
 	const [claimLoading, setClaimLoading] = useState(false);
 	const [nullValue, setNullValue] = useState(false);
 
@@ -59,12 +59,14 @@ const CollateralTable = ({}: any) => {
 		updateCollateralWalletBalance(collateral, value, true)
 		updateCollateralAmount(collateral, value, false)
 		setNullValue(!nullValue);
+		handleChange()
 	}
 
 	const handleWithdraw = (collateral: string, value: string) => {
 		updateCollateralWalletBalance(collateral, value, false)
 		updateCollateralAmount(collateral, value, true)
 		setNullValue(!nullValue);
+		handleChange()
 	}
 
 	// console.log(collaterals);
@@ -163,10 +165,6 @@ const CollateralTable = ({}: any) => {
 											/>
 											<WithdrawModal
 												asset={collateral}
-												balance={
-													collateral['amount'] /
-													10 ** collateral['decimal']
-												}
 												handleWithdraw={handleWithdraw}
 											/>
 										</Flex>

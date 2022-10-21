@@ -31,7 +31,7 @@ import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
 
-const DepositModal = ({ asset }: any) => {
+const DepositModal = ({ asset, handleIssue }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [loader, setloader] = React.useState(false);
 	const [hash, sethash] = React.useState('');
@@ -52,8 +52,7 @@ const DepositModal = ({ asset }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const { safeCRatio, totalCollateral, cRatio, availableToBorrow } =
-		useContext(WalletContext);
+	const { safeCRatio, totalCollateral, cRatio, availableToBorrow } = useContext(WalletContext);
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt
@@ -101,6 +100,7 @@ const DepositModal = ({ asset }: any) => {
 					if (hash) {
 						setloader(false);
 						setissueconfirm(true);
+						handleIssue(asset['synth_id'], value);
 					}
 				}
 			}

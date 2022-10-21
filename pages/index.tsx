@@ -13,8 +13,12 @@ import ConnectButton from '../components/ConnectButton';
 import { BiError, BiErrorAlt } from 'react-icons/bi';
 
 function App() {
-	const { colorMode } = useColorMode();
+	const [nullValue, setNullValue] = useState(false);
 	
+	const handleChange = () => {
+		setNullValue(!nullValue);
+	}
+
 	const {
 		totalCollateral,
 		totalDebt,
@@ -31,7 +35,7 @@ function App() {
 		width: { sm: '100%', lg: '50%' },
 		flex: "1",
 		minH: "200px",
-		bg: colorMode == 'dark' ? '#171717' : '#FFFFFF',
+		bg: '#FFFFFF',
 		borderRadius: '20px',
 		boxShadow: 'lg'
 	};
@@ -116,11 +120,11 @@ function App() {
 						
 						>
 						<Box {...TableStyle}>
-							<CollateralTable/>
+							<CollateralTable handleChange={handleChange}/>
 						</Box>
 
 						<Box {...TableStyle}>
-							<IssuanceTable/>
+							<IssuanceTable handleChange={handleChange}/>
 						</Box>
 					</Flex>
 				</Box>

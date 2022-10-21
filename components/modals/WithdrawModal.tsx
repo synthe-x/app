@@ -129,7 +129,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 							disabled={!isConnected || !amount || amount == 0 || amount > max()}
 							colorScheme={"red"} width="100%" mt={4} onClick={issue}
 						>
-							{isConnected? (amount > max()) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
+							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
 						</Button>
 					
 						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">

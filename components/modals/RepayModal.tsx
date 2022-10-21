@@ -27,7 +27,7 @@ import { getContract } from '../../src/utils';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 
-const RepayModal = ({ asset }: any) => {
+const RepayModal = ({ asset, handleRepay }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [loader, setloader] = React.useState(false)
 	const [hash, sethash] =  React.useState("")
@@ -87,6 +87,7 @@ const RepayModal = ({ asset }: any) => {
 				if(hash){
 					setloader(false)
 					setrepayconfirm(true)
+					handleRepay(asset['synth_id'], value)
 				}
 			}
 		})
