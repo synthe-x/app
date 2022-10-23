@@ -27,6 +27,7 @@ import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
 import { getContract } from '../src/utils';
 import { BsArrowDown } from 'react-icons/bs';
 import { WalletContext } from './WalletContextProvider';
+import { AppDataContext } from './AppDataProvider';
 
 
 const EnterPool = ({assets, pool, poolIndex}: any) => {
@@ -48,11 +49,8 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		onClose();
 	}
 
-	const {
-		isConnected,
-		pools,
-		tronWeb
-	} = useContext(WalletContext);
+	const { isConnected, tronWeb } = useContext(WalletContext);
+	const { pools } = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
 		if(event.target.value < 0) {

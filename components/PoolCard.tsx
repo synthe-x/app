@@ -14,24 +14,14 @@ import { useContext, useEffect, useState } from 'react';
 import { WalletContext } from '../components/WalletContextProvider';
 import { LinkBox, LinkOverlay } from '@chakra-ui/react'
 import PoolCardAssets from './PoolCardAssets';
+import { AppDataContext } from './AppDataProvider';
 
 function PoolCard({ pool }: any) {
 	const { colorMode } = useColorMode();
 
 	const {
-		// isConnected,
-		// isConnecting,
-		// address,
-		// connect,
-		// collaterals,
-		// synths,
-		// totalCollateral,
-		// totalDebt,
-		// isDataReady,
-		// connectionError,
-		// pools,
 		dollarFormatter
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const [totalLiquidity, setTotalLiquidity] = useState(0);
 	useEffect(() => {

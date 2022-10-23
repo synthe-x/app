@@ -35,6 +35,7 @@ import {
 	PaginationContainer,
 	PaginationPageGroup,
 } from '@ajna/pagination';
+import { AppDataContext } from './AppDataProvider';
 
 const IssuanceTable = ({handleChange}: any) => {
 	const [nullValue, setNullValue] = useState(false);
@@ -45,13 +46,16 @@ const IssuanceTable = ({handleChange}: any) => {
 		});
 	
 	const {
-		synths: debts,
 		isConnected,
+	} = useContext(WalletContext);
+
+	const {
+		synths: debts,
 		tokenFormatter,
 		dollarFormatter,
 		isDataReady,
 		updateSynthWalletBalance, updateSynthAmount
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const handleIssue = (synthId: string, value: string) => {
 		updateSynthWalletBalance(synthId, value, true)

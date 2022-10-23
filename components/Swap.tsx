@@ -27,6 +27,7 @@ import ConnectButton from '../components/ConnectButton';
 import { BsArrowBarDown, BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import { MdOutlineSwapVert } from 'react-icons/md';
 import TradingChart from './charts/TradingChart';
+import { AppDataContext } from './AppDataProvider';
 
 function Swap() {
 	const { colorMode } = useColorMode();
@@ -135,13 +136,16 @@ function Swap() {
 
 	const {
 		isConnected,
+		tronWeb,
+	} = useContext(WalletContext);
+
+	const {
 		synths,
 		tradingPool,
 		pools,
 		tradingBalanceOf,
-		tronWeb,
 		tokenFormatter,
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	useEffect(() => {
 		if (

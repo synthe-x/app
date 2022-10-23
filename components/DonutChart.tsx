@@ -2,13 +2,15 @@ import React, { useContext } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart, ArcElement, Legend } from 'chart.js'
 import { WalletContext } from './WalletContextProvider';
+import { AppDataContext } from './AppDataProvider';
+import { Box } from '@chakra-ui/react';
 Chart.register(ArcElement);
 
 export default function DonutChart({}: any){
   
   const {
 		availableToBorrow, totalDebt, totalCollateral
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
   
   const data = {
     labels: [
@@ -45,14 +47,14 @@ export default function DonutChart({}: any){
   }
   return (
     <>
-    <div style={{ width: "300px" }}>
+    <Box>
       <Doughnut
         data={data}
-        width={100}
-        height={100}
+        width={220}
+        height={220}
         options={Options}
       />
-    </div>
+    </Box>
     </>
   )
 }

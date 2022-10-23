@@ -26,6 +26,7 @@ import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract } from '../../src/utils';
 import { WalletContext } from '../WalletContextProvider';
+import { AppDataContext } from '../AppDataProvider';
 const { Big } = require("big.js");
 
 const WithdrawModal = ({ asset, handleWithdraw }: any) => {
@@ -36,7 +37,8 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const [withdrawerror,setwithdrawerror] = React.useState("")
 	const [withdrawconfirm, setwithdrawconfirm] = React.useState(false)
 
-	const {isConnected, tronWeb, safeCRatio, totalCollateral, totalDebt} = useContext(WalletContext)
+	const { isConnected, tronWeb } = useContext(WalletContext)
+	const { safeCRatio, totalCollateral, totalDebt} = useContext(AppDataContext)
 
 	const _onClose = () => {
 		setwithdrawerror("")

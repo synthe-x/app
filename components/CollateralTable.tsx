@@ -25,6 +25,7 @@ import Image from 'next/image';
 import { getContract } from '../src/utils';
 import { useState } from 'react';
 import { WalletContext } from './WalletContextProvider';
+import { AppDataContext } from './AppDataProvider';
 
 const CollateralTable = ({handleChange}: any) => {
 	const [claimLoading, setClaimLoading] = useState(false);
@@ -32,13 +33,16 @@ const CollateralTable = ({handleChange}: any) => {
 
 	const {
 		isConnected,
-		collaterals,
 		tronWeb,
+	} = useContext(WalletContext);
+
+	const {
+		collaterals,
 		tokenFormatter,
 		dollarFormatter,
 		updateCollateralWalletBalance,
 		updateCollateralAmount
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const claim = async () => {
 		setClaimLoading(true);
@@ -102,7 +106,7 @@ const CollateralTable = ({handleChange}: any) => {
 						{collaterals.map((collateral: any) => {
 							return (
 								<Tr key={collateral['symbol']}>
-									<Td>
+									<Td minW={'220px'}>
 										<Box display="flex" alignItems="center">
 											<Image
 												src={`/${collateral?.symbol}.png`}

@@ -35,8 +35,9 @@ function NavBar() {
             router.push("/")
           }} src={
             // colorMode == "dark" ? 
-            darklogo
-            //  : lightlogo
+            // darklogo
+            //  : 
+             lightlogo
             } alt="" width="100px" height="70px" />
         </Box>
 
@@ -79,16 +80,6 @@ function NavBar() {
                 </Text>
               </Link>
             </ListItem>
-            {/* <ListItem mx="1rem">
-              <Link href={"/portfolio"}  >
-                <Text cursor={"pointer"} my="1rem" onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
-                  Portfolio
-                </Text>
-              </Link>
-            </ListItem> */}
-            {/* <ListItem ml="1rem">
-              <Button width={"3rem"} onClick={toggleColorMode} mr={5}> {colorMode == "dark" ? <BsMoonFill size={25} /> : <BsSunFill size={25} />}</Button>
-            </ListItem> */}
             <ListItem mx="1rem">
               <ConnectButton />
             </ListItem>
@@ -96,15 +87,15 @@ function NavBar() {
         </Box>
 
 
-        {/* <Box display={{ sm: "block", md: "none", lg: "none" }}>
-          <FaBars size={35} onClick={onOpen} />
-        </Box> */}
+        <Box display={{ sm: "block", md: "none", lg: "none" }}>
+          <FaBars size={20} onClick={onOpen} color="white"/>
+        </Box>
 
 
       </Flex>
-      {/* <Drawer placement={"right"} onClose={onClose} isOpen={isOpen}>
+      <Drawer placement={"right"} onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
-        <DrawerContent alignItems={"center"}>
+        <DrawerContent alignItems={"center"} bgColor={"gray.800"}>
           <DrawerHeader borderBottomWidth='1px'>
             <Flex alignItems={"center"}>
               <Image src={colorMode == "dark" ? darklogo : lightlogo} alt="" width="100px" height="100px" />
@@ -113,36 +104,54 @@ function NavBar() {
             <Box mt="1rem" minWidth={"100%"}>
             </Box>
           </DrawerHeader>
-          <DrawerBody>
+          <DrawerBody >
 
-            <nav >
-              <UnorderedList display={"flex"} flexDirection="column" alignItems="center" justifyContent={"center"} listStyleType="none">
-                <ListItem>
-                  <Link href="/dashboard">
-                    <Text cursor={"pointer"} my="1rem" onClick={onClose} fontFamily="Roboto" fontSize={"2xl"} fontWeight={"bold"}>
-                      Dashboard
-                    </Text>
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  <Link href="/portfolio"   >
-                    <Text cursor={"pointer"} onClick={onClose} my="1rem" fontFamily="Roboto" fontSize={"2xl"} fontWeight={"bold"}>
-                      Portfolio
-                    </Text>
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  <Button variant={"outline"} width={"11rem"} onClick={toggleColorMode} > {colorMode == "dark" ? <BsMoonFill size={25} /> : <BsSunFill size={25} />} <Text ml="1rem">{colorMode == "light" ? "light" : "dark"} mode</Text></Button>
-                </ListItem>
-                <ListItem my="1rem">
-                  <ConnectButton/>
-                </ListItem>
+            <Box>
+              <UnorderedList display={"flex"} flexDirection="column" alignItems="center" justifyContent={"center"} listStyleType="none" >
+              <ListItem>
+              <Link href="/">
+                <Text my="1rem" 
+                color={router.pathname == "/" ? "green" : "white"} 
+                textDecoration={router.pathname == "/" ? "underline": ""} 
+                textUnderlineOffset={5} 
+                cursor={"pointer"} onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
+                  App
+                </Text>
+              </Link>
+            </ListItem>
+
+            <ListItem>
+              <Link href="/pools">
+                <Text my="1rem" 
+                color={router.pathname.includes("pool") ? "green" : "gray.100"} 
+                textDecoration={router.pathname.includes("pool") ? "underline": ""} 
+                textUnderlineOffset={5} 
+                cursor={"pointer"} onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
+                  Pools
+                </Text>
+              </Link>
+            </ListItem>
+
+            <ListItem>
+              <Link href={"/exchange"}  >
+                <Text cursor={"pointer"} 
+                color={router.pathname == "/exchange" ? "green" : "gray.100"} 
+                textDecoration={router.pathname == "/exchange" ? "underline": ""} 
+                textUnderlineOffset={5} 
+                my="1rem" onClick={onClose} fontFamily="Roboto" fontWeight={"bold"} fontSize="sm">
+                  Exchange
+                </Text>
+              </Link>
+            </ListItem>
+            <ListItem my="1rem">
+              <ConnectButton />
+            </ListItem>
               </UnorderedList>
-            </nav>
+            </Box>
 
           </DrawerBody>
         </DrawerContent>
-      </Drawer> */}
+      </Drawer>
     </>
   )
 }

@@ -29,6 +29,7 @@ import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
 import { getAddress, getContract } from '../../src/utils';
 import { useEffect } from 'react';
 import { WalletContext } from '../WalletContextProvider';
+import { AppDataContext } from '../AppDataProvider';
 
 const TransferModal = ({ asset, handleUpdate }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -45,17 +46,19 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 		isConnecting,
 		address,
 		connect,
+		tronWeb,
+	} = useContext(WalletContext);
+
+	const {
 		synths,
 		totalDebt,
 		isDataReady,
 		tradingPool,
 		setTradingPool,
 		pools,
-		poolUserData,
-		tronWeb,
 		tradingBalanceOf,
 		updateSynthAmount
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
 		setAmount(event.target.value);

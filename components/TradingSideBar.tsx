@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import { WalletContext } from '../components/WalletContextProvider';
+import { AppDataContext } from './AppDataProvider';
 import TransferModal from './modals/TransferModal';
 
 function ExchangeSideBar({}) {
@@ -32,15 +33,17 @@ function ExchangeSideBar({}) {
 		isConnecting,
 		address,
 		connect,
+	} = useContext(WalletContext);
+
+	const {
 		synths,
 		totalDebt,
 		isDataReady,
 		tradingPool,
 		setTradingPool,
 		pools,
-		poolUserData,
 		tradingBalanceOf
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const updatePoolIndex = (e: any) => {
 		setTradingPool(e.target.value);

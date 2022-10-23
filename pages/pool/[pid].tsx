@@ -25,6 +25,7 @@ import React from 'react';
 import PoolPie from '../../components/charts/PoolPie';
 import axios from 'axios';
 import PoolTable from '../../components/charts/PoolTable';
+import { AppDataContext } from '../../components/AppDataProvider';
 
 const dollarFormatter = new Intl.NumberFormat('en-US', {
 	style: 'currency',
@@ -44,16 +45,19 @@ const Pool = () => {
 		isConnecting,
 		address,
 		connect,
+	} = useContext(WalletContext);
+
+	const {
+		
 		collaterals,
 		synths,
 		totalCollateral,
 		totalDebt,
 		isDataReady,
-		connectionError,
 		pools,
 		// tokenFormatter,
 		// dollarFormatter,
-	} = useContext(WalletContext);
+	} = useContext(AppDataContext);
 
 	const [volume, setVolume] = React.useState<{}[]>([]);
 	const [_24h, set24h] = React.useState(0);

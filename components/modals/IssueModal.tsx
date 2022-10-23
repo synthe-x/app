@@ -30,6 +30,7 @@ import { getContract } from '../../src/utils';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
+import { AppDataContext } from '../AppDataProvider';
 
 const DepositModal = ({ asset, handleIssue }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -52,7 +53,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const { safeCRatio, totalCollateral, cRatio, availableToBorrow } = useContext(WalletContext);
+	const { safeCRatio, totalCollateral, cRatio, availableToBorrow } = useContext(AppDataContext);
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt

@@ -41,6 +41,7 @@ import { getAddress, getContract } from '../../src/utils';
 import { useEffect, useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
+import { AppDataContext } from '../AppDataProvider';
 
 const DepositModal = ({ asset, handleDeposit }: any) => {
 	const balance = asset.walletBalance / (10**asset.decimal)
@@ -166,7 +167,8 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 		setAmount((balance * e) / 100);
 	};
 
-	const {isConnected, tronWeb, address, updateCollateralWalletBalance, updateCollateralAmount} = useContext(WalletContext)
+	const {isConnected, tronWeb, address} = useContext(WalletContext);
+	const { updateCollateralWalletBalance, updateCollateralAmount } = useContext(AppDataContext);
 
 	return (
 		<Box>
