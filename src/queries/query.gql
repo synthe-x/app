@@ -1,0 +1,34 @@
+query fetchAppData {
+	synths {
+		synth_id
+		name
+		symbol
+		liquidity
+		apy
+		totalBorrowed
+		interestRateModel
+		borrowIndex
+		price
+	}
+	collaterals {
+		coll_address
+		name
+		symbol
+		price
+		decimal
+		cAsset
+		liquidity
+	}
+	tradingPools {
+		name
+		symbol
+		poolSynth_ids {
+			synth_id {
+				name
+				symbol
+				price
+			}
+			balance
+		}
+	}
+}
