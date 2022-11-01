@@ -1,20 +1,32 @@
 import Web3 from "web3";
-import Contract from "web3-eth-contract";
+var Contract = require('web3-eth-contract');
+import { ChainID } from "./chains";
+import { deployments } from "./const";
 
-// const config = require("../config.json");
-let data = require(`../artifacts/deployments.json`)
-
-export async function getContract(tronweb: any, name: string, address: (string|null) = null, mock: boolean = false) {
-    if(!address) address = data["contracts"][name]["address"]
-    const abi = data["sources"][name];
-    const contractInstance = await tronweb.contract(abi, address);
-    return contractInstance;
+export async function getContract(web3: any, abi: any, address: (string|null) = null, chain: ChainID) {
+    var contract
+    if(chain != ChainID.NILE){
+        contract = new web3.eth.Contract(abi, address);
+    } else {
+        contract = await web3.contract(abi, address);
+    }
+    return contract;
 }
 
-export function getAddress(name: string) {
-    return data["contracts"][name]["address"]
+export function getAddress(chain: ChainID, name: string) {
+    return (deployments as any)[chain]["contracts"][name]["address"]
 }
 
-export function getABI(name: string) {
-    return data["sources"][name];
+export function getABI(chain: ChainID, name: string) {
+    return (deployments as any)[chain]["sources"][name];
+}
+
+export function call(contract: any, method: string, args: any[], network: ChainID){
+    return contract.methods[method](...args).call()
+}
+
+export function send(web3: any, contract: any, method: string, network: ChainID){
+    return new Promise((resolve, reject) => {
+        
+    })
 }

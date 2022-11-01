@@ -61,8 +61,7 @@ export default function PoolTable({pool}: any) {
 															alt="logo"
 															mr={2}
 														/>
-														{synth?.name
-															.split(' ')
+														{synth?.name?.split(' ')
 															.slice(1)
 															.join(' ')}
 													</Td>

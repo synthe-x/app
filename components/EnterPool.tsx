@@ -24,7 +24,7 @@ import {
 import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
-import { getContract } from '../src/utils';
+import { getContract, getABI, getAddress } from '../src/utils';
 import { BsArrowDown } from 'react-icons/bs';
 import { WalletContext } from './WalletContextProvider';
 import { AppDataContext } from './AppDataProvider';
@@ -49,7 +49,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		onClose();
 	}
 
-	const { isConnected, tronWeb } = useContext(WalletContext);
+	const { isConnected, tronWeb, chain } = useContext(WalletContext);
 	const { pools } = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
@@ -77,7 +77,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	
 	const transfer = async () => {
 		if (!amount) return;
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract(tronWeb, getABI(chain, 'System'), getAddress(chain, 'System'), chain);
 		let value = BigInt(amount * 10 ** (pool.poolSynth_ids[activeAssetIndex]['decimal'] ?? 18)).toString();
 		setloader(true);
 		setdepositerror('');
@@ -141,7 +141,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
                 />
 				<ModalContent width={'30rem'} >
 					<ModalCloseButton />
-					<ModalHeader>Enter {pool.poolSynth_ids[activeAssetIndex]['name'].split(" ").slice(1).join(" ")}</ModalHeader>
+					<ModalHeader>Enter {pool.poolSynth_ids[activeAssetIndex]['name']?.split(" ").slice(1).join(" ")}</ModalHeader>
 					<ModalBody>
 						<Select disabled>
 									<option >

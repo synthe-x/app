@@ -35,9 +35,9 @@ function NavBar() {
             router.push("/")
           }} src={
             // colorMode == "dark" ? 
-            // darklogo
+            darklogo
             //  : 
-             lightlogo
+            //  lightlogo
             } alt="" width="100px" height="70px" />
         </Box>
 

@@ -31,17 +31,26 @@ export default function _index({ children }: any) {
 		isFetchingData,
 	} = useContext(AppDataContext);
 
+
+	const [trynaConnect, setTrynaConnect] = useState(false);
+
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			if (localStorage.getItem('address') && !isConnected && !isConnecting) {
-				connect((_address: string|null, _err: string) => {
+			let _address = localStorage.getItem('address');
+			let _chain = localStorage.getItem('chain')
+			setTrynaConnect(true)
+			// console.log("Tryna connect", _address, _chain, isConnected, isConnecting, trynaConnect);
+			if (_address && _chain && !isConnected && !isConnecting && trynaConnect) {
+				console.log("Attempting connection...")
+				connect(parseInt(_chain), (_address: string|null, _err: string) => {
 					if(!isDataReady && !isFetchingData && _address) {
-                        fetchData(tronWeb, _address)
-                    }
-				});
+					    fetchData(parseInt(_chain as string), tronWeb, _address)
+					}
+				})
 			}
 		}
 	});
+
 
 	const router = useRouter();
 

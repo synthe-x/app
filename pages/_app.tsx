@@ -2,11 +2,6 @@ import '../styles/globals.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import type { AppProps } from 'next/app';
 import {
-	RainbowKitProvider,
-	getDefaultWallets,
-	darkTheme,
-} from '@rainbow-me/rainbowkit';
-import {
 	chain,
 	configureChains,
 	createClient,
@@ -14,12 +9,9 @@ import {
 	defaultChains,
 } from 'wagmi';
 import { chains } from '../src/chains';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { Box, ChakraProvider, Flex } from '@chakra-ui/react';
 import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
-import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
 import { WalletContextProvider } from '../components/WalletContextProvider';
 import Index from './_index';
 

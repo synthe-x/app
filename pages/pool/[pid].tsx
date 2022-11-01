@@ -71,7 +71,7 @@ const Pool = () => {
 			// 	pools.find(
 			// 	(pool: any, index: number) => pool?.pool_address == pid
 			// )
-			if (pools[i]?.pool_address == pid) {
+			if (pools[i]?.id == pid) {
 				_pool = pools[i];
 				_poolIndex = Number(i);
 			}

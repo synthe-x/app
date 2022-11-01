@@ -27,7 +27,7 @@ function PoolCard({ pool }: any) {
 	useEffect(() => {
 		let _totalLiquidity = 0;
 		for(let i in pool.poolSynth_ids){
-			_totalLiquidity += pool.poolSynth_ids[i].balance * pool.poolSynth_ids[i].price / 10**18;
+			_totalLiquidity += pool.poolSynth_ids[i].balance * pool.poolSynth_ids[i].synth_id.price / 10**18;
 		}
 		setTotalLiquidity(_totalLiquidity)
 	}, [pool.poolSynth_ids])
@@ -56,7 +56,7 @@ function PoolCard({ pool }: any) {
 				<Flex justify={'space-between'} px={5} mt={2}>
 					<Flex align={"center"} gap={2}>
                         <Text fontSize={'2xl'} fontWeight="bold">
-							<LinkOverlay href={"/pool/"+pool.pool_address}>
+							<LinkOverlay href={"/pool/"+pool.id}>
 								{pool.name}
 							</LinkOverlay>
                         </Text>
