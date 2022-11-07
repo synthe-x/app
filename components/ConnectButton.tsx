@@ -71,11 +71,11 @@ const ConnectButton = ({}) => {
 		<Box>
 			{isTronConnected || isWagmiConnected ? (
 				<Box>
-					<Button bgColor={"#0CAD4B"} color="gray.100" size="sm" _hover={{ bg: 'transparent' }} onClick={onOpen}>{(tronAddress ?? wagmiAddress)?.slice(0, 6) + "..." + (tronAddress ?? wagmiAddress)?.slice(-4)}</Button>
+					<Button bgColor={"secondary"} color="gray.100" size="sm" _hover={{ bg: 'transparent' }} onClick={onOpen}>{(tronAddress ?? wagmiAddress)?.slice(0, 6) + "..." + (tronAddress ?? wagmiAddress)?.slice(-4)}</Button>
 				</Box>
 			) : (
 				<Button
-					bgColor={'#0CAD4B'}
+					bgColor={'secondary'}
 					color="gray.100"
 					onClick={onConnectOpen}
 					isLoading={isConnecting}

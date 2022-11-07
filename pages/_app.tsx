@@ -52,6 +52,10 @@ const theme = extendTheme({
 	// styles,
 	config,
 	breakpoints,
+	colors: {
+		primary: '#3EE6C4',
+		secondary: '#5677FB'
+	},
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

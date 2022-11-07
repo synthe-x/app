@@ -74,19 +74,20 @@ const IssuanceTable = ({handleChange}: any) => {
 	return (
 		<Skeleton isLoaded={debts.length > 0}>
 			<TableContainer>
-				<Table overflow={'auto'} variant="simple">
+				<Table overflow={'auto'} variant="simple" >
 					<Thead>
 						<Tr>
-							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Issuance Assets
 							</Th>
-							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Protocol Debt
 							</Th>
-							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'}>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Liquidity
 							</Th>
 							<Th
+							borderColor={'#3C3C3C'}
 								isNumeric
 								fontSize={'xs'}
 								fontFamily="Poppins"
@@ -94,13 +95,13 @@ const IssuanceTable = ({handleChange}: any) => {
 							></Th>
 						</Tr>
 					</Thead>
-					<Tbody>
+					<Tbody >
 						{debts
 							.slice((currentPage - 1) * 8, currentPage * 8)
 							.map((debt: any) => {
 								return (
-									<Tr key={debt['symbol']}>
-										<Td minW={'190px'}>
+									<Tr key={debt['symbol']} >
+										<Td minW={'190px'} borderColor={'#3C3C3C'}>
 											<Flex align={'center'} gap={2}>
 												<Image
 													src={`/${debt.symbol}.png`}
@@ -129,7 +130,7 @@ const IssuanceTable = ({handleChange}: any) => {
 											</Flex>
 										</Td>
 
-										<Td maxW={'110px'}>
+										<Td maxW={'110px'} borderColor={'#3C3C3C'}>
 											<Box>
 												<Text
 													fontSize="sm"
@@ -155,7 +156,7 @@ const IssuanceTable = ({handleChange}: any) => {
 												</Text>
 											</Box>
 										</Td>
-										<Td>
+										<Td borderColor={'#3C3C3C'}>
 											<Text fontSize={'sm'}>
 												{dollarFormatter.format(
 													((debt.liquidity ??
@@ -163,8 +164,8 @@ const IssuanceTable = ({handleChange}: any) => {
 												)}
 											</Text>
 										</Td>
-										<Td isNumeric maxW={'110px'}>
-											<Flex alignItems={'center'}>
+										<Td isNumeric maxW={'110px'} borderColor={'#3C3C3C'}>
+											<Flex alignItems={'end'} justify='end' gap={2}>
 												<IssueModel asset={debt} handleIssue={handleIssue} />
 												<RepayModel asset={debt} handleRepay={handleRepay} />
 											</Flex>
@@ -192,7 +193,8 @@ const IssuanceTable = ({handleChange}: any) => {
 									page={page}
 									width={10}
 									rounded={'full'}
-									bgColor={page === currentPage ? 'gray.200' : 'white'}
+									bgColor={page === currentPage ? 'black' : '#171717'}
+									_hover={{bgColor: 'gray.700'}}
 								/>
 							))}
 						</PaginationPageGroup>

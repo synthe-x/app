@@ -77,6 +77,7 @@ function AppDataProvider({ children }: any) {
 				axios.get('https://api.synthex.finance/system'),
 			])
 				.then(async (res) => {
+					console.log(res[0].data.data)
 					let contract = await _tronWeb.contract().at('TY7KLZkopABnjy4x8SSbsaK9viV9bqxCvE');
 					Promise.all([_setSynths(
 						res[2].data.data,
@@ -225,7 +226,6 @@ function AppDataProvider({ children }: any) {
 	) => {
 		return new Promise((resolve, reject) => {
 			let tokens: string[] = [];
-			console.log(_synths);
 			for (let i in _synths) {
 				tokens.push(_synths[i].synth_id);
 			}
@@ -250,7 +250,7 @@ function AppDataProvider({ children }: any) {
 						totalDebt +=
 							Number(debtBalances[i] / 1e18) * _synths[i].price;
 					}
-
+					console.log(_tradingPools);
 					let tradingPoolAddresses: string[] = [];
 					for (let i in _tradingPools) {
 						tradingPoolAddresses.push(

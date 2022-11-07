@@ -15,8 +15,8 @@ function App() {
 	return (
 		<>
 			<Box mb={20}>
-				<Text fontSize={'xl'} fontWeight="bold" mt={10} color="whiteAlpha.800">
-					TRADING POOLS
+				<Text fontSize={'2xl'} fontWeight="bold" mt={10} color="whiteAlpha.800">
+					Trading Pools
 				</Text>
 				<Text color={"whiteAlpha.700"} fontSize="sm">
 					Trade without frictions

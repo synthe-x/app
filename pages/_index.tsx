@@ -46,15 +46,11 @@ export default function _index({ children }: any) {
 	const router = useRouter();
 
 	const backgroundStyle = {
-		backgroundColor: '#000',
+		backgroundColor: '#0B0B0B',
 		backgroundRepeat: 'no-repeat',
-		height:
-			router.pathname === '/' || router.pathname.includes('pool/')
-				? {sm: '100%', md: '480px'}
-				: '100%',
+		height: '100%',
 		backgroundSize: 'contain',
 		backgroundPosition: 'top',
-		// minW: '100%',
 	};
 
 	return (

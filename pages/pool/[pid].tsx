@@ -198,7 +198,7 @@ const Pool = () => {
 							justify="space-evenly"
 							width={'75%'}
 							minH="200px"
-							bgColor="white"
+							bgColor="#171717"
 							rounded={20}
 							px={10}
 							boxShadow={'lg'}
@@ -232,7 +232,7 @@ const Pool = () => {
 						height="550px"
 						my={10}
 						textAlign="center"
-						bgColor={'white'}
+						bgColor={'#171717'}
 						p={8}
 						rounded={20}
 						boxShadow={'lg'}>

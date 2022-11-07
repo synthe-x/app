@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
 	Button,
 	Box,
@@ -8,7 +8,7 @@ import {
     Input,
     IconButton,
 	InputRightElement,
-	InputGroup,Spinner,Link
+	InputGroup,Spinner,Link, Alert, AlertIcon
 } from '@chakra-ui/react';
 
 import {
@@ -28,25 +28,27 @@ import { getContract } from '../../src/utils';
 import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';
 const { Big } = require("big.js");
+import axios from 'axios';
 
 const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(0);
-	const [loader, setloader] = React.useState(false)
-	const [hash, sethash] =  React.useState("")
-	const [withdrawerror,setwithdrawerror] = React.useState("")
-	const [withdrawconfirm, setwithdrawconfirm] = React.useState(false)
+	
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<string | null>(null);
+	const [hash, setHash] = useState(null);
+	const [confirmed, setConfirmed] = useState(false);
 
 	const { isConnected, tronWeb } = useContext(WalletContext)
 	const { safeCRatio, totalCollateral, totalDebt} = useContext(AppDataContext)
 
 	const _onClose = () => {
-		setwithdrawerror("")
-		setwithdrawconfirm(false)
-		setAmount(0)
-		sethash("")
-		setloader(false)
-		onClose()
+		setLoading(false);
+		setResponse(null);
+		setHash(null);
+		setConfirmed(false);
+		setAmount(0);
+		onClose();
 	}
 
 	const max = () => {
@@ -63,41 +65,60 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 
 	const issue = async () => {
 		if(!amount) return
+		setLoading(true);
+		setConfirmed(false);
+		setHash(null);
+		setResponse('');
 		let system = await getContract(tronWeb, 'System');
 		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
-		setloader(true)
-		setwithdrawerror("");
-		setwithdrawconfirm(false);
 		system.methods.withdraw(asset['coll_address'], value)
 		.send({
 			value, 
 			// shouldPollResponse:true
 			feeLimit: 1000000000
-		}, (error: any, hash: any) => {
-			if(error){
-				if(error.output) {
-					if(error.output.contractResult){
-						setwithdrawerror((window as any).tronWeb.toAscii(error.output.contractResult[0]));
-					} else {
-						setwithdrawerror("Errored. Please try again");
-					}
-				} else {
-					setwithdrawerror(error.error);
-				}
-				setloader(false)
-			}
-			if(hash){
-				console.log("hash", hash);
-				sethash(hash)
-				if(hash){
-					setloader(false)
-					setwithdrawconfirm(true)
-					handleWithdraw(asset['coll_address'], value)
-				}
-			}
 		})
+		.then((res: any) => {
+			setHash(res);
+			setLoading(false);
+			checkResponse(res);
+			setResponse('Transaction sent! Waiting for confirmation...');
+		})
+		.catch((err: any) => {
+			setLoading(false);
+			setResponse('Transaction Failed: Signature rejected');
+		});
 	}
 
+	const checkResponse = (tx_id: string, retryCount = 0) => {
+		axios
+			.get(
+				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
+					tx_id
+			)
+			.then((res) => {
+				console.log(res);
+				if (!res.data.ret) {
+					setTimeout(() => {
+						checkResponse(tx_id);
+					}, 2000);
+				} else {
+					setConfirmed(true);
+					if (res.data.ret[0].contractRet == 'SUCCESS') {
+						setResponse('Transaction Successful!');
+					} else {
+						if (retryCount < 3)
+							setTimeout(() => {
+								checkResponse(tx_id, retryCount + 1);
+							}, 2000);
+						else {
+							setResponse(
+								'Transaction Failed. Please try again.'
+							);
+						}
+					}
+				}
+			});
+	};
 	return (
 		<Box>
 			<IconButton 
@@ -128,40 +149,50 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
                         <Button 
-							disabled={!isConnected || !amount || amount == 0 || amount > max()}
+							disabled={loading || !isConnected || !amount || amount == 0 || amount > max()}
+							loadingText='Please sign the transaction'
+							isLoading={loading}
 							colorScheme={"red"} width="100%" mt={4} onClick={issue}
+
 						>
 							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
 						</Button>
 					
-						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
-							
-							
-						<Box>
-									<Text fontFamily={'Roboto'} fontSize="md">
-										{' '}
-										Waiting for the blockchain to confirm
-										your transaction.
-										<Link
-											color="blue.200"
-											fontSize={'sm'}
-											href={`https://nile.tronscan.org/#/transaction/${hash}`}
-											target="_blank"
-											rel="noreferrer">
-											{' '}
-											View on Tronscan
-										</Link>
-									</Text>
-								</Box>
-						</Flex>}
-						{withdrawerror && <Text textAlign={"center"} color="red">{withdrawerror}</Text>}
-							{withdrawconfirm && <Flex flexDirection={"column"} mt="1rem" justifyContent="center" alignItems="center">
-								<Text fontFamily={"Roboto"} textAlign={"center"}>Transaction Submitted</Text>
-								<Box>
-								<Link fontSize={"sm"} color="blue.200" href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">View on Tronscan</Link >
-								</Box>
-
-							</Flex>}
+						{response && (
+							<Box width={'100%'} my={2} color="black">
+								<Alert
+									status={
+										response.includes('confirm')
+											? 'info'
+											: confirmed &&
+											  response.includes('Success')
+											? 'success'
+											: 'error'
+									}
+									variant="subtle"
+									rounded={6}>
+									<AlertIcon />
+									<Box>
+										<Text fontSize="md" mb={0}>
+											{response}
+										</Text>
+										{hash && (
+											<Link
+												href={
+													'https://nile.tronscan.org/#/transaction/' +
+													hash
+												}
+												target="_blank">
+												{' '}
+												<Text fontSize={'sm'}>
+													View on TronScan
+												</Text>
+											</Link>
+										)}
+									</Box>
+								</Alert>
+							</Box>
+						)}
 					</ModalBody>
                     <ModalFooter>
 

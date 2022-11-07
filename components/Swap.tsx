@@ -12,37 +12,34 @@ import {
 	Select,
 	Spinner,
 	Link,
+	Alert,
+	AlertIcon,
 } from '@chakra-ui/react';
-import Navbar from '../components/Navbar';
-import IssuanceTable from '../components/IssuanceTable';
-import CollateralTable from '../components/CollateralTable';
 import { useContext, useEffect, useState } from 'react';
 import { getContract } from '../src/utils';
 import { useAccount } from 'wagmi';
 import web3 from 'web3';
-import Chart from '../components/DonutChart';
-import axios from 'axios';
 import { WalletContext } from '../components/WalletContextProvider';
-import ConnectButton from '../components/ConnectButton';
-import { BsArrowBarDown, BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import { MdOutlineSwapVert } from 'react-icons/md';
 import TradingChart from './charts/TradingChart';
 import { AppDataContext } from './AppDataProvider';
+import axios from 'axios';
 
 function Swap() {
-	const { colorMode } = useColorMode();
 	const [inputAssetIndex, setInputAssetIndex] = useState(1);
 	const [outputAssetIndex, setOutputAssetIndex] = useState(0);
 	const [inputAmount, setInputAmount] = useState(0);
 	const [outputAmount, setOutputAmount] = useState(0);
-	const [loader, setloader] = useState(false);
-	const [hash, sethash] = useState('');
-	const [depositerror, setdepositerror] = useState('');
-	const [depositconfirm, setdepositconfirm] = useState(false);
+
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<string | null>(null);
+	const [hash, setHash] = useState(null);
+	const [confirmed, setConfirmed] = useState(false);
 
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
-		let outputAmount = (e.target.value * inputToken().price) / outputToken().price;
+		let outputAmount =
+			(e.target.value * inputToken().price) / outputToken().price;
 		setOutputAmount(outputAmount);
 	};
 
@@ -52,7 +49,9 @@ function Swap() {
 		}
 		setInputAssetIndex(e.target.value);
 		// calculate output amount
-		let _outputAmount = inputAmount * inputToken(e.target.value).price / outputToken().price;
+		let _outputAmount =
+			(inputAmount * inputToken(e.target.value).price) /
+			outputToken().price;
 		setOutputAmount(_outputAmount);
 	};
 
@@ -72,7 +71,9 @@ function Swap() {
 		}
 		setOutputAssetIndex(e.target.value);
 		// calculate input amount
-		let _inputAmount = outputAmount * outputToken(e.target.value).price / inputToken().price;
+		let _inputAmount =
+			(outputAmount * outputToken(e.target.value).price) /
+			inputToken().price;
 		setInputAmount(_inputAmount);
 	};
 
@@ -88,9 +89,10 @@ function Swap() {
 		if (!inputAmount || !outputAmount) {
 			return;
 		}
-		setloader(true);
-		setdepositerror('');
-		setdepositconfirm(false);
+		setLoading(true);
+		setConfirmed(false);
+		setHash(null);
+		setResponse('');
 		let contract = await getContract(tronWeb, 'System');
 		contract.methods
 			.exchange(
@@ -101,62 +103,69 @@ function Swap() {
 				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]
 					.synth_id
 			)
-			.send(
-				{
-					feeLimit: 1000000000,
-				},
-				(error: any, hash: any) => {
-					if (error) {
-						if (error.output) {
-							if (error.output.contractResult) {
-								setdepositerror(
-									(window as any).tronWeb.toAscii(
-										error.output.contractResult[0]
-									)
-								);
-							} else {
-								setdepositerror('Errored. Please try again');
-							}
-						} else {
-							setdepositerror(error.error);
-						}
-						setloader(false);
-					}
-					if (hash) {
-						console.log('hash', hash);
-						sethash(hash);
-						if (hash) {
-							setloader(false);
-							setdepositconfirm(true);
+			.send({
+				feeLimit: 1000000000,
+			})
+			.then((res: any) => {
+					setHash(res);
+					setLoading(false);
+					checkResponse(res);
+					setResponse(
+						'Transaction sent! Waiting for confirmation...'
+					);
+				}
+			).catch((err: any) => {
+				setLoading(false);
+				setResponse('Transaction Failed: Signature rejected');
+			})
+	};
+
+	// check response in intervals
+	const checkResponse = (tx_id: string, retryCount = 0) => {
+		axios
+			.get(
+				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
+					tx_id
+			)
+			.then((res) => {
+				console.log(res)
+				if (!res.data.ret) {
+					setTimeout(() => {
+						checkResponse(tx_id);
+					}, 2000);
+				} else {
+					setConfirmed(true);
+					if (res.data.ret[0].contractRet == 'SUCCESS') {
+						setResponse('Transaction Successful!');
+					} else {
+						if(retryCount < 3) setTimeout(() => {
+							checkResponse(tx_id, retryCount + 1);
+						}, 2000);
+						else{
+							setResponse('Transaction Failed. Please try again.');
 						}
 					}
 				}
-			);
+			});
 	};
 
-	const {
-		isConnected,
-		tronWeb,
-	} = useContext(WalletContext);
+	const { isConnected, tronWeb } = useContext(WalletContext);
 
-	const {
-		synths,
-		tradingPool,
-		pools,
-		tradingBalanceOf,
-		tokenFormatter,
-	} = useContext(AppDataContext);
+	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter } =
+		useContext(AppDataContext);
 
 	useEffect(() => {
 		if (
-			inputAssetIndex > 1 && (pools[tradingPool].poolSynth_ids ?? synths).length <
-			inputAssetIndex
+			inputAssetIndex > 1 &&
+			(pools[tradingPool].poolSynth_ids ?? synths).length <
+				inputAssetIndex
 		) {
 			setInputAssetIndex(0);
 		}
 		if (
-			outputAssetIndex > 1 && (pools[tradingPool].poolSynth_ids ?? synths).length <
-			outputAssetIndex
+			outputAssetIndex > 1 &&
+			(pools[tradingPool].poolSynth_ids ?? synths).length <
+				outputAssetIndex
 		) {
 			setOutputAssetIndex(
 				(pools[tradingPool].poolSynth_ids ?? synths).length - 1
@@ -169,7 +178,7 @@ function Swap() {
 			inputAssetIndex
 		];
 		let _inputAmount =
-			0.999 * tradingBalanceOf(_inputAsset.synth_id) /
+			(0.999 * tradingBalanceOf(_inputAsset.synth_id)) /
 			10 ** (_inputAsset.decimal ?? 18);
 		setInputAmount(_inputAmount);
 		let _outputAmount =
@@ -187,7 +196,7 @@ function Swap() {
 		} else {
 			return synths[_inputAssetIndex];
 		}
-	}
+	};
 
 	const outputToken = (_outputAssetIndex = outputAssetIndex) => {
 		if (pools[tradingPool].poolSynth_ids) {
@@ -195,7 +204,7 @@ function Swap() {
 		} else {
 			return synths[_outputAssetIndex];
 		}
-	}
+	};
 
 	return (
 		<>
@@ -211,34 +220,38 @@ function Swap() {
 					<Flex justify={'space-between'} mb={5}>
 						{/* Asset Name */}
 						<Text mb={3} fontSize="3xl" fontWeight={'bold'}>
-							{inputToken()?.symbol}
-							/
-							{outputToken()?.symbol}
+							{inputToken()?.symbol}/{outputToken()?.symbol}
 						</Text>
 						{/* Asset Price */}
 						<Box>
 							<Flex align={'center'} gap={1}>
 								<Text fontSize={'2xl'} fontWeight="bold">
 									{tokenFormatter.format(
-										inputToken()?.price / outputToken()?.price
+										inputToken()?.price /
+											outputToken()?.price
 									)}
 								</Text>
 								<Text fontSize={'sm'}>
-									{
-										outputToken()?.symbol
-									}
+									{outputToken()?.symbol}
 								</Text>
 								<Text fontSize={'sm'}>
-									/{' '}
-									{
-										inputToken()?.symbol
-									}
+									/ {inputToken()?.symbol}
 								</Text>
 							</Flex>
 						</Box>
-
 					</Flex>
-					<TradingChart input={(pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]?.symbol} output={(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]?.symbol} />
+					<TradingChart
+						input={
+							(pools[tradingPool].poolSynth_ids ?? synths)[
+								inputAssetIndex
+							]?.symbol
+						}
+						output={
+							(pools[tradingPool].poolSynth_ids ?? synths)[
+								outputAssetIndex
+							]?.symbol
+						}
+					/>
 
 					{/* Input */}
 					<Flex>
@@ -327,11 +340,14 @@ function Swap() {
 						mt={6}
 						size="lg"
 						width={'100%'}
-						bgColor={'#0CAD4B'}
+						bgColor={'primary'}
 						onClick={exchange}
-						disabled={!isConnected || inputAmount <= 0}>
-						{isConnected ? (
-							inputAmount > 0 ? (
+						disabled={loading || !isConnected || inputAmount <= 0}
+						loadingText='Sign the transaction in your wallet'
+						isLoading={loading}
+						_hover={{ bg: 'gray.600' }}
+						>
+						{isConnected ? (inputAmount > 0 ? (
 								<>Exchange</>
 							) : (
 								<>Enter Amount</>
@@ -341,79 +357,39 @@ function Swap() {
 						)}
 					</Button>
 
-					{loader && (
-						<Flex
-							alignItems={'center'}
-							flexDirection={'row'}
-							justifyContent="center"
-							mt="1rem"
-							// bgColor={'#2C2C2C'}
-							rounded={8}
-							py={4}>
-							<Box>
-								<Spinner
-									thickness="10px"
-									speed="0.65s"
-									emptyColor="gray.200"
-									color="green.500"
-									size="xl"
-									mr={4}
-								/>
-							</Box>
-
-							<Box ml="0.5rem">
-								<Text fontFamily={'Roboto'} fontSize="sm">
-									{' '}
-									Waiting for the blockchain to confirm your
-									transaction...{' '}
-								</Text>
-								<Link
-									color="blue.200"
-									fontSize={'xs'}
-									href={`https://nile.tronscan.org/#/transaction/${hash}`}
-									target="_blank"
-									rel="noreferrer">
-									View on Tronscan
-								</Link>
-							</Box>
-						</Flex>
-					)}
-					{depositerror && (
-						<Text
-							textAlign={'center'}
-							color="red"
-							// bgColor={'#2C2C2C'}
-							rounded={8}
-							py={4}>
-							{depositerror}
-						</Text>
-					)}
-					{depositconfirm && (
-						<Flex
-							flexDirection={'column'}
-							mt="1rem"
-							justifyContent="center"
-							alignItems="center"
-							// bgColor={'#2C2C2C'}
-							rounded={8}
-							py={4}>
-							<Text
-								fontFamily={'Roboto'}
-								textAlign={'center'}
-								fontSize="sm">
-								Transaction Submitted
-							</Text>
-							<Box>
-								<Link
-									fontSize={'xs'}
-									color="blue.200"
-									href={`https://nile.tronscan.org/#/transaction/${hash}`}
-									target="_blank"
-									rel="noreferrer">
-									View on Tronscan
-								</Link>
-							</Box>
-						</Flex>
+					{response && (
+						<Box width={'100%'} my={2} color='black' >
+							<Alert
+								status={
+									response.includes('confirm')
+										? 'info'
+										: confirmed &&
+										  response.includes('Success')
+										? 'success'
+										: 'error'
+								}
+								variant="subtle"
+								rounded={6}
+								>
+								<AlertIcon />
+								<Box>
+									<Text fontSize="md" mb={0}>
+										{response}
+									</Text>
+									{hash && <Link
+										href={
+											'https://nile.tronscan.org/#/transaction/' +
+											hash
+										}
+										target="_blank">
+										{' '}
+										<Text fontSize={'sm'}>
+											View on TronScan
+										</Text>
+									</Link>}
+								</Box>
+							</Alert>
+						</Box>
 					)}
 				</Box>
 			)}

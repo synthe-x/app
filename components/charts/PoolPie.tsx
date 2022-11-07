@@ -39,7 +39,7 @@ const renderActiveShape = (props: any) => {
 	const textAnchor = cos >= 0 ? 'start' : 'end';
 
 	// random color
-	const fill = "#5CB450"
+	const fill = "#3EE6C4"
 
 	return (
 		<g>
@@ -108,7 +108,7 @@ const PoolPie = ({data}: any) => {
 					cy="50%"
 					innerRadius={140}
 					outerRadius={180}
-					fill="#053300"
+					fill="#5677FB"
 					dataKey="value"
 					onMouseEnter={onPieEnter}
 				/>

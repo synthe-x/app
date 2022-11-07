@@ -17,8 +17,6 @@ import PoolCardAssets from './PoolCardAssets';
 import { AppDataContext } from './AppDataProvider';
 
 function PoolCard({ pool }: any) {
-	const { colorMode } = useColorMode();
-
 	const {
 		dollarFormatter
 	} = useContext(AppDataContext);
@@ -27,6 +25,7 @@ function PoolCard({ pool }: any) {
 	useEffect(() => {
 		let _totalLiquidity = 0;
 		for(let i in pool.poolSynth_ids){
+			console.log(pool.poolSynth_ids[i].balance, pool.poolSynth_ids[i].price)
 			_totalLiquidity += pool.poolSynth_ids[i].balance * pool.poolSynth_ids[i].price / 10**18;
 		}
 		setTotalLiquidity(_totalLiquidity)
@@ -35,25 +34,25 @@ function PoolCard({ pool }: any) {
 	return (
 		<>
         <LinkBox>
-			<Box
+			<Flex
+			justify={'space-between'}
+			flexDirection={'column'}
 				width={'100%'}
-				bgColor="white"
-				height={'250px'}
-				rounded={20}
-				border="1px"
-				borderColor="white"
+				height={'241px'}
+				style={{
+					background: 'url(/bgpool1.png) padding-box, linear-gradient(to right, #FFFFFF, #1c1c1c, #FFFFFF) border-box',
+					borderRadius: '30px',
+					border: '1px solid transparent'
+				}}
                 onClick={()=>{}}
-                // border="1px solid #2D2D2D"
+				bgSize={'1327px 241px'}
+				px='30px'
+				py='20px'
+				color={'#fff'}
                 >
-					<Flex height={"75%"} 
-					bgColor="black" 
-					p={5} borderRadius={'19px 19px 0 0'} justify="end" flexDirection={"column"}
-					bgImage={"./cover.png"}
-					>
-						<PoolCardAssets assets={pool.poolSynth_ids}/>
-					</Flex>
+					
+				<Flex justify={'space-between'}>
 
-				<Flex justify={'space-between'} px={5} mt={2}>
 					<Flex align={"center"} gap={2}>
                         <Text fontSize={'2xl'} fontWeight="bold">
 							<LinkOverlay href={"/pool/"+pool.pool_address}>
@@ -64,11 +63,13 @@ function PoolCard({ pool }: any) {
 					</Flex>
                     <Box textAlign={"right"}>
 						<Text fontWeight={"bold"} color="gray" fontSize={"sm"}>LIQUIDITY</Text>
-                        <Heading size={'md'} fontWeight={'bold'} color="black">{dollarFormatter.format(totalLiquidity)}</Heading>
+                        <Heading size={'md'} fontWeight={'bold'}>{dollarFormatter.format(totalLiquidity)}</Heading>
                     </Box>
+				</Flex>
+					
+					<PoolCardAssets assets={pool.poolSynth_ids}/>
 
-                </Flex>
-			</Box>
+			</Flex>
             </LinkBox>
 		</>
 	);

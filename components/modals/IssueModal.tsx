@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	Button,
 	Box,
@@ -12,7 +12,9 @@ import {
 	Spinner,
 	Link,
 	Progress,
-	Image
+	Image,
+	Alert,
+	AlertIcon
 } from '@chakra-ui/react';
 
 import {
@@ -24,6 +26,7 @@ import {
 	ModalBody,
 	ModalCloseButton,
 } from '@chakra-ui/react';
+import axios from 'axios';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract } from '../../src/utils';
@@ -34,18 +37,20 @@ import { AppDataContext } from '../AppDataProvider';
 
 const DepositModal = ({ asset, handleIssue }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const [loader, setloader] = React.useState(false);
-	const [hash, sethash] = React.useState('');
-	const [issueerror, setissueerror] = React.useState('');
-	const [issueconfirm, setissueconfirm] = React.useState(false);
+	
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<string | null>(null);
+	const [hash, setHash] = useState(null);
+	const [confirmed, setConfirmed] = useState(false);
+
 	const [amount, setAmount] = React.useState(0);
 
 	const _onClose = () => {
-		setissueerror('');
-		setissueconfirm(false);
+		setLoading(false);
+		setResponse(null);
+		setHash(null);
+		setConfirmed(false);
 		setAmount(0);
-		sethash('');
-		setloader(false);
 		onClose();
 	};
 
@@ -67,57 +72,78 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 	// 1/1.69 - 1/1.5 = 0.58823529411764705882352941176471 - 0.66666666666666666666666666666667 = -0.07843137254901960784313725490196
 	const issue = async () => {
 		if (!amount) return;
+		setLoading(true);
+		setConfirmed(false);
+		setHash(null);
+		setResponse('');
+
 		let system = await getContract(tronWeb, 'System');
 		let value = BigInt(amount * 10 ** asset['decimal']).toString();
-		setloader(true);
-		setissueerror('');
-		setissueconfirm(false);
 		system.methods.borrow(asset['synth_id'], value).send(
 			{
 				value,
 				// shouldPollResponse:true
 				feeLimit: 1000000000,
-			},
-			(error: any, hash: any) => {
-				if (error) {
-					if (error.output) {
-						if (error.output.contractResult) {
-							setissueerror(
-								(window as any).tronWeb.toAscii(
-									error.output.contractResult[0]
-								)
-							);
-						} else {
-							setissueerror('Errored. Please try again');
-						}
-					} else {
-						setissueerror(error.error);
-					}
-					setloader(false);
-				}
-				if (hash) {
-					console.log('hash', hash);
-					sethash(hash);
-					if (hash) {
-						setloader(false);
-						setissueconfirm(true);
-						handleIssue(asset['synth_id'], value);
-					}
-				}
-			}
-		);
+			})
+			.then((res: any) => {
+				setHash(res);
+				setLoading(false);
+				checkResponse(res);
+				setResponse('Transaction sent! Waiting for confirmation...');
+			})
+			.catch((err: any) => {
+				setLoading(false);
+				setResponse('Transaction Failed: Signature rejected');
+			});
 	};
+
+	const checkResponse = (tx_id: string, retryCount = 0) => {
+		axios
+			.get(
+				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
+					tx_id
+			)
+			.then((res) => {
+				console.log(res);
+				if (!res.data.ret) {
+					setTimeout(() => {
+						checkResponse(tx_id);
+					}, 2000);
+				} else {
+					setConfirmed(true);
+					if (res.data.ret[0].contractRet == 'SUCCESS') {
+						setResponse('Transaction Successful!');
+					} else {
+						if (retryCount < 3)
+							setTimeout(() => {
+								checkResponse(tx_id, retryCount + 1);
+							}, 2000);
+						else {
+							setResponse(
+								'Transaction Failed. Please try again.'
+							);
+						}
+					}
+				}
+			});
+	};
+
 	const {isConnected, tronWeb} = useContext(WalletContext)
 
 	return (
 		<Box>
-			<IconButton
+			{/* <IconButton
 			// disabled={!isConnected}
 				variant="ghost"
 				onClick={onOpen}
 				icon={<BiPlusCircle size={35} color="gray" />}
 				aria-label={''}
-				isRound={true}></IconButton>
+				isRound={true}></IconButton> */}
+
+
+				<Button disabled={!isConnected} onClick={onOpen} variant={'ghost'} size='sm' bgColor={'secondary'} rounded={100} color="white" my={1} _hover={{bgColor: 'gray.700'}}>
+				<Text mr={1}>Borrow</Text> <BiPlusCircle size={20} /> 
+				</Button>
 				<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
 				<ModalContent width={'30rem'} bgColor="">
@@ -159,68 +185,50 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 							</Text>
 						</Flex>
 						<Button
-							disabled={!isConnected || !amount || amount == 0 || amount > max()}
-							isLoading={loader}
+							disabled={loading || !isConnected || !amount || amount == 0 || amount > max()}
+							isLoading={loading}
+							loadingText='Please sign the transaction'
 							colorScheme={'whatsapp'}
 							width="100%"
 							mt={4}
 							onClick={issue}>
 							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Issue</> : <>Please connect your wallet</>} 
 						</Button>
-						{loader && (
-							<Flex
-								alignItems={'center'}
-								flexDirection={'column'}
-								justifyContent="center"
-								mt="1.5rem"
-								gap={8}>
-								
-								<Box ml="0.5rem">
-									<Text fontFamily={'Roboto'} fontSize="md">
-										{' '}
-										Waiting for the blockchain to confirm
-										your transaction.
-										<Link
-											color="blue.200"
-											href={`https://nile.tronscan.org/#/transaction/${hash}`}
-											target="_blank"
-											rel="noreferrer"
-											fontSize={'sm'}>
-											{' '}
-											View on Tronscan
-										</Link>
-									</Text>
-								</Box>
-								{/* <PacmanLoader color='#B3B3B3'/> */}
-							</Flex>
-						)}
-						{issueerror && (
-							<Text textAlign={'center'} color="red">
-								{issueerror}
-							</Text>
-						)}
-						{issueconfirm && (
-							<Flex
-								flexDirection={'column'}
-								mt="1rem"
-								justifyContent="center"
-								alignItems="center">
-								<Text
-									fontFamily={'Roboto'}
-									textAlign={'center'}>
-									Transaction Successful
-								</Text>
-								<Box>
-									<Link
-										color="blue.200"
-										fontSize={'sm'}
-										href={`https://nile.tronscan.org/#/transaction/${hash}`}
-										target="_blank"
-										rel="noreferrer">
-										View on Tronscan
-									</Link>
-								</Box>
-							</Flex>
+						
+						{response && (
+							<Box width={'100%'} my={2} color="black">
+								<Alert
+									status={
+										response.includes('confirm')
+											? 'info'
+											: confirmed &&
+											  response.includes('Success')
+											? 'success'
+											: 'error'
+									}
+									variant="subtle"
+									rounded={6}>
+									<AlertIcon />
+									<Box>
+										<Text fontSize="md" mb={0}>
+											{response}
+										</Text>
+										{hash && (
+											<Link
+												href={
+													'https://nile.tronscan.org/#/transaction/' +
+													hash
+												}
+												target="_blank">
+												{' '}
+												<Text fontSize={'sm'}>
+													View on TronScan
+												</Text>
+											</Link>
+										)}
+									</Box>
+								</Alert>
+							</Box>
 						)}
 					</ModalBody>
 					<ModalFooter>

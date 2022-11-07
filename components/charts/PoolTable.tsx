@@ -25,68 +25,75 @@ import React from 'react';
 import PoolPie from '../../components/charts/PoolPie';
 import axios from 'axios';
 
-const dollarFormatter = (new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }));
-const tokenFormatter = (new Intl.NumberFormat('en-US'));
+const dollarFormatter = new Intl.NumberFormat('en-US', {
+	style: 'currency',
+	currency: 'USD',
+});
+const tokenFormatter = new Intl.NumberFormat('en-US');
 
-export default function PoolTable({pool}: any) {
-  return (
-    <>
-        {pool && pool.poolSynth_ids? 
+export default function PoolTable({ pool }: any) {
+	return (
+		<>
+			{pool && pool.poolSynth_ids ? (
 				<TableContainer
-							rounded={10}
-							py={4}
-							px={4}
-							bgColor="white"
-							minH="700px">
-							<Table variant="simple" size={'sm'}>
-								<Thead>
-									<Tr>
-										<Th>Asset</Th>
-										<Th>Liquidity</Th>
-										<Th>Price</Th>
-									</Tr>
-								</Thead>
-								<Tbody>
-									{pool.poolSynth_ids.map(
-										(synth: any, index: number) => {
-											return (
-												<Tr key={index}>
-													<Td
-														display="flex"
-														alignItems={'center'}>
-														<Image
-															src={`/${synth?.symbol}.png`}
-															width="25"
-															height={25}
-															alt="logo"
-															mr={2}
-														/>
-														{synth?.name
-															.split(' ')
-															.slice(1)
-															.join(' ')}
-													</Td>
-													<Td>
-														{tokenFormatter.format(
-															synth?.balance /
-																10 **
-																	(synth?.decimal ??
-																		18)
-														)}{' '}
-														{synth?.symbol}
-													</Td>
-													<Td>
-														{dollarFormatter.format(
-															synth?.price
-														)}
-													</Td>
-												</Tr>
-											);
-										}
-									)}
-								</Tbody>
-							</Table>
-						</TableContainer>: <>Loading</>}
-    </>
-  )
+					rounded={10}
+					py={4}
+					px={4}
+					bgColor="#171717"
+					color={'white'}
+					minH="700px">
+					<Table variant="simple" size={'sm'}>
+						<Thead>
+							<Tr>
+								<Th>Asset</Th>
+								<Th>Liquidity</Th>
+								<Th>Price</Th>
+							</Tr>
+						</Thead>
+						<Tbody>
+							{pool.poolSynth_ids.map(
+								(synth: any, index: number) => {
+									return (
+										<Tr key={index}>
+											<Td
+												display="flex"
+												alignItems={'center'}>
+												<Image
+													src={`/${synth?.symbol}.png`}
+													width="25"
+													height={25}
+													alt="logo"
+													mr={2}
+												/>
+												{synth?.name
+													.split(' ')
+													.slice(1)
+													.join(' ')}
+											</Td>
+											<Td>
+												{tokenFormatter.format(
+													synth?.balance /
+														10 **
+															(synth?.decimal ??
+																18)
+												)}{' '}
+												{synth?.symbol}
+											</Td>
+											<Td>
+												{dollarFormatter.format(
+													synth?.price
+												)}
+											</Td>
+										</Tr>
+									);
+								}
+							)}
+						</Tbody>
+					</Table>
+				</TableContainer>
+			) : (
+				<>Loading</>
+			)}
+		</>
+	);
 }
