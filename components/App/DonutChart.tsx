@@ -6,7 +6,7 @@ import { AppDataContext } from '../AppDataProvider';
 import { Box, Text } from '@chakra-ui/react';
 Chart.register(ArcElement);
 
-export  function DonutChart({}: any){
+export default function DonutChart({}: any){
   
   const {
 		availableToBorrow, totalDebt, totalCollateral
@@ -29,7 +29,7 @@ export  function DonutChart({}: any){
       data: [availableToBorrow(), totalCollateral > 0 ? totalCollateral : 1, totalDebt],
       backgroundColor: [
         '#2CC4FF',
-        '#fff',
+        '#B9FFF1',
         '#3EE6C4'
       ],
 
@@ -113,7 +113,7 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export default function DonutChart2() {
+export function DonutChart2() {
   const [activeIndex, setActiveIndex] = React.useState(0);
   
   const {
@@ -131,9 +131,10 @@ export default function DonutChart2() {
   };
 
     return (
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart width={1000} height={600}>
+      <ResponsiveContainer width={'1000px'} height={1000}>
+        <PieChart>
           <Pie
+          width={1000}
             activeIndex={activeIndex}
             activeShape={renderActiveShape}
             data={data}

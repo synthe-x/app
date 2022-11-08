@@ -81,6 +81,9 @@ const IssuanceTable = ({handleChange}: any) => {
 								Issuance Assets
 							</Th>
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
+								Price
+							</Th>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Protocol Debt
 							</Th>
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
@@ -101,7 +104,7 @@ const IssuanceTable = ({handleChange}: any) => {
 							.map((debt: any) => {
 								return (
 									<Tr key={debt['symbol']} >
-										<Td minW={'190px'} borderColor={'#3C3C3C'}>
+										<Td borderColor={'#3C3C3C'}>
 											<Flex align={'center'} gap={2}>
 												<Image
 													src={`/${debt.symbol}.png`}
@@ -130,6 +133,16 @@ const IssuanceTable = ({handleChange}: any) => {
 											</Flex>
 										</Td>
 
+										<Td borderColor={'#3C3C3C'}>
+												<Text
+													fontSize="sm"
+													// fontWeight="bold"
+													textAlign={'left'}>
+													{isConnected
+														? dollarFormatter.format((debt.price))
+														: '-'}{' '}
+												</Text>
+										</Td>
 										<Td maxW={'110px'} borderColor={'#3C3C3C'}>
 											<Box>
 												<Text
@@ -164,7 +177,7 @@ const IssuanceTable = ({handleChange}: any) => {
 												)}
 											</Text>
 										</Td>
-										<Td isNumeric maxW={'110px'} borderColor={'#3C3C3C'}>
+										<Td isNumeric borderColor={'#3C3C3C'}>
 											<Flex alignItems={'end'} justify='end' gap={2}>
 												<IssueModel asset={debt} handleIssue={handleIssue} />
 												<RepayModel asset={debt} handleRepay={handleRepay} />

@@ -25,6 +25,7 @@ import Borrow from '../components/App/Borrow';
 import { Heading } from '@chakra-ui/react';
 import { BsArrowBarRight, BsArrowReturnRight } from 'react-icons/bs';
 import { AiOutlineArrowRight } from 'react-icons/ai';
+import Link from 'next/link';
 
 function App() {
 	const [nullValue, setNullValue] = useState(false);
@@ -93,9 +94,11 @@ function App() {
 						<Heading>Trade with no slippage</Heading>
 						<Text>Frictionless trading with no fees</Text>
 						</Box>
+						<Link href='/pools'>
 						<Button maxW={'200px'} size='lg' bgColor='black' fontSize={'md'} rounded={10}>
-							<Text mr={2}>Enter Pool</Text> 
+							<Text mr={2}>Enter a Pool</Text> 
 							<AiOutlineArrowRight/> </Button>
+						</Link>
 
 						</Flex>
 						<Box bgImage='/swapmockup.png' bgSize={'350px'} bgRepeat='no-repeat' width={'45%'} mx={'-10px'} mt={-10} my={'-22px'}>
