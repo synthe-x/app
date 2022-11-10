@@ -216,8 +216,9 @@ function Swap() {
 					{tokenFormatter.format(
 						inputToken()?.price / outputToken()?.price
 					)}{' '}
-					{outputToken().symbol}/{inputToken().symbol}
+					{outputToken().symbol}/{inputToken().symbol} | Synthex
 				</title>
+				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
 			{pools[tradingPool] && (
 				<Box

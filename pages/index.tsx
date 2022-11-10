@@ -50,8 +50,9 @@ function App() {
 
 	return (
 		<>
-		<Head>
-				<title>SyntheX</title>
+			<Head>
+				<title>App | SyntheX</title>
+				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
 			{
 				<Flex flexDir={'column'} mt={10} mb={10} gap={3}>

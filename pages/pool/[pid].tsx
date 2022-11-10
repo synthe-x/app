@@ -27,6 +27,7 @@ import axios from 'axios';
 import PoolTable from '../../components/charts/PoolTable';
 import { AppDataContext } from '../../components/AppDataProvider';
 import Link from 'next/link';
+import Head from 'next/head';
 
 const dollarFormatter = new Intl.NumberFormat('en-US', {
 	style: 'currency',
@@ -146,6 +147,10 @@ const Pool = () => {
 
 	return (
 		<>
+		<Head>
+			<title>{pool?.name} | Synthex</title>
+			<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
+		</Head>
 			{pool && synths ? (
 				<Box mt={5}>
 					<Link href="/pools" as="/pools"  >

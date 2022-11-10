@@ -16,7 +16,8 @@ function App() {
 	return (
 		<>
 			<Head>
-				<title>Trading Pools</title>
+				<title>Trading Pools | SyntheX</title>
+				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
 			<Box mb={20}>
 				<Text fontSize={'3xl'} fontWeight="bold" mt={10} color="whiteAlpha.800">
