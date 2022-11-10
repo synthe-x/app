@@ -66,7 +66,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const { collaterals } = useContext(AppDataContext);
 
 	const asset = () => collaterals[selectedAsset];
-	const balance = () => (asset().walletBalance/10 ** asset().decimal);
+	const balance = () => asset().walletBalance / 10 ** asset().decimal;
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const allowanceCheck = async () => {
@@ -114,7 +114,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 	};
 
 	const issue = async () => {
-		console.log(asset())
+		console.log(asset());
 		if (!amount) return;
 		setLoading(true);
 		setConfirmed(false);
@@ -155,6 +155,12 @@ const DepositModal = ({ handleDeposit }: any) => {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleDeposit(
+							asset()['coll_address'],
+							Big(amount)
+								.mul(Big(10).pow(Number(asset()['decimal'])))
+								.toFixed(0)
+						);
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {
@@ -171,11 +177,11 @@ const DepositModal = ({ handleDeposit }: any) => {
 	};
 
 	const amountLowerThanMin = () => {
-		if (Number(amount) > (asset()?.minCollateral/(10**asset().decimal))) {
+		if (Number(amount) > asset()?.minCollateral / 10 ** asset().decimal) {
 			return false;
 		}
 		return true;
-	}
+	};
 
 	const approve = async () => {
 		setLoading(true);
@@ -283,7 +289,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 								</Slider>
 								<Flex mt={4} justify="space-between">
 									<Text fontSize={'xs'} color="gray.400">
-										1 {asset()?.symbol} = {asset()?.price} USD
+										1 {asset()?.symbol} = {asset()?.price}{' '}
+										USD
 									</Text>
 								</Flex>
 							</Box>
@@ -319,14 +326,15 @@ const DepositModal = ({ handleDeposit }: any) => {
 								width="100%"
 								mt={4}
 								isDisabled={loading}
-								onClick={issue}
-								>
+								onClick={issue}>
 								{isConnected ? (
 									!amount || amount == 0 ? (
 										'Enter amount'
-									) : amountLowerThanMin() ? 'Amount too less' : amount > balance() ? (
+									) : amountLowerThanMin() ? (
+										'Amount too less'
+									) : amount > balance() ? (
 										'Insufficient Balance'
-									) :  (
+									) : (
 										<>Deposit</>
 									)
 								) : (

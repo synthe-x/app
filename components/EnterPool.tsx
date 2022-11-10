@@ -96,7 +96,6 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 			}
 		}
 		
-		console.log(poolIndex, pool.poolSynth_ids[activeAssetIndex]['synth_id'], value);
 		system.methods.enterPool(poolIndex, pool.poolSynth_ids[activeAssetIndex]['synth_id'], value)
 		.send({
 				value,

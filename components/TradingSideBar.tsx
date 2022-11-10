@@ -59,15 +59,11 @@ function ExchangeSideBar({}) {
 
 	return (
 		<>
-			<Box>
-                <Text mt={10} mb={2} fontSize={"xs"} fontWeight="bold" color={"gray"} ml={1}>CHOOSE A POOL</Text>
+                <Text mb={2} mt={6} fontSize={"xs"} fontWeight="bold" color={"gray"} ml={1}>CHOOSE A POOL</Text>
 				<Select
 					mb={10}
 					onChange={updatePoolIndex}
 					value={tradingPool}
-					color="white"
-					// bgColor={'gray'}
-					// height="100"
                     >
 					{pools.map((pool: any, index: number) => {
 						return (
@@ -77,30 +73,31 @@ function ExchangeSideBar({}) {
 						);
 					})}
 				</Select>
-				<TableContainer border={"1px solid #2C2C2C"} rounded={6} py={2} bgColor="#171717" color={"white"}>
+				
+				<TableContainer rounded={6} bgColor="#171717" color={"white"}>
 					<Table variant="simple" size="sm">
 						<Thead>
 							<Tr>
-								<Th color="#686868">Asset</Th>
-								<Th color="#686868">Balance</Th>
-								<Th></Th>
+								<Th color="#686868" borderColor={'#3C3C3C'}>Asset</Th>
+								<Th color="#686868" borderColor={'#3C3C3C'}>Balance</Th>
+								<Th borderColor={'#3C3C3C'}></Th>
 							</Tr>
 						</Thead>
 						<Tbody>
 							{((pools[tradingPool] && pools[tradingPool].poolSynth_ids) ?? synths).map((_synth: any, index: number) => {
 								return (
-									<Tr key={index}>
-										<Td>
+									<Tr key={index} >
+										<Td borderColor={'#3C3C3C'}>
 											{_synth.name
 												.split(' ')
 												.slice(1)
 												.join(' ')}
 										</Td>
-										<Td>
+										<Td borderColor={'#3C3C3C'}>
 											{(tradingBalanceOf(_synth.synth_id)/10**(_synth.decimal ?? 18)).toFixed(2)}{' '}
 											{_synth.symbol}
 										</Td>
-										<Td>
+										<Td borderColor={'#3C3C3C'}>
                                             <TransferModal asset={getSynth(_synth.synth_id)} handleUpdate={handleUpdate} />
 										</Td>
 									</Tr>
@@ -109,7 +106,6 @@ function ExchangeSideBar({}) {
 						</Tbody>
 					</Table>
 				</TableContainer>
-			</Box>
 		</>
 	);
 }

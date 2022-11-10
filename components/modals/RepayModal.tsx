@@ -99,6 +99,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleRepay(asset['synth_id'], BigInt(amount*10**asset['decimal']).toString())
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {

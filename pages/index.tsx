@@ -26,6 +26,7 @@ import { Heading } from '@chakra-ui/react';
 import { BsArrowBarRight, BsArrowReturnRight } from 'react-icons/bs';
 import { AiOutlineArrowRight } from 'react-icons/ai';
 import Link from 'next/link';
+import Head from 'next/head';
 
 function App() {
 	const [nullValue, setNullValue] = useState(false);
@@ -49,6 +50,9 @@ function App() {
 
 	return (
 		<>
+		<Head>
+				<title>SyntheX</title>
+			</Head>
 			{
 				<Flex flexDir={'column'} mt={10} mb={10} gap={3}>
 					<Flex

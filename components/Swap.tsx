@@ -24,6 +24,7 @@ import { MdOutlineSwapVert } from 'react-icons/md';
 import TradingChart from './charts/TradingChart';
 import { AppDataContext } from './AppDataProvider';
 import axios from 'axios';
+import Head from 'next/head';
 
 function Swap() {
 	const [inputAssetIndex, setInputAssetIndex] = useState(1);
@@ -107,17 +108,15 @@ function Swap() {
 				feeLimit: 1000000000,
 			})
 			.then((res: any) => {
-					setHash(res);
-					setLoading(false);
-					checkResponse(res);
-					setResponse(
-						'Transaction sent! Waiting for confirmation...'
-					);
-				}
-			).catch((err: any) => {
+				setHash(res);
+				setLoading(false);
+				checkResponse(res);
+				setResponse('Transaction sent! Waiting for confirmation...');
+			})
+			.catch((err: any) => {
 				setLoading(false);
 				setResponse('Transaction Failed: Signature rejected');
-			})
+			});
 	};
 
 	// check response in intervals
@@ -128,7 +127,7 @@ function Swap() {
 					tx_id
 			)
 			.then((res) => {
-				console.log(res)
+				console.log(res);
 				if (!res.data.ret) {
 					setTimeout(() => {
 						checkResponse(tx_id);
@@ -138,11 +137,14 @@ function Swap() {
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
 					} else {
-						if(retryCount < 3) setTimeout(() => {
-							checkResponse(tx_id, retryCount + 1);
-						}, 2000);
-						else{
-							setResponse('Transaction Failed. Please try again.');
+						if (retryCount < 3)
+							setTimeout(() => {
+								checkResponse(tx_id, retryCount + 1);
+							}, 2000);
+						else {
+							setResponse(
+								'Transaction Failed. Please try again.'
+							);
 						}
 					}
 				}
@@ -208,12 +210,21 @@ function Swap() {
 
 	return (
 		<>
+			<Head>
+				<title>
+					{' '}
+					{tokenFormatter.format(
+						inputToken()?.price / outputToken()?.price
+					)}{' '}
+					{outputToken().symbol}/{inputToken().symbol}
+				</title>
+			</Head>
 			{pools[tradingPool] && (
 				<Box
 					px={10}
 					// pt={10}
-					pb={'150px'}
-					mt={6}
+					pb={20}
+					mt={8}
 					// bgColor={'#171717'}
 					// border={'1px solid #2C2C2C'}
 					rounded={6}>
@@ -343,11 +354,12 @@ function Swap() {
 						bgColor={'primary'}
 						onClick={exchange}
 						disabled={loading || !isConnected || inputAmount <= 0}
-						loadingText='Sign the transaction in your wallet'
+						loadingText="Sign the transaction in your wallet"
 						isLoading={loading}
 						_hover={{ bg: 'gray.600' }}
-						>
-						{isConnected ? (inputAmount > 0 ? (
+						color="#171717">
+						{isConnected ? (
+							inputAmount > 0 ? (
 								<>Exchange</>
 							) : (
 								<>Enter Amount</>
@@ -358,7 +370,7 @@ function Swap() {
 					</Button>
 
 					{response && (
-						<Box width={'100%'} my={2} color='black' >
+						<Box width={'100%'} my={2} color="black">
 							<Alert
 								status={
 									response.includes('confirm')
@@ -369,24 +381,25 @@ function Swap() {
 										: 'error'
 								}
 								variant="subtle"
-								rounded={6}
-								>
+								rounded={6}>
 								<AlertIcon />
 								<Box>
 									<Text fontSize="md" mb={0}>
 										{response}
 									</Text>
-									{hash && <Link
-										href={
-											'https://nile.tronscan.org/#/transaction/' +
-											hash
-										}
-										target="_blank">
-										{' '}
-										<Text fontSize={'sm'}>
-											View on TronScan
-										</Text>
-									</Link>}
+									{hash && (
+										<Link
+											href={
+												'https://nile.tronscan.org/#/transaction/' +
+												hash
+											}
+											target="_blank">
+											{' '}
+											<Text fontSize={'sm'}>
+												View on TronScan
+											</Text>
+										</Link>
+									)}
 								</Box>
 							</Alert>
 						</Box>

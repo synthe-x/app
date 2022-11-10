@@ -105,6 +105,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleWithdraw(asset['coll_address'], Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0))
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {

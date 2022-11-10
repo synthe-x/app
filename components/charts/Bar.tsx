@@ -57,7 +57,7 @@ const PoolDailyVolume = ({ data, poolSynths }: any) => {
 								dataKey="dayId"
 								height={30}
 								stroke="#50C878"
-								fill="#fff"
+								fill="#000"
 							/>
 							{poolSynths.map((synth: any, index: number) => {
 								return (

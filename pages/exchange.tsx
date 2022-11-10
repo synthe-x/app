@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useContext, useEffect, useState } from 'react';
-import { WalletContext } from '../components/WalletContextProvider';
+import Head from 'next/head'
 import Swap from '../components/Swap';
 import ExchangeSideBar from '../components/TradingSideBar';
 import { AppDataContext } from '../components/AppDataProvider';
@@ -25,11 +25,12 @@ function Exchange() {
 
 	return (
 		<>
-			{isDataReady && <Flex justifyContent={"space-between"} gap={10} wrap="wrap-reverse">
-				<Box width={'35%'}>
+		
+			{isDataReady && <Flex mt={'10'} gap={'2%'} wrap="wrap-reverse" align='stretch' justify='stretch' >
+				<Box width={'35%'} px={5} bgColor={'#171717'} color={'white'} rounded={10}>
 					<ExchangeSideBar />
 				</Box>
-				<Box mt={10} width='60%' color="white">
+				<Box my={'auto'} width='63%' bgColor={'#171717'} color={'white'} rounded={10}>
 					<Swap />
 				</Box>
 			</Flex>}

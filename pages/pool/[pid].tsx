@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Link, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { WalletContext } from '../../components/WalletContextProvider';
@@ -26,6 +26,7 @@ import PoolPie from '../../components/charts/PoolPie';
 import axios from 'axios';
 import PoolTable from '../../components/charts/PoolTable';
 import { AppDataContext } from '../../components/AppDataProvider';
+import Link from 'next/link';
 
 const dollarFormatter = new Intl.NumberFormat('en-US', {
 	style: 'currency',
@@ -40,15 +41,10 @@ const Pool = () => {
 	const [pool, setPool] = React.useState<any>({});
 	const [pieData, setPieData] = React.useState([]);
 
-	const {
-		isConnected,
-		isConnecting,
-		address,
-		connect,
-	} = useContext(WalletContext);
+	const { isConnected, isConnecting, address, connect } =
+		useContext(WalletContext);
 
 	const {
-		
 		collaterals,
 		synths,
 		totalCollateral,
@@ -62,7 +58,6 @@ const Pool = () => {
 	const [volume, setVolume] = React.useState<{}[]>([]);
 	const [_24h, set24h] = React.useState(0);
 	const [totalVolume, setTotalVolume] = React.useState(0);
-
 
 	useEffect(() => {
 		let _pool: any;
@@ -106,20 +101,21 @@ const Pool = () => {
 					const dayId =
 						Math.round(Date.now() / (1000 * 60 * 60 * 24)) + 1;
 					let _24hvolume = 0;
-					let _totalVolume = 0
+					let _totalVolume = 0;
 					for (let i in resp.data.data) {
 						for (let j in _pool.poolSynth_ids) {
 							if (resp.data.data[i].dayId == dayId) {
 								_24hvolume +=
+									resp.data.data[i][
+										_pool.poolSynth_ids[j].symbol
+									] * _pool.poolSynth_ids[j].price;
+							}
+							_totalVolume +=
 								resp.data.data[i][
 									_pool.poolSynth_ids[j].symbol
 								] * _pool.poolSynth_ids[j].price;
-							}
-							_totalVolume += resp.data.data[i][
-								_pool.poolSynth_ids[j].symbol
-							] * _pool.poolSynth_ids[j].price;
 						}
-						
+
 						for (let j in _pool.poolSynth_ids) {
 							resp.data.data[i][_pool.poolSynth_ids[j].symbol] = (
 								resp.data.data[i][
@@ -130,7 +126,7 @@ const Pool = () => {
 					}
 
 					set24h(_24hvolume);
-					setTotalVolume(_totalVolume)
+					setTotalVolume(_totalVolume);
 
 					for (let i in resp.data.data) {
 						resp.data.data[i].dayId = new Date(
@@ -152,13 +148,14 @@ const Pool = () => {
 		<>
 			{pool && synths ? (
 				<Box mt={5}>
-					<Link
-						color={'whiteAlpha.700'}
-						display={'flex'}
-						alignItems="center"
-						mb={5}
-						href="/pools">
-						<MdArrowBackIos /> Back
+					<Link href="/pools" as="/pools"  >
+						<a>
+
+						<Flex align="center" color={'whiteAlpha.700'} mb={5}>
+							
+							<MdArrowBackIos /> Back
+						</Flex>
+						</a>
 					</Link>
 					<Flex justify={'space-between'} mb={10} color="white">
 						<Box>
@@ -203,13 +200,11 @@ const Pool = () => {
 							px={10}
 							boxShadow={'lg'}
 							pb={5}
-							flex="1"
-							>
-							<Box height={'80%'} >
+							flex="1">
+							<Box height={'90%'}>
 								<PoolPie data={pieData} />
 							</Box>
-							<Flex gap={4} height="20%" align={"end"}
-							>
+							<Flex gap={4} height="10%" align={'end'}>
 								<Box width={'50%'}>
 									<EnterPool assets={synths} pool={pool} />
 								</Box>
@@ -223,7 +218,12 @@ const Pool = () => {
 								</Box>
 							</Flex>
 						</Flex>
-						<Box boxShadow={'lg'} rounded={10} minH="200px" width={"20%"} flex="0.75">
+						<Box
+							boxShadow={'lg'}
+							rounded={10}
+							minH="200px"
+							width={'20%'}
+							flex="0.75">
 							<PoolTable pool={pool} />
 						</Box>
 					</Flex>
@@ -238,7 +238,7 @@ const Pool = () => {
 						boxShadow={'lg'}>
 						<Bar data={volume} poolSynths={pool.poolSynth_ids} />
 						<Box mt={3} color="gray">
-							<Text fontSize={"sm"}>Total Volume</Text>
+							<Text fontSize={'sm'}>Total Volume</Text>
 							<Text>{dollarFormatter.format(totalVolume)}</Text>
 						</Box>
 					</Box>

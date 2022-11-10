@@ -57,7 +57,7 @@ function NavBar() {
 
 				<Box display={{ sm: 'none', md: 'block' }}>
 					<Flex gap={8}>
-							<Link href="/">
+							<Link href="/" as="/">
 								<Text
 									my="1rem"
 									color={
@@ -80,7 +80,7 @@ function NavBar() {
 								</Text>
 							</Link>
 
-							<Link href="/pools">
+							<Link href="/pools" as='/pools'>
 								<Text
 									my="1rem"
 									color={
@@ -103,7 +103,7 @@ function NavBar() {
 								</Text>
 							</Link>
 
-							<Link href={'/exchange'}>
+							<Link href={'/exchange'} as='/exchange'>
 								<Text
 									cursor={'pointer'}
 									color={

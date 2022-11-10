@@ -113,6 +113,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleIssue(asset['synth_id'], BigInt(amount * 10 ** asset['decimal']).toString())
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {

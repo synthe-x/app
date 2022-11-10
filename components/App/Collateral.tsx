@@ -52,8 +52,11 @@ export default function Collateral({ handleChange }: any) {
 	const handleDeposit = (collateral: string, value: string) => {
 		updateCollateralWalletBalance(collateral, value, true)
 		updateCollateralAmount(collateral, value, false)
+		console.log(1, collaterals)
 		setNullValue(!nullValue);
+		console.log(2, collaterals)
 		handleChange()
+		console.log(3, collaterals)
 	}
 	
 	return (

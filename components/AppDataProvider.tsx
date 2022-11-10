@@ -151,6 +151,7 @@ function AppDataProvider({ children }: any) {
 								_collaterals[i / 2].price) /
 							10 ** _collaterals[i / 2].decimal;
 					}
+					console.log('collaterals', _collaterals);
 					setCollaterals(_collaterals);
 					setTotalCollateral(collateralBalance);
                     resolve(null)
@@ -194,6 +195,7 @@ function AppDataProvider({ children }: any) {
 						? Big(_collaterals[i].amount).minus(value)
 						: Big(_collaterals[i].amount).plus(value)
 				).toString();
+
 				// update total collateral
 				isMinus
 					? setTotalCollateral(
@@ -214,6 +216,7 @@ function AppDataProvider({ children }: any) {
 					  );
 			}
 		}
+		console.log('settin', _collaterals);
 		setCollaterals(_collaterals);
 	};
 

@@ -45,9 +45,9 @@ export default function PoolTable({ pool }: any) {
 					<Table variant="simple" size={'sm'}>
 						<Thead>
 							<Tr>
-								<Th>Asset</Th>
-								<Th>Liquidity</Th>
-								<Th>Price</Th>
+								<Th borderColor={'#3C3C3C'}>Asset</Th>
+								<Th borderColor={'#3C3C3C'}>Liquidity</Th>
+								<Th borderColor={'#3C3C3C'}>Price</Th>
 							</Tr>
 						</Thead>
 						<Tbody>
@@ -56,6 +56,7 @@ export default function PoolTable({ pool }: any) {
 									return (
 										<Tr key={index}>
 											<Td
+											borderColor={'#3C3C3C'}
 												display="flex"
 												alignItems={'center'}>
 												<Image
@@ -70,7 +71,7 @@ export default function PoolTable({ pool }: any) {
 													.slice(1)
 													.join(' ')}
 											</Td>
-											<Td>
+											<Td borderColor={'#3C3C3C'}>
 												{tokenFormatter.format(
 													synth?.balance /
 														10 **
@@ -79,7 +80,7 @@ export default function PoolTable({ pool }: any) {
 												)}{' '}
 												{synth?.symbol}
 											</Td>
-											<Td>
+											<Td borderColor={'#3C3C3C'}>
 												{dollarFormatter.format(
 													synth?.price
 												)}
