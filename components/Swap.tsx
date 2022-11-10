@@ -25,6 +25,7 @@ import TradingChart from './charts/TradingChart';
 import { AppDataContext } from './AppDataProvider';
 import axios from 'axios';
 import Head from 'next/head';
+import Image from 'next/image';
 
 function Swap() {
 	const [inputAssetIndex, setInputAssetIndex] = useState(1);
@@ -231,9 +232,16 @@ function Swap() {
 					rounded={6}>
 					<Flex justify={'space-between'} mb={5}>
 						{/* Asset Name */}
+						<Flex gap={2}>
+							<Box>
+
+						<Image src={'/'+inputToken()?.symbol+'.png'} height={'50px'} width={'50px'} style={{maxHeight: '50px', maxWidth: '50px'}} alt={inputToken()?.symbol}/>
+							</Box>
+
 						<Text mb={3} fontSize="3xl" fontWeight={'bold'}>
 							{inputToken()?.symbol}/{outputToken()?.symbol}
 						</Text>
+						</Flex>
 						{/* Asset Price */}
 						<Box>
 							<Flex align={'center'} gap={1}>

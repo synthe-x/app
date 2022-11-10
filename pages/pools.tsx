@@ -19,7 +19,7 @@ function App() {
 				<title>Trading Pools | SyntheX</title>
 				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
-			<Box mb={20}>
+			<Box mb={10}>
 				<Text fontSize={'3xl'} fontWeight="bold" mt={10} color="whiteAlpha.800">
 					Trading Pools
 				</Text>

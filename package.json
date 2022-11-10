@@ -20,6 +20,7 @@
     "ethers": "^5.7.1",
     "framer-motion": "^7.5.0",
     "fs": "^0.0.1-security",
+    "lightweight-charts": "^3.8.0",
     "next": "^12.1.6",
     "react": "^18.1.0",
     "react-chartjs-2": "^4.3.1",

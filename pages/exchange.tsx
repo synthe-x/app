@@ -26,11 +26,11 @@ function Exchange() {
 	return (
 		<>
 		
-			{isDataReady && <Flex mt={'10'} gap={'2%'} wrap="wrap-reverse" align='stretch' justify='stretch' >
+			{isDataReady && <Flex mt={'10'} gap={'1%'} wrap="wrap-reverse" align='stretch' justify='stretch' mb={10}>
 				<Box width={'35%'} px={5} bgColor={'#171717'} color={'white'} rounded={10}>
 					<ExchangeSideBar />
 				</Box>
-				<Box my={'auto'} width='63%' bgColor={'#171717'} color={'white'} rounded={10}>
+				<Box my={'auto'} width='64%' bgColor={'#171717'} color={'white'} rounded={10}>
 					<Swap />
 				</Box>
 			</Flex>}

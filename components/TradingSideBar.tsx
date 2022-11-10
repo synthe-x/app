@@ -20,6 +20,7 @@ import {
 	TableCaption,
 	TableContainer,
 } from '@chakra-ui/react';
+import Image from 'next/image';
 import { useContext, useState } from 'react';
 import { WalletContext } from '../components/WalletContextProvider';
 import { AppDataContext } from './AppDataProvider';
@@ -88,10 +89,14 @@ function ExchangeSideBar({}) {
 								return (
 									<Tr key={index} >
 										<Td borderColor={'#3C3C3C'}>
+											<Flex align={'center'} gap={'1'}>
+
+											<Image src={'/'+_synth.symbol+'.png'} height={20} width={20} alt={_synth.symbol}/>
 											{_synth.name
 												.split(' ')
 												.slice(1)
 												.join(' ')}
+												</Flex>
 										</Td>
 										<Td borderColor={'#3C3C3C'}>
 											{(tradingBalanceOf(_synth.synth_id)/10**(_synth.decimal ?? 18)).toFixed(2)}{' '}
