@@ -214,7 +214,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 	return (
 		<Box>
 			<Button
-				disabled={!isConnected}
 				width={'100%'}
 				size="lg"
 				bgColor={'primary'}
@@ -283,7 +282,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 									// width={"74%"}
 								>
 									<SliderTrack>
-										<SliderFilledTrack bgColor="#276220" />
+										<SliderFilledTrack bgColor='#3EE6C4' />
 									</SliderTrack>
 									<SliderThumb />
 								</Slider>
@@ -322,7 +321,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 									amount == 0 ||
 									amount > balance()
 								}
-								colorScheme={'whatsapp'}
+								bgColor='#3EE6C4'
+								color={'gray.800'}
 								width="100%"
 								mt={4}
 								isDisabled={loading}

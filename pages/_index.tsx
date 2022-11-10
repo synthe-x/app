@@ -46,11 +46,7 @@ export default function _index({ children }: any) {
 	const router = useRouter();
 
 	const backgroundStyle = {
-		backgroundColor: '#0B0B0B',
-		backgroundRepeat: 'no-repeat',
-		height: '100%',
-		backgroundSize: 'contain',
-		backgroundPosition: 'top',
+		backgroundColor: '#0B0B0B'
 	};
 
 	return (
@@ -70,7 +66,7 @@ export default function _index({ children }: any) {
 				<Flex
 					justify={'center'}
 					flexDirection={{ sm: 'column', md: 'row' }}
-					minH="100vh">
+					minH="94vh">
 					<Box maxWidth={'1300px'} 
                     minW={{sm: '0', md: '0', lg: '1200px'}}
                     >

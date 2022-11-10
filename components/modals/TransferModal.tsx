@@ -250,7 +250,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 							}
 							loadingText='Please sign the transaction'
 							isLoading={loading}
-							colorScheme={'whatsapp'}
+							bgColor='#3EE6C4'
 							width="100%"
 							mt={4}
 							onClick={transfer}>

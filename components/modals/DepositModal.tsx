@@ -253,7 +253,8 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 							<Button
 								isLoading={loader}
 								disabled={!isConnected || !amount || amount == 0 || amount > balance}
-								colorScheme={'whatsapp'}
+								bgColor='#3EE6C4'
+								color={'black'}
 								width="100%"
 								mt={4}
 								onClick={issue}>
