@@ -69,6 +69,7 @@ export default function _index({ children }: any) {
 					minH="94vh">
 					<Box maxWidth={'1300px'} 
                     minW={{sm: '0', md: '0', lg: '1200px'}}
+					px={{sm: '4', md: '0'}}
                     >
 						<Navbar />
 						{children}

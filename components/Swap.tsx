@@ -224,7 +224,7 @@ function Swap() {
 			</Head>
 			{pools[tradingPool] && (
 				<Box
-					px={10}
+					px={{sm: '5', md: '10'}}
 					// pt={10}
 					pb={20}
 					mt={8}

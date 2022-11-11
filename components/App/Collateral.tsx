@@ -116,18 +116,7 @@ export default function Collateral({ handleChange }: any) {
 									: '-'}{' '}
 								{collateral['symbol']}
 							</Text>
-							{collateral['symbol'] == 'WTRX' && isConnected ? (
-								<Button
-									mt={2}
-									isLoading={claimLoading}
-									size={'xs'}
-									rounded={40}
-									onClick={claim} color='black'>
-									Get WTRX Tokens
-								</Button>
-							) : (
-								<></>
-							)}
+							
 						</Box>
 					</Flex>
 

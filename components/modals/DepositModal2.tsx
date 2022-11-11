@@ -51,6 +51,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const [selectedAsset, setSelectedAsset] = React.useState<number>(0);
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(0);
+	const [claimLoading, setClaimLoading] = useState(false);
 
 	const [loading, setLoading] = useState(false);
 	const [response, setResponse] = useState<string | null>(null);
@@ -63,7 +64,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	const { isConnected, tronWeb, address } = useContext(WalletContext);
 
-	const { collaterals } = useContext(AppDataContext);
+	const { collaterals, updateCollateralWalletBalance,
+		updateCollateralAmount, tokenFormatter } = useContext(AppDataContext);
 
 	const asset = () => collaterals[selectedAsset];
 	const balance = () => asset().walletBalance / 10 ** asset().decimal;
@@ -176,6 +178,28 @@ const DepositModal = ({ handleDeposit }: any) => {
 			});
 	};
 
+	const claim = async () => {
+		setClaimLoading(true);
+		let wtrx = await getContract(tronWeb, 'WTRX');
+		wtrx.deposit().send({}, (err: any, hash: string) => {
+			if (err) {
+				console.log(err);
+				setClaimLoading(false);
+			}
+			if (hash) {
+				console.log(hash);
+				setClaimLoading(false);
+				updateCollateralWalletBalance(
+					wtrx.address,
+					'100000000000',
+					false
+				);
+				// handleChange();
+			}
+		});
+	};
+
+
 	const amountLowerThanMin = () => {
 		if (Number(amount) > asset()?.minCollateral / 10 ** asset().decimal) {
 			return false;
@@ -250,9 +274,26 @@ const DepositModal = ({ handleDeposit }: any) => {
 						</Select>
 						{!tryApprove ? (
 							<Box>
-								<Text mb={2} textAlign="right" fontSize={'sm'}>
-									Balance: {balance()} {asset()?.symbol}
+								<Flex justify={'space-between'} align='center' width={'100%'} mb={2}>
+								<Text textAlign="right" fontSize={'xs'}>
+									Balance: {tokenFormatter.format(balance())} {asset()?.symbol}
 								</Text>
+								{asset()?.symbol == 'WTRX' && isConnected ? (
+								<Button
+									
+									isLoading={claimLoading}
+									size={'xs'}
+									// rounded={40}
+									onClick={claim} 
+									color='black'
+									// variant={'ghost'}
+									>
+									Claim WTRX Tokens 💰
+								</Button>
+							) : (
+								<></>
+							)}
+								</Flex>
 								<InputGroup size="md" alignItems={'center'}>
 									<Image
 										src={`/${asset()?.symbol}.png`}

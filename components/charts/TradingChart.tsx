@@ -3,7 +3,8 @@ import React from 'react'
 // import SymbolOverview from 'react-tradingview-embed/dist/components/SymbolOverview';
 
 import dynamic from "next/dynamic";
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import { MdWarning } from 'react-icons/md';
 
 const Graph = dynamic(() => import("./Graph"), {
   ssr: false
@@ -14,6 +15,7 @@ export default function TradingChart({input, output}: any) {
         <>
         <Box mb={10}>
             {/* <SymbolOverview chartOnly={true}/> */}
+            <Flex position={'absolute'} zIndex={10} color={'green.300'} gap={1} align='center'><Text fontSize='sm'> ERROR: Chart not found</Text></Flex>
             <Graph/>
         </Box>
         </>

@@ -37,7 +37,7 @@ function AppDataProvider({ children }: any) {
 	const [totalDebt, setTotalDebt] = React.useState(0);
 
 	const [pools, setPools] = React.useState([]);
-	const [tradingPool, setTradingPool] = React.useState(0);
+	const [tradingPool, setTradingPool] = React.useState(1);
 	const [dollarFormatter, setDollarFormatter] = React.useState<null | {}>(
 		null
 	);
