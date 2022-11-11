@@ -47,10 +47,11 @@ function PoolCard({ pool }: any) {
 					height={'220px'}
 					style={{
 						background:
-							'linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0)), url(/bgpool1.png) padding-box padding-box, linear-gradient(to right, #D9D9D9, #1c1c1c, #D9D9D9) border-box',
+							'linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0)), url(/bgpool1.png) padding-box, linear-gradient(to right, #D9D9D9, #1c1c1c, #D9D9D9) border-box',
 						borderRadius: '20px',
 						border: '1px solid transparent',
 					}}
+					
 					bgColor="black"
 					onClick={() => {}}
 					bgSize={'1327px 241px'}

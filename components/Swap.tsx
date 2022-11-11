@@ -253,7 +253,6 @@ function Swap() {
 									{outputToken()?.symbol}
 								</Text>
 								<Text
-									mb={3}
 									fontSize="md"
 									display={'flex'}
 									alignItems="center"

@@ -24,7 +24,7 @@ function App() {
 					Trading Pools
 				</Text>
 				<Text color={"whiteAlpha.700"} fontSize="sm">
-					Trade without frictions
+				No-slippage trading. Find the ideal pool for your trading needs
 				</Text>
 				<Flex flexDirection={"column"} gap={10} my={10}>
 				{pools.slice(1).map((pool: any, index: number) => {

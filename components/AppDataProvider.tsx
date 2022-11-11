@@ -52,7 +52,9 @@ function AppDataProvider({ children }: any) {
 				currency: 'USD',
 			})
 		);
-		setTokenFormatter(new Intl.NumberFormat('en-US'));
+		setTokenFormatter(new Intl.NumberFormat('en-US', {
+			maximumSignificantDigits: 8
+		}));
 		fetchData(tronWebObject, DUMMY_ADDRESS);
 	}, []);
 
