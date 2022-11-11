@@ -26,6 +26,7 @@ import { AppDataContext } from './AppDataProvider';
 import axios from 'axios';
 import Head from 'next/head';
 import Image from 'next/image';
+import { BsArrowRightCircle } from 'react-icons/bs';
 
 function Swap() {
 	const [inputAssetIndex, setInputAssetIndex] = useState(1);
@@ -233,29 +234,54 @@ function Swap() {
 					<Flex justify={'space-between'} mb={5}>
 						{/* Asset Name */}
 						<Flex gap={2}>
-							<Box>
-
-						<Image src={'/'+inputToken()?.symbol+'.png'} height={'50px'} width={'50px'} style={{maxHeight: '50px', maxWidth: '50px'}} alt={inputToken()?.symbol}/>
+							<Box mt={2}>
+								<Image
+									src={'/' + inputToken()?.symbol + '.png'}
+									height={'50px'}
+									width={'50px'}
+									style={{
+										maxHeight: '50px',
+										maxWidth: '50px',
+									}}
+									alt={inputToken()?.symbol}
+								/>
 							</Box>
 
-						<Text mb={3} fontSize="3xl" fontWeight={'bold'}>
-							{inputToken()?.symbol}/{outputToken()?.symbol}
-						</Text>
+							<Box mb={3}>
+								<Text fontSize="3xl" fontWeight={'bold'}>
+									{inputToken()?.symbol}/
+									{outputToken()?.symbol}
+								</Text>
+								<Text
+									mb={3}
+									fontSize="md"
+									display={'flex'}
+									alignItems="center"
+									gap={1}>
+									{inputToken()
+										?.name.split(' ')
+										.slice(1)
+										.join(' ')}{' '}
+									<BsArrowRightCircle />{' '}
+									{outputToken()
+										?.name.split(' ')
+										.slice(1)
+										.join(' ')}
+								</Text>
+							</Box>
 						</Flex>
 						{/* Asset Price */}
 						<Box>
-							<Flex align={'center'} gap={1}>
-								<Text fontSize={'2xl'} fontWeight="bold">
+							<Flex flexDir={'column'} align={'end'} gap={1}>
+								<Text fontSize={'3xl'} fontWeight="bold">
 									{tokenFormatter.format(
 										inputToken()?.price /
 											outputToken()?.price
 									)}
 								</Text>
 								<Text fontSize={'sm'}>
-									{outputToken()?.symbol}
-								</Text>
-								<Text fontSize={'sm'}>
-									/ {inputToken()?.symbol}
+									{outputToken()?.symbol}/
+									{inputToken()?.symbol}
 								</Text>
 							</Flex>
 						</Box>
