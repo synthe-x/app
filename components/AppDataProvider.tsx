@@ -369,6 +369,7 @@ function AppDataProvider({ children }: any) {
 					  );
 			}
 		}
+		console.log(_synths)
 		setSynths(_synths);
 	};
 

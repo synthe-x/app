@@ -20,6 +20,11 @@ import index from './pool/index';
 
 function Exchange() {
 	const { isDataReady } = useContext(AppDataContext);
+	const [nullValue, setNullValue] = useState(false);
+
+	const handleChange = () => {
+		setNullValue(!nullValue);
+	}
 
 	return (
 		<>
@@ -45,7 +50,7 @@ function Exchange() {
 						bgColor={'#171717'}
 						color={'white'}
 						rounded={10}>
-						<Swap />
+						<Swap handleChange={handleChange}/>
 					</Box>
 				</Flex>
 			)}

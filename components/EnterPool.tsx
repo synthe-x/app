@@ -54,7 +54,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	}
 
 	const { isConnected, tronWeb } = useContext(WalletContext);
-	const { pools } = useContext(AppDataContext);
+	const { pools, updateSynthAmount } = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
 		if(event.target.value < 0) {
@@ -130,6 +130,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleExchange(pool.poolSynth_ids[activeAssetIndex]['synth_id'], BigInt(amount * 10 ** (pool.poolSynth_ids[activeAssetIndex]['decimal'] ?? 18)).toString())
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {
@@ -145,6 +146,9 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 			});
 	};
 
+	const handleExchange = (synth: string, value: string) => {
+		updateSynthAmount(synth, poolIndex, value, false);
+	}
 
 	return (
 		<>{

@@ -58,14 +58,14 @@ const IssuanceTable = ({handleChange}: any) => {
 	} = useContext(AppDataContext);
 
 	const handleIssue = (synthId: string, value: string) => {
-		updateSynthWalletBalance(synthId, value, true)
+		updateSynthWalletBalance(synthId, value, false)
 		updateSynthAmount(synthId, 0, value, false)
 		setNullValue(!nullValue)
 		handleChange()
 	}
 
 	const handleRepay = (synthId: string, value: string) => {
-		updateSynthWalletBalance(synthId, value, false)
+		updateSynthWalletBalance(synthId, value, true)
 		updateSynthAmount(synthId, 0, value, true)
 		setNullValue(!nullValue)
 		handleChange()

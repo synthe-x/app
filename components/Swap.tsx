@@ -27,12 +27,14 @@ import axios from 'axios';
 import Head from 'next/head';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
+const Big = require('big.js');
 
-function Swap() {
+function Swap({handleChange}: any) {
 	const [inputAssetIndex, setInputAssetIndex] = useState(1);
 	const [outputAssetIndex, setOutputAssetIndex] = useState(0);
 	const [inputAmount, setInputAmount] = useState(0);
 	const [outputAmount, setOutputAmount] = useState(0);
+	const [nullValue, setNullValue] = useState(false);
 
 	const [loading, setLoading] = useState(false);
 	const [response, setResponse] = useState<string | null>(null);
@@ -138,6 +140,7 @@ function Swap() {
 					setConfirmed(true);
 					if (res.data.ret[0].contractRet == 'SUCCESS') {
 						setResponse('Transaction Successful!');
+						handleExchange(inputToken().synth_id, outputToken().synth_id, Big(inputAmount).mul(10**18).toString(), Big(outputAmount).mul(10**18).toString());
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {
@@ -155,8 +158,14 @@ function Swap() {
 
 	const { isConnected, tronWeb } = useContext(WalletContext);
 
-	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter } =
-		useContext(AppDataContext);
+	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter, updateSynthWalletBalance, updateSynthAmount } = useContext(AppDataContext);
+
+	const handleExchange = (src: string, dst: string, srcValue: string, dstValue: string) => {
+		updateSynthAmount(dst, tradingPool, dstValue, false)
+		updateSynthAmount(src, tradingPool, srcValue, true)
+		setNullValue(!nullValue)
+		handleChange()
+	}
 
 	useEffect(() => {
 		if (
