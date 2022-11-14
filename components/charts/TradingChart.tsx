@@ -13,7 +13,7 @@ const Graph = dynamic(() => import("./Graph"), {
 export default function TradingChart({input, output}: any) {
     return (
         <>
-        <Box mb={10}>
+        <Box mb={10} height='400px'>
             {/* <SymbolOverview chartOnly={true}/> */}
             <Flex position={'absolute'} zIndex={10} color={'gray.600'} gap={1} align='center'><Text fontSize='sm'> ERROR: Chart not found</Text></Flex>
             <Graph/>

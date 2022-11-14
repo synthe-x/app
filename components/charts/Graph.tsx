@@ -12,7 +12,7 @@ const Graph = ({}) => {
         if(!chart.current){
 		chart.current = createChart(chartContainerRef.current, {
 			width: chartContainerRef.current.clientWidth,
-			height: 500, //"300px", //chartContainerRef.current.clientHeight,
+			height: chartContainerRef.current.clientHeight,
 			layout: {
 				backgroundColor: '#161616',
 				textColor: 'rgba(255, 255, 255, 0.9)',

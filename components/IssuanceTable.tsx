@@ -72,12 +72,12 @@ const IssuanceTable = ({handleChange}: any) => {
 	}
 
 	return (
-		<Skeleton isLoaded={debts.length > 0}>
+		<Skeleton isLoaded={debts.length > 0} minH='600px' rounded={'10'}>
 			<TableContainer>
 				<Table overflow={'auto'} variant="simple" >
 					<Thead>
 						<Tr>
-							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'} minW='200px'>
 								Issuance Assets
 							</Th>
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
