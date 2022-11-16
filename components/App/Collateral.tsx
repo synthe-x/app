@@ -1,13 +1,12 @@
 import { Box, Button, Divider, Flex, Text, Image } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
-import { getContract } from '../../src/utils';
+import { getContract } from '../../src/contract';
 import { AppDataContext } from '../AppDataProvider';
 import DepositModal from '../modals/DepositModal2';
 import WithdrawModal from '../modals/WithdrawModal';
 import { WalletContext } from '../WalletContextProvider';
 
 export default function Collateral({ handleChange }: any) {
-	const [claimLoading, setClaimLoading] = useState(false);
 	const [nullValue, setNullValue] = useState(false);
 
 	const {
@@ -21,27 +20,7 @@ export default function Collateral({ handleChange }: any) {
 
 	const { isConnected, tronWeb } = useContext(WalletContext);
 
-	const claim = async () => {
-		setClaimLoading(true);
-		let wtrx = await getContract(tronWeb, 'WTRX');
-		wtrx.deposit().send({}, (err: any, hash: string) => {
-			if (err) {
-				console.log(err);
-				setClaimLoading(false);
-			}
-			if (hash) {
-				console.log(hash);
-				setClaimLoading(false);
-				updateCollateralWalletBalance(
-					wtrx.address,
-					'100000000000',
-					false
-				);
-				handleChange();
-			}
-		});
-	};
-
+	
 	const handleWithdraw = (collateral: string, value: string) => {
 		updateCollateralWalletBalance(collateral, value, false);
 		updateCollateralAmount(collateral, value, true);

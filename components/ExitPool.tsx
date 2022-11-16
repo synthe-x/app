@@ -24,11 +24,12 @@ import {
 import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
-import { getContract } from '../src/utils';
+import { getContract, send } from '../src/contract';
 import { BsArrowDown } from 'react-icons/bs';
 import { WalletContext } from './WalletContextProvider';
 import { AppDataContext } from './AppDataProvider';
 import axios from 'axios';
+import { ChainID } from '../src/chains';
 
 
 const EnterPool = ({assets, pool, poolIndex}: any) => {
@@ -53,14 +54,12 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		onClose();
 	}
 
-	const {
-		isConnected,
-		tronWeb
-	} = useContext(WalletContext);
+	const { isConnected } = useContext(WalletContext);
 
 	const {
 		updateSynthAmount,
 		pools,
+		chain
 	} = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
@@ -83,7 +82,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	}
 	const transfer = async () => {
 		if (!amount) return;
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = BigInt(amount * 10 ** assets[activeAssetIndex]['decimal']).toString();
 		setLoading(true);
 		setConfirmed(false);
@@ -98,23 +97,24 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 			}
 		}
     
-		system.methods.exitPool(poolIndex, assets[activeAssetIndex]['synth_id'], value)
-		.send(
-			{
-				value,
-                feeLimit: 1000000000,
-				// shouldPollResponse:true
-			},
-		)
-		.then((res: any) => {
-			setHash(res);
+		send(system, 'exitPool', [poolIndex, assets[activeAssetIndex]['synth_id'], value], chain)
+		.then(async (res: any) => {
 			setLoading(false);
-			checkResponse(res);
 			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
+				setHash(res);
+				checkResponse(res);
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
 		})
 		.catch((err: any) => {
 			setLoading(false);
-			setResponse('Transaction Failed: Signature rejected');
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
 		});
 	};
 

@@ -22,10 +22,11 @@ import DepositModal from './modals/DepositModal';
 import WithdrawModal from './modals/WithdrawModal';
 
 import Image from 'next/image';
-import { getContract } from '../src/utils';
+import { getContract } from '../src/contract';
 import { useState } from 'react';
 import { WalletContext } from './WalletContextProvider';
 import { AppDataContext } from './AppDataProvider';
+import { ChainID } from '../src/chains';
 
 const CollateralTable = ({handleChange}: any) => {
 	const [claimLoading, setClaimLoading] = useState(false);
@@ -41,12 +42,13 @@ const CollateralTable = ({handleChange}: any) => {
 		tokenFormatter,
 		dollarFormatter,
 		updateCollateralWalletBalance,
-		updateCollateralAmount
+		updateCollateralAmount,
+		chain
 	} = useContext(AppDataContext);
 
 	const claim = async () => {
 		setClaimLoading(true);
-		let wtrx = await getContract(tronWeb, 'WTRX');
+		let wtrx = await getContract('WTRX', chain);
 		wtrx.deposit().send({}, (err: any, hash: string) => {
 			if (err) {
 				console.log(err);

@@ -8,6 +8,9 @@ import { id } from 'ethers/lib/utils';
 import { useRouter } from 'next/router';
 import { AppDataContext } from '../components/AppDataProvider';
 import { useState } from 'react';
+import { ChainID, chainIndex } from '../src/chains';
+import { useAccount, useConnect } from 'wagmi';
+import { DUMMY_ADDRESS } from '../src/const';
 
 export default function _index({ children }: any) {
 
@@ -29,19 +32,41 @@ export default function _index({ children }: any) {
 		availableToBorrow,
 		fetchData,
 		isFetchingData,
+		setChain
 	} = useContext(AppDataContext);
+	const [init, setInit] = useState(false);
+
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
+	const {connectAsync: connectEvm, connectors} = useConnect();
 
 	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			if (localStorage.getItem('address') && !isConnected && !isConnecting) {
-				connect((_address: string|null, _err: string) => {
-					if(!isDataReady && !isFetchingData && _address) {
-                        fetchData(tronWeb, _address)
-                    }
-				});
-			}
+		if (typeof window !== 'undefined' && !init) {
+			const _address = localStorage.getItem('address');
+				const _chain = localStorage.getItem('chain');
+				if(_address && _chain){
+					if(parseInt(_chain) == ChainID.NILE){
+						connect((_address: string | null, _err: string) => {
+							if (!isDataReady && !isFetchingData && _address) {
+								fetchData(_address, ChainID.NILE);
+								setChain(ChainID.NILE);
+							}
+						});
+					} else {
+						connectEvm({chainId: parseInt(_chain), connector: connectors[chainIndex[parseInt(_chain)]]}).then((res: any) => {
+							if (!isDataReady && !isFetchingData && res.account) {
+								fetchData(res.account, ChainID.AURORA);
+								setChain(ChainID.AURORA);
+								localStorage.setItem("address", res.account)
+								localStorage.setItem("chain", ChainID.AURORA.toString());
+							}
+						})
+					}
+				} else {
+					fetchData(DUMMY_ADDRESS, ChainID.NILE);
+					setInit(true)
+				}
 		}
-	});
+	}, [connect, connectEvm, connectors, fetchData, init, isDataReady, isFetchingData, setChain, setInit]);
 
 	const router = useRouter();
 

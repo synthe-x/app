@@ -1,5 +1,8 @@
 import * as React from 'react';
 import axios from 'axios';
+import { getContract, call } from '../src/contract';
+import { Endpoints } from '../src/const';
+import { ChainID } from '../src/chains';
 const { Big } = require('big.js');
 
 const AppDataContext = React.createContext<AppDataValue>({} as AppDataValue);
@@ -45,6 +48,8 @@ function AppDataProvider({ children }: any) {
 	const [minCRatio, setMinCRatio] = React.useState(130);
 	const [safeCRatio, setSafeCRatio] = React.useState(200);
 
+	const [chain, setChain] = React.useState(0);
+
 	React.useEffect(() => {
 		setDollarFormatter(
 			new Intl.NumberFormat('en-US', {
@@ -55,7 +60,7 @@ function AppDataProvider({ children }: any) {
 		setTokenFormatter(new Intl.NumberFormat('en-US', {
 			maximumSignificantDigits: 8
 		}));
-		fetchData(tronWebObject, DUMMY_ADDRESS);
+		fetchData(DUMMY_ADDRESS, ChainID.NILE);
 	}, []);
 
 	const tradingBalanceOf = (_s: string) => {
@@ -66,43 +71,42 @@ function AppDataProvider({ children }: any) {
 		}
 	};
 
-	const fetchData = (_tronWeb: any, _address: string) => {
-        if(_tronWeb) _tronWeb = tronWebObject
-        if(!_tronWeb.contract) return
+	const fetchData = (_address: string, chainId: number) => {
 		return new Promise((resolve, reject) => {
 			setIsFetchingData(true);
-			console.log('Fetching data...');
+			console.log('Fetching data...', Endpoints[chainId]);
 			Promise.all([
-				axios.get('https://api.synthex.finance/assets/synths'),
-				axios.get('https://api.synthex.finance/assets/collaterals'),
-				axios.get('https://api.synthex.finance/pool/all'),
-				axios.get('https://api.synthex.finance/system'),
+				axios.get(Endpoints[chainId]+'assets/synths'),
+				axios.get(Endpoints[chainId]+'assets/collaterals'),
+				axios.get(Endpoints[chainId]+'pool/all'),
+				axios.get(Endpoints[chainId]+'system'),
 			])
 				.then(async (res) => {
-					console.log(res[0].data.data)
-					let contract = await _tronWeb.contract().at('TY7KLZkopABnjy4x8SSbsaK9viV9bqxCvE');
+					let contract = await getContract('Helper', chainId);
 					Promise.all([_setSynths(
 						res[2].data.data,
 						res[0].data.data,
 						contract,
-						_tronWeb,
-						_address
+						_address,
+						chainId
 					),
 					_setCollaterals(
 						res[1].data.data,
 						contract,
-						_tronWeb,
-						_address
+						_address,
+						chainId
 					)]).then((_) => {
                         setMinCRatio(res[3].data.data.minCollateralRatio);
                         setSafeCRatio(res[3].data.data.safeCollateralRatio);
                         resolve(null)
                     })
                     .catch(err => {
+						console.log('Error', err);
                         reject(err)
                     })
 				})
 				.catch((err) => {
+					console.log('error', err)
 					setDataFetchError(
 						'Failed to fetch data. Please refresh the page.'
 					);
@@ -111,25 +115,11 @@ function AppDataProvider({ children }: any) {
 		});
 	};
 
-	const fetchDataLocal = async (_tronWeb: any, _address: string) => {
-		let contract = await _tronWeb
-			.contract()
-			.at('TY7KLZkopABnjy4x8SSbsaK9viV9bqxCvE');
-		_setSynths(
-			tradingPoolsConfig,
-			synthsConfig,
-			contract,
-			_tronWeb,
-			_address
-		);
-		_setCollaterals(collateralsConfig, contract, _tronWeb, _address);
-	};
-
 	const _setCollaterals = (
 		_collaterals: any,
-		contract: any,
-		_tronWeb: any,
-		_address: string
+		helper: any,
+		_address: string,
+		_chain: number
 	) => {
 		return new Promise((resolve, reject) => {
 			let tokens = [];
@@ -138,11 +128,9 @@ function AppDataProvider({ children }: any) {
 				tokens.push(_collaterals[i].cAsset);
 			}
 
-			contract
-				.balanceOf(tokens, _address)
-				.call()
+				call(helper, 'balanceOf', [tokens, _address], _chain)
 				.then((res: any) => {
-					res = res[0];
+					console.log('balanceOf', res);
 					let collateralBalance = 0;
 					for (let i = 0; i < res.length; i += 2) {
 						_collaterals[i / 2]['walletBalance'] =
@@ -225,9 +213,9 @@ function AppDataProvider({ children }: any) {
 	const _setSynths = (
 		_tradingPools: any,
 		_synths: any,
-		contract: any,
-		_tronWeb: string,
-		_address: string
+		helper: any,
+		_address: string,
+		_chain: number
 	) => {
 		return new Promise((resolve, reject) => {
 			let tokens: string[] = [];
@@ -236,12 +224,12 @@ function AppDataProvider({ children }: any) {
 			}
 
 			Promise.all([
-				contract.balanceOf(tokens, _address).call(),
-				contract.debtBalanceOf(tokens, _address).call(),
+				call(helper, 'balanceOf', [tokens, _address], _chain),
+				call(helper, 'debtBalanceOf', [tokens, _address], _chain)
 			])
 				.then((res: any) => {
-					let walletBalances = res[0][0];
-					let debtBalances = res[1][0];
+					let walletBalances = res[0];
+					let debtBalances = res[1];
 
 					let totalDebt = 0;
 
@@ -255,6 +243,7 @@ function AppDataProvider({ children }: any) {
 						totalDebt +=
 							Number(debtBalances[i] / 1e18) * _synths[i].price;
 					}
+
 					console.log(_tradingPools);
 					let tradingPoolAddresses: string[] = [];
 					for (let i in _tradingPools) {
@@ -275,28 +264,23 @@ function AppDataProvider({ children }: any) {
 					let poolUserDataRequests: any = [];
 					for (let i in tradingPoolAddresses) {
 						poolUserDataRequests.push(
-							contract
-								.tradingBalanceOf(
-									tradingPoolAddresses[i],
-									tokens,
-									_address
-								)
-								.call()
+							// helper.tradingBalanceOf(
+							// 		tradingPoolAddresses[i],
+							// 		tokens,
+							// 		_address
+							// 	).call()
+
+								call(helper, 'tradingBalanceOf', [tradingPoolAddresses[i], tokens, _address], _chain)
 						);
 					}
 
 					Promise.all(poolUserDataRequests)
 						.then((res: any) => {
 							for (let i in res) {
-								for (let j = 0; j < res[i][0].length; j++) {
-									if (!_synths[j].amount)
-										_synths[j]['amount'] = [];
-									_synths[j]['amount'].push(
-										res[i][0][j].toString()
-									);
-									totalDebt +=
-										Number(res[i][0][j] / 1e18) *
-										_synths[j].price;
+								for (let j = 0; j < res[i].length; j++) {
+									if (!_synths[j].amount) _synths[j]['amount'] = [];
+									_synths[j]['amount'].push(res[i][j].toString());
+									totalDebt += Number(res[i][j] / 1e18) * _synths[j].price;
 								}
 							}
 							setTotalDebt(totalDebt);
@@ -369,7 +353,6 @@ function AppDataProvider({ children }: any) {
 					  );
 			}
 		}
-		console.log(_synths)
 		setSynths(_synths);
 	};
 
@@ -404,6 +387,7 @@ function AppDataProvider({ children }: any) {
 		updateCollateralAmount,
 		updateSynthWalletBalance,
 		updateSynthAmount,
+		chain, setChain
 	};
 
 	return (
@@ -420,7 +404,7 @@ interface AppDataValue {
 	synths: any[];
 	totalDebt: number;
 	pools: any[];
-	fetchData: (_tronWeb: any, _address: string) => Promise<unknown>|undefined;
+	fetchData: (_address: string, chainId: number) => Promise<unknown>|undefined;
 	tradingPool: number;
 	setTradingPool: (_: number) => void;
 	dataFetchError: string | null;
@@ -445,6 +429,8 @@ interface AppDataValue {
 		___: string,
 		____: boolean
 	) => void;
+	chain: number; 
+	setChain: (_: number) => void;
 }
 
 export { AppDataProvider, AppDataContext };

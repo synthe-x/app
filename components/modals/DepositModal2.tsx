@@ -40,12 +40,13 @@ import {
 const Big = require('big.js');
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getAddress, getContract } from '../../src/utils';
+import { getAddress, getContract, send, call } from '../../src/contract';
 import { useEffect, useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
 import { AppDataContext } from '../AppDataProvider';
 import axios from 'axios';
+import { ChainID } from '../../src/chains';
 
 const DepositModal = ({ handleDeposit }: any) => {
 	const [selectedAsset, setSelectedAsset] = React.useState<number>(0);
@@ -64,8 +65,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	const { isConnected, tronWeb, address } = useContext(WalletContext);
 
-	const { collaterals, updateCollateralWalletBalance,
-		updateCollateralAmount, tokenFormatter } = useContext(AppDataContext);
+	const { collaterals, tokenFormatter, chain, updateCollateralWalletBalance } = useContext(AppDataContext);
 
 	const asset = () => collaterals[selectedAsset];
 	const balance = () => asset().walletBalance / 10 ** asset().decimal;
@@ -74,13 +74,14 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const allowanceCheck = async () => {
 		if (!(tronWeb as any).contract || !asset()) return;
 		let collateral = await getContract(
-			tronWeb,
 			'CollateralERC20',
+			chain,
 			asset()['coll_address']
 		);
-		let allowance = await collateral.methods
-			.allowance(address, getAddress('System'))
-			.call();
+		let allowance = await call(collateral, 'allowance', [address, getAddress('System')], chain)
+		// collateral.methods
+		// 	.allowance(address, getAddress('System'))
+		// 	.call();
 		allowance = allowance
 			.div((10 ** asset()['decimal']).toString())
 			.toString();
@@ -116,29 +117,35 @@ const DepositModal = ({ handleDeposit }: any) => {
 	};
 
 	const issue = async () => {
-		console.log(asset());
 		if (!amount) return;
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = Big(amount)
 			.mul(Big(10).pow(Number(asset()['decimal'])))
 			.toFixed(0);
-		system.methods
-			.deposit(asset()['coll_address'], value)
-			.send({ feeLimit: 1000000000 })
-			.then((res: any) => {
+
+		send(system, 'deposit', [asset()['coll_address'], value], chain)
+		.then(async (res: any) => {
+			setLoading(false);
+			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
 				setHash(res);
-				setLoading(false);
 				checkResponse(res);
-				setResponse('Transaction sent! Waiting for confirmation...');
-			})
-			.catch((err: any) => {
-				setLoading(false);
-				setResponse('Transaction Failed: Signature rejected');
-			});
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
+		})
+		.catch((err: any) => {
+			setLoading(false);
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
+		});
 	};
 
 	const checkResponse = (tx_id: string, retryCount = 0) => {
@@ -180,7 +187,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	const claim = async () => {
 		setClaimLoading(true);
-		let wtrx = await getContract(tronWeb, 'WTRX');
+		let wtrx = await getContract('WTRX', chain);
 		wtrx.deposit().send({}, (err: any, hash: string) => {
 			if (err) {
 				console.log(err);
@@ -194,7 +201,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 					'100000000000',
 					false
 				);
-				// handleChange();
 			}
 		});
 	};
@@ -210,8 +216,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const approve = async () => {
 		setLoading(true);
 		let collateral = await getContract(
-			tronWeb,
 			'CollateralERC20',
+			chain,
 			asset()['coll_address']
 		);
 		collateral

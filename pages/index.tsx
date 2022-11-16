@@ -12,7 +12,7 @@ import Navbar from '../components/Navbar';
 import IssuanceTable from '../components/IssuanceTable';
 import CollateralTable from '../components/CollateralTable';
 import { useContext, useEffect, useState } from 'react';
-import { getContract } from '../src/utils';
+import { getContract } from '../src/contract';
 import { useAccount } from 'wagmi';
 import web3 from 'web3';
 import { WalletContext } from '../components/WalletContextProvider';

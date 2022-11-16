@@ -28,7 +28,7 @@ import {
 
 import { BsArrowDown } from 'react-icons/bs';
 import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
-import { getAddress, getContract } from '../../src/utils';
+import { getAddress, getContract } from '../../src/contract';
 import { useEffect } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';

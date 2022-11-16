@@ -29,7 +29,7 @@ import {
 import axios from 'axios';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/utils';
+import { getContract } from '../../src/contract';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';

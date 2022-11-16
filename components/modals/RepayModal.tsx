@@ -23,7 +23,7 @@ import {
 
 import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/utils';
+import { getContract } from '../../src/contract';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import axios from 'axios';
@@ -54,7 +54,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	}
 
 	const max = () => {
-		return 0.999 * Math.min(asset.amount[0], asset['walletBalance'])/1e18;
+		return 0.999 * Math.min(asset.amount?.[0], asset['walletBalance'])/1e18;
 	}
 
 	const issue = async () => {

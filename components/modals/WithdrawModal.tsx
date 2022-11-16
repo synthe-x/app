@@ -24,7 +24,7 @@ import {
 import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/utils';
+import { getContract } from '../../src/contract';
 import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';
 const { Big } = require("big.js");

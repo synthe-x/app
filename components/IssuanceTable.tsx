@@ -72,7 +72,7 @@ const IssuanceTable = ({handleChange}: any) => {
 	}
 
 	return (
-		<Skeleton isLoaded={debts.length > 0} minH='600px' rounded={'10'}>
+		<Skeleton isLoaded={debts.length > 0} minH='600px' rounded={'10'} >
 			<TableContainer>
 				<Table overflow={'auto'} variant="simple" >
 					<Thead>
@@ -151,7 +151,7 @@ const IssuanceTable = ({handleChange}: any) => {
 													textAlign={'left'}>
 													{isConnected
 														? tokenFormatter.format(
-																debt.amount[0] / 1e18
+																debt.amount?.[0] / 1e18
 														  )
 														: '-'}{' '}
 													{debt['symbol']}
@@ -162,7 +162,7 @@ const IssuanceTable = ({handleChange}: any) => {
 													textAlign={'left'}>
 													{isConnected
 														? dollarFormatter.format(
-																(debt.amount[0] * debt.price) /
+																(debt.amount?.[0] * debt.price) /
 																	1e18
 														  )
 														: '-'}{' '}

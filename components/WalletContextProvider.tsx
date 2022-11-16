@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ChainID } from '../src/chains';
 const {Big} = require('big.js');
 
 const WalletContext = React.createContext<WalletValue>({} as WalletValue);
@@ -45,6 +46,7 @@ function WalletContextProvider({children}: any) {
                 setIsDisconnected(false);
                 setIsConnecting(false);
 				localStorage.setItem("address", _addr)
+                localStorage.setItem("chain", ChainID.NILE.toString())
             })
 			.catch((err: any) => {
 				if(options.errRetryCount >= 5){
