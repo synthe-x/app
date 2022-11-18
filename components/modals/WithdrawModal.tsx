@@ -24,11 +24,12 @@ import {
 import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/contract';
+import { getContract, send } from '../../src/contract';
 import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';
 const { Big } = require("big.js");
 import axios from 'axios';
+import { ChainID } from '../../src/chains';
 
 const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,7 +41,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const [confirmed, setConfirmed] = useState(false);
 
 	const { isConnected, tronWeb } = useContext(WalletContext)
-	const { safeCRatio, totalCollateral, totalDebt} = useContext(AppDataContext)
+	const { safeCRatio, totalCollateral, totalDebt, chain} = useContext(AppDataContext)
 
 	const _onClose = () => {
 		setLoading(false);
@@ -69,23 +70,26 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
-		system.methods.withdraw(asset['coll_address'], value)
-		.send({
-			value, 
-			// shouldPollResponse:true
-			feeLimit: 1000000000
-		})
-		.then((res: any) => {
-			setHash(res);
+		send(system, 'withdraw', [asset['coll_address'], value], chain)
+		.then(async (res: any) => {
 			setLoading(false);
-			checkResponse(res);
 			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
+				setHash(res);
+				checkResponse(res);
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
 		})
 		.catch((err: any) => {
 			setLoading(false);
-			setResponse('Transaction Failed: Signature rejected');
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
 		});
 	}
 

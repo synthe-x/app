@@ -36,6 +36,7 @@ import {
 	PaginationPageGroup,
 } from '@ajna/pagination';
 import { AppDataContext } from './AppDataProvider';
+import { useAccount } from 'wagmi';
 
 const IssuanceTable = ({handleChange}: any) => {
 	const [nullValue, setNullValue] = useState(false);
@@ -48,6 +49,8 @@ const IssuanceTable = ({handleChange}: any) => {
 	const {
 		isConnected,
 	} = useContext(WalletContext);
+
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	const {
 		synths: debts,
@@ -138,7 +141,7 @@ const IssuanceTable = ({handleChange}: any) => {
 													fontSize="sm"
 													// fontWeight="bold"
 													textAlign={'left'}>
-													{isConnected
+													{(isConnected || isEvmConnected)
 														? dollarFormatter.format((debt.price))
 														: '-'}{' '}
 												</Text>
@@ -149,7 +152,7 @@ const IssuanceTable = ({handleChange}: any) => {
 													fontSize="sm"
 													// fontWeight="bold"
 													textAlign={'left'}>
-													{isConnected
+													{(isConnected || isEvmConnected)
 														? tokenFormatter.format(
 																debt.amount?.[0] / 1e18
 														  )
@@ -160,7 +163,7 @@ const IssuanceTable = ({handleChange}: any) => {
 													fontSize="xs"
 													// fontWeight="bold"
 													textAlign={'left'}>
-													{isConnected
+													{(isConnected || isEvmConnected)
 														? dollarFormatter.format(
 																(debt.amount?.[0] * debt.price) /
 																	1e18

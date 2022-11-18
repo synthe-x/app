@@ -29,11 +29,13 @@ import {
 import axios from 'axios';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/contract';
+import { getContract, send } from '../../src/contract';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
 import { AppDataContext } from '../AppDataProvider';
+import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
 
 const DepositModal = ({ asset, handleIssue }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,7 +60,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const { safeCRatio, totalCollateral, cRatio, availableToBorrow } = useContext(AppDataContext);
+	const { chain, availableToBorrow } = useContext(AppDataContext);
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt
@@ -77,23 +79,26 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setHash(null);
 		setResponse('');
 
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = BigInt(amount * 10 ** asset['decimal']).toString();
-		system.methods.borrow(asset['synth_id'], value).send(
-			{
-				value,
-				// shouldPollResponse:true
-				feeLimit: 1000000000,
-			})
-			.then((res: any) => {
-				setHash(res);
+		send(system, 'borrow', [asset['synth_id'], value], chain)
+			.then(async (res: any) => {
 				setLoading(false);
-				checkResponse(res);
 				setResponse('Transaction sent! Waiting for confirmation...');
+				if (chain == ChainID.NILE) {
+					setHash(res);
+					checkResponse(res);
+				} else {
+					setHash(res.hash);
+					await res.wait(1);
+					setConfirmed(true);
+					setResponse('Transaction Successful!');
+				}
 			})
 			.catch((err: any) => {
 				setLoading(false);
-				setResponse('Transaction Failed: Signature rejected');
+				setConfirmed(true);
+				setResponse('Transaction failed. Please try again!');
 			});
 	};
 
@@ -130,6 +135,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 	};
 
 	const {isConnected, tronWeb} = useContext(WalletContext)
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<Box>
@@ -142,7 +148,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 				isRound={true}></IconButton> */}
 
 
-				<Button disabled={!isConnected} onClick={onOpen} variant={'ghost'} size='sm' bgColor={'secondary'} rounded={100} color="white" my={1} _hover={{bgColor: 'gray.700'}}>
+				<Button onClick={onOpen} variant={'ghost'} size='sm' bgColor={'secondary'} rounded={100} color="white" my={1} _hover={{bgColor: 'gray.700'}}>
 				<Text mr={1}>Borrow</Text> <BiPlusCircle size={20} /> 
 				</Button>
 				<Modal isCentered isOpen={isOpen} onClose={_onClose}>
@@ -151,7 +157,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 					<ModalCloseButton />
 					<ModalHeader>Issue {asset['symbol']}</ModalHeader>
 					<ModalBody>
-						<InputGroup size="md" alignItems={'center'}>
+						<InputGroup size="md" alignItems={'center'} >
 							<Image
 								src={`/${asset.symbol}.png`}
 								alt=""
@@ -164,13 +170,16 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 								placeholder="Enter amount"
 								onChange={changeAmount}
 								value={amount}
+								disabled={!(isConnected || isEvmConnected)}
 							/>
 							<InputRightElement width="4.5rem">
 								<Button
 									h="1.75rem"
 									size="sm"
 									mr={1}
-									onClick={setMax}>
+									onClick={setMax}
+									disabled={!(isConnected || isEvmConnected)}
+									>
 									Set Max
 								</Button>
 							</InputRightElement>
@@ -186,14 +195,14 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 							</Text>
 						</Flex>
 						<Button
-							disabled={loading || !isConnected || !amount || amount == 0 || amount > max()}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
 							isLoading={loading}
 							loadingText='Please sign the transaction'
 							bgColor='#3EE6C4'
 							width="100%"
 							mt={4}
 							onClick={issue}>
-							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Issue</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Issue</> : <>Please connect your wallet</>} 
 						</Button>
 						
 						{response && (

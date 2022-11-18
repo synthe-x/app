@@ -52,17 +52,22 @@ export default function _index({ children }: any) {
 							}
 						});
 					} else {
-						connectEvm({chainId: parseInt(_chain), connector: connectors[chainIndex[parseInt(_chain)]]}).then((res: any) => {
-							if (!isDataReady && !isFetchingData && res.account) {
-								fetchData(res.account, ChainID.AURORA);
-								setChain(ChainID.AURORA);
-								localStorage.setItem("address", res.account)
-								localStorage.setItem("chain", ChainID.AURORA.toString());
-							}
-						})
+						if(!isEvmConnected && !evmAddress){
+							connectEvm({chainId: parseInt(_chain), connector: connectors[chainIndex[parseInt(_chain)]]}).then((res: any) => {
+								if (!isDataReady && !isFetchingData && res.account) {
+									fetchData(res.account, ChainID.AURORA);
+									setChain(ChainID.AURORA);
+									localStorage.setItem("address", res.account)
+									localStorage.setItem("chain", ChainID.AURORA.toString());
+								}
+							})
+						} else {
+							fetchData(evmAddress!, ChainID.AURORA);
+							setInit(true)
+						}
 					}
 				} else {
-					fetchData(DUMMY_ADDRESS, ChainID.NILE);
+					fetchData(DUMMY_ADDRESS, ChainID.AURORA);
 					setInit(true)
 				}
 		}

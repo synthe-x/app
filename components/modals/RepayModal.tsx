@@ -23,10 +23,12 @@ import {
 
 import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/contract';
+import { getContract, send } from '../../src/contract';
 import { useContext } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import axios from 'axios';
+import { AppDataContext } from '../AppDataProvider';
+import { ChainID } from '../../src/chains';
 
 const RepayModal = ({ asset, handleRepay }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -35,6 +37,8 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
 	const [amount, setAmount] = React.useState(0);
+
+	const {chain} = useContext(AppDataContext);
 
 	const _onClose = () => {
 		setLoading(false);
@@ -63,23 +67,26 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = BigInt(amount*10**asset['decimal']).toString();
-		system.methods.repay(asset['synth_id'], value)
-		.send({
-			value, 
-			// shouldPollResponse:true
-			feeLimit: 1000000000
-		})
-		.then((res: any) => {
-			setHash(res);
+		send(system, 'repay', [asset['synth_id'], value], chain)
+		.then(async (res: any) => {
 			setLoading(false);
-			checkResponse(res);
 			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
+				setHash(res);
+				checkResponse(res);
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
 		})
 		.catch((err: any) => {
 			setLoading(false);
-			setResponse('Transaction Failed: Signature rejected');
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
 		});
 	}
 

@@ -47,7 +47,13 @@ import { BiPlusCircle } from 'react-icons/bi';
 import { AppDataContext } from '../AppDataProvider';
 import axios from 'axios';
 import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 
+const CLAIM_AMOUNTS: any = {
+	'WTRX': '100000000000',
+	'ETH': ethers.utils.parseEther('10').toString()
+}
 const DepositModal = ({ handleDeposit }: any) => {
 	const [selectedAsset, setSelectedAsset] = React.useState<number>(0);
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -72,13 +78,14 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const allowanceCheck = async () => {
-		if (!(tronWeb as any).contract || !asset()) return;
+		console.log('checking allowance');
+		if (!asset()) return;
 		let collateral = await getContract(
 			'CollateralERC20',
 			chain,
 			asset()['coll_address']
 		);
-		let allowance = await call(collateral, 'allowance', [address, getAddress('System')], chain)
+		let allowance = await call(collateral, 'allowance', [address ?? evmAddress, getAddress('System', chain)], chain)
 		// collateral.methods
 		// 	.allowance(address, getAddress('System'))
 		// 	.call();
@@ -100,7 +107,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	// const balance = asset.walletBalance / (10**asset.decimal)
 	useEffect(() => {
-		if (tryApprove == 'null' && isConnected) allowanceCheck();
+		if (tryApprove == 'null' && (isConnected || isEvmConnected)) allowanceCheck();
 	}, [allowanceCheck, selectedAsset, collaterals, isConnected, tryApprove]);
 
 	const _onClose = () => {
@@ -188,20 +195,19 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const claim = async () => {
 		setClaimLoading(true);
 		let wtrx = await getContract('WTRX', chain);
-		wtrx.deposit().send({}, (err: any, hash: string) => {
-			if (err) {
-				console.log(err);
-				setClaimLoading(false);
-			}
-			if (hash) {
-				console.log(hash);
-				setClaimLoading(false);
-				updateCollateralWalletBalance(
-					wtrx.address,
-					'100000000000',
-					false
-				);
-			}
+		send(wtrx, 'deposit', [], chain)
+		.then(async (res: any) => {
+			console.log(hash);
+			setClaimLoading(false);
+			updateCollateralWalletBalance(
+				wtrx.address,
+				CLAIM_AMOUNTS[asset().symbol],
+				false
+			);
+		})
+		.catch((err: any) => {
+			console.log(err);
+			setClaimLoading(false);
 		});
 	};
 
@@ -220,17 +226,14 @@ const DepositModal = ({ handleDeposit }: any) => {
 			chain,
 			asset()['coll_address']
 		);
-		collateral
-			.approve(getAddress('System'), '100000000000000000000000000000000')
-			.send({}, (error: any, hash: any) => {
-				if (error) {
-					console.log(error);
-				}
-				if (hash) {
-					setTryApprove(false);
-					setLoading(false);
-				}
-			});
+		send(collateral, 'approve', [getAddress('System', chain), ethers.constants.MaxUint256], chain)
+		.then(async (res: any) => {
+			setTryApprove(false);
+			setLoading(false);
+		})
+		.catch((err: any) => {
+			console.log(err);
+		});
 	};
 
 	const updateSlider = (e: any) => {
@@ -240,6 +243,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const updateAsset = (e: any) => {
 		setSelectedAsset(e.target.value);
 	};
+
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<Box>
@@ -284,7 +289,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 								<Text textAlign="right" fontSize={'xs'}>
 									Balance: {tokenFormatter.format(balance())} {asset()?.symbol}
 								</Text>
-								{asset()?.symbol == 'WTRX' && isConnected ? (
+								{(asset()?.symbol == 'WTRX' || asset()?.symbol == 'ETH') && (isConnected || isEvmConnected) ? (
 								<Button
 									
 									isLoading={claimLoading}
@@ -294,7 +299,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 									color='black'
 									// variant={'ghost'}
 									>
-									Claim WTRX Tokens 💰
+									Claim {asset()?.symbol} Tokens 💰
 								</Button>
 							) : (
 								<></>
@@ -363,7 +368,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 								disabled={
 									amountLowerThanMin() ||
 									loading ||
-									!isConnected ||
+									!(isConnected || isEvmConnected) ||
 									!amount ||
 									amount == 0 ||
 									amount > balance()
@@ -374,7 +379,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 								mt={4}
 								isDisabled={loading}
 								onClick={issue}>
-								{isConnected ? (
+								{(isConnected || isEvmConnected) ? (
 									!amount || amount == 0 ? (
 										'Enter amount'
 									) : amountLowerThanMin() ? (
@@ -390,7 +395,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 							</Button>
 						) : (
 							<Button
-								disabled={!isConnected}
+								disabled={!(isConnected || isEvmConnected)}
 								isLoading={loading}
 								loadingText="Please sign the transaction"
 								colorScheme={'orange'}
@@ -398,7 +403,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 								mt={4}
 								onClick={approve}
 								isDisabled={loading}>
-								{isConnected ? (
+								{(isConnected || isEvmConnected) ? (
 									<>Approve {asset()?.symbol}</>
 								) : (
 									<>Please connect your wallet</>

@@ -8,7 +8,6 @@ export function getABI(contractName: string) {
 }
 
 export function getAddress(contractName: string, chain: number = ChainID.NILE) {
-  console.log('getAddress', contractName, chain);
   return ADDRESSES[chain][contractName]
 }
 

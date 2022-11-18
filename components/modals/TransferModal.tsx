@@ -28,11 +28,12 @@ import {
 
 import { BsArrowDown } from 'react-icons/bs';
 import { AiOutlineInfoCircle, AiOutlineSwap } from 'react-icons/ai';
-import { getAddress, getContract } from '../../src/contract';
+import { getAddress, getContract, send } from '../../src/contract';
 import { useEffect } from 'react';
 import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';
 import axios from 'axios';
+import { ChainID } from '../../src/chains';
 
 const TransferModal = ({ asset, handleUpdate }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -45,24 +46,9 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 	const [inputPoolIndex, setInputPoolIndex] = React.useState(0);
 	const [outputPoolIndex, setOutputPoolIndex] = React.useState(1);
 
-	const {
-		isConnected,
-		isConnecting,
-		address,
-		connect,
-		tronWeb,
-	} = useContext(WalletContext);
-
-	const {
-		synths,
-		totalDebt,
-		isDataReady,
-		tradingPool,
-		setTradingPool,
-		pools,
-		tradingBalanceOf,
-		updateSynthAmount
-	} = useContext(AppDataContext);
+	const { isConnected } = useContext(WalletContext);
+ 
+	const { chain, pools } = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
 		setAmount(event.target.value);
@@ -77,9 +63,9 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 
 	const transfer = async () => {
 		if (!amount) return;
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = BigInt(amount * 10 ** (asset['decimal'] ?? 18)).toString();
-		
+
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
@@ -87,32 +73,28 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 
 		let tx =
 			inputPoolIndex == 0
-				? system.methods.enterPool(
-						outputPoolIndex,
-						asset['synth_id'],
-						value
-				  )
-				: system.methods.exitPool(
-						inputPoolIndex,
-						asset['synth_id'],
-						value
-				  );
+				? send(system, 'enterPool', [outputPoolIndex, asset['synth_id'], value], chain)
+				: send(system, 'exitPool', [inputPoolIndex, asset['synth_id'], value], chain);
 
-		tx.send(
-			{
-				feeLimit: 1000000000,
-			})
-			.then((res: any) => {
+		tx
+		.then(async (res: any) => {
+			setLoading(false);
+			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
 				setHash(res);
-				setLoading(false);
 				checkResponse(res);
-				setResponse('Transaction sent! Waiting for confirmation...');
-			})
-			.catch((err: any) => {
-				setLoading(false);
-				setResponse('Transaction Failed: Signature rejected');
-			});
-
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
+		})
+		.catch((err: any) => {
+			setLoading(false);
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
+		});
 	};
 
 	const inputPoolChange = (event: any) => {
@@ -182,7 +164,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
 				<ModalContent width={'30rem'}>
 					<ModalCloseButton />
-					<ModalHeader>Transfer {asset['symbol']}</ModalHeader>
+					<ModalHeader>Transfer {asset?.symbol}</ModalHeader>
 					<ModalBody>
 						<Select
 							value={inputPoolIndex}
@@ -200,7 +182,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 							<Input
 								disabled={!isConnected}
 								type="number"
-								placeholder={`Enter ${asset['symbol']} amount`}
+								placeholder={`Enter ${asset?.symbol} amount`}
 								onChange={changeAmount}
 								value={amount}
 							/>
@@ -236,7 +218,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 
 						<Flex mt={4} justify="space-between">
 							<Text fontSize={'xs'} color="gray.400">
-								1 {asset['symbol']} = {asset['price']} USD
+								1 {asset?.symbol} = {asset?.price} USD
 							</Text>
 						</Flex>
 
@@ -248,9 +230,9 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 								amount == 0 ||
 								amount > max()
 							}
-							loadingText='Please sign the transaction'
+							loadingText="Please sign the transaction"
 							isLoading={loading}
-							bgColor='#3EE6C4'
+							bgColor="#3EE6C4"
 							width="100%"
 							mt={4}
 							onClick={transfer}>

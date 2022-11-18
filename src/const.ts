@@ -20,5 +20,5 @@ export const ADDRESSES: any = {
 
 export const Endpoints: any = {
 	[ChainID.NILE]: 'https://api.synthex.finance/',
-	[ChainID.AURORA]: 'https://api.synthex.finance/',
+	[ChainID.AURORA]: 'http://localhost:3030/',
 };

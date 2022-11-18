@@ -60,7 +60,7 @@ function AppDataProvider({ children }: any) {
 		setTokenFormatter(new Intl.NumberFormat('en-US', {
 			maximumSignificantDigits: 8
 		}));
-		fetchData(DUMMY_ADDRESS, ChainID.NILE);
+		// fetchData(DUMMY_ADDRESS, ChainID.NILE);
 	}, []);
 
 	const tradingBalanceOf = (_s: string) => {
@@ -128,28 +128,26 @@ function AppDataProvider({ children }: any) {
 				tokens.push(_collaterals[i].cAsset);
 			}
 
-				call(helper, 'balanceOf', [tokens, _address], _chain)
-				.then((res: any) => {
-					console.log('balanceOf', res);
-					let collateralBalance = 0;
-					for (let i = 0; i < res.length; i += 2) {
-						_collaterals[i / 2]['walletBalance'] =
-							res[i].toString();
-						_collaterals[i / 2]['amount'] = res[i + 1].toString();
-						collateralBalance +=
-							(res[i + 1].toString() *
-								_collaterals[i / 2].price) /
-							10 ** _collaterals[i / 2].decimal;
-					}
-					console.log('collaterals', _collaterals);
-					setCollaterals(_collaterals);
-					setTotalCollateral(collateralBalance);
-                    resolve(null)
-				})
-				.catch((err: any) => {
-					console.log('Error:', err);
-                    reject(err)
-				});
+			call(helper, 'balanceOf', [tokens, _address], _chain)
+			.then((res: any) => {
+				let collateralBalance = 0;
+				for (let i = 0; i < res.length; i += 2) {
+					_collaterals[i / 2]['walletBalance'] =
+						res[i].toString();
+					_collaterals[i / 2]['amount'] = res[i + 1].toString();
+					collateralBalance +=
+						(res[i + 1].toString() *
+							_collaterals[i / 2].price) /
+						10 ** _collaterals[i / 2].decimal;
+				}
+				setCollaterals(_collaterals);
+				setTotalCollateral(collateralBalance);
+				resolve(null)
+			})
+			.catch((err: any) => {
+				console.log('Error:', err);
+				reject(err)
+			});
 		});
 	};
 
@@ -244,7 +242,6 @@ function AppDataProvider({ children }: any) {
 							Number(debtBalances[i] / 1e18) * _synths[i].price;
 					}
 
-					console.log(_tradingPools);
 					let tradingPoolAddresses: string[] = [];
 					for (let i in _tradingPools) {
 						tradingPoolAddresses.push(
@@ -264,13 +261,7 @@ function AppDataProvider({ children }: any) {
 					let poolUserDataRequests: any = [];
 					for (let i in tradingPoolAddresses) {
 						poolUserDataRequests.push(
-							// helper.tradingBalanceOf(
-							// 		tradingPoolAddresses[i],
-							// 		tokens,
-							// 		_address
-							// 	).call()
-
-								call(helper, 'tradingBalanceOf', [tradingPoolAddresses[i], tokens, _address], _chain)
+							call(helper, 'tradingBalanceOf', [tradingPoolAddresses[i], tokens, _address], _chain)
 						);
 					}
 
