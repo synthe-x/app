@@ -70,7 +70,7 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 
 	const issue = async () => {
 		if (!amount) return;
-		let system = await getContract(tronWeb, 'System');
+		let system = await getContract('System', chain);
 		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
 		setloader(true);
 		setdepositerror('');
@@ -112,8 +112,8 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 
 	const approve = async () => {
 		let collateral = await getContract(
-			tronWeb,
 			'CollateralERC20',
+			chain,
 			asset['coll_address']
 		);
 		setloader(true);
@@ -133,8 +133,8 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 	const allowanceCheck = async () => {
 		if(!(tronWeb as any).contract) return;
 		let collateral = await getContract(
-			tronWeb,
 			'CollateralERC20',
+			chain,
 			asset['coll_address']
 		);
 		let allowance = await collateral.methods
@@ -168,7 +168,7 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 	};
 
 	const {isConnected, tronWeb, address} = useContext(WalletContext);
-	const { updateCollateralWalletBalance, updateCollateralAmount } = useContext(AppDataContext);
+	const { updateCollateralWalletBalance, updateCollateralAmount, explorer, chain } = useContext(AppDataContext);
 
 	return (
 		<Box>
@@ -287,11 +287,11 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 										<Link
 											color="blue.200"
 											fontSize={'sm'}
-											href={`https://nile.tronscan.org/#/transaction/${hash}`}
+											href={`${explorer()}${hash}`}
 											target="_blank"
 											rel="noreferrer">
 											{' '}
-											View on Tronscan
+											View on explorer
 										</Link>
 									</Text>
 								</Box>
@@ -317,10 +317,10 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 									<Link
 										fontSize={'sm'}
 										color="blue.200"
-										href={`https://nile.tronscan.org/#/transaction/${hash}`}
+										href={`${explorer()}${hash}`}
 										target="_blank"
 										rel="noreferrer">
-										View on Tronscan
+										View on explorer
 									</Link>
 								</Box>
 							</Flex>

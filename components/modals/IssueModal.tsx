@@ -60,7 +60,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const { chain, availableToBorrow } = useContext(AppDataContext);
+	const { chain, availableToBorrow, explorer } = useContext(AppDataContext);
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt
@@ -92,6 +92,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 					setHash(res.hash);
 					await res.wait(1);
 					setConfirmed(true);
+					handleIssue(asset['synth_id'], BigInt(amount * 10 ** asset['decimal']).toString())
 					setResponse('Transaction Successful!');
 				}
 			})
@@ -226,13 +227,13 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}

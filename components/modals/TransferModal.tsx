@@ -48,7 +48,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 
 	const { isConnected } = useContext(WalletContext);
  
-	const { chain, pools } = useContext(AppDataContext);
+	const { chain, pools, explorer } = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
 		setAmount(event.target.value);
@@ -273,13 +273,13 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}

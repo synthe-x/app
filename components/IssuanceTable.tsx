@@ -102,11 +102,11 @@ const IssuanceTable = ({handleChange}: any) => {
 						</Tr>
 					</Thead>
 					<Tbody >
-						{debts
+						{[...debts]
 							.slice((currentPage - 1) * 8, currentPage * 8)
 							.map((debt: any) => {
 								return (
-									<Tr key={debt['symbol']} >
+									<Tr key={debt['synth_id']} >
 										<Td borderColor={'#3C3C3C'}>
 											<Flex align={'center'} gap={2}>
 												<Image

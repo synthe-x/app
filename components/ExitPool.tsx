@@ -60,7 +60,8 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 	const {
 		updateSynthAmount,
 		pools,
-		chain
+		chain,
+		explorer
 	} = useContext(AppDataContext);
 
 	const changeAmount = (event: any) => {
@@ -109,6 +110,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
+				handleExchange(assets[activeAssetIndex]['synth_id'], BigInt(amount * 10 ** assets[activeAssetIndex]['decimal']).toString())
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -261,13 +263,13 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}

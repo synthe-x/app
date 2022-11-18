@@ -71,7 +71,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	const { isConnected, tronWeb, address } = useContext(WalletContext);
 
-	const { collaterals, tokenFormatter, chain, updateCollateralWalletBalance } = useContext(AppDataContext);
+	const { collaterals, tokenFormatter, chain, updateCollateralWalletBalance, explorer } = useContext(AppDataContext);
 
 	const asset = () => collaterals[selectedAsset];
 	const balance = () => asset().walletBalance / 10 ** asset().decimal;
@@ -143,6 +143,12 @@ const DepositModal = ({ handleDeposit }: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
+				handleDeposit(
+					asset()['coll_address'],
+					Big(amount)
+						.mul(Big(10).pow(Number(asset()['decimal'])))
+						.toFixed(0)
+				);
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -429,13 +435,13 @@ const DepositModal = ({ handleDeposit }: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}

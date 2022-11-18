@@ -42,7 +42,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const [confirmed, setConfirmed] = useState(false);
 
 	const { isConnected, tronWeb } = useContext(WalletContext)
-	const { safeCRatio, totalCollateral, totalDebt, chain} = useContext(AppDataContext)
+	const { safeCRatio, totalCollateral, totalDebt, chain, explorer } = useContext(AppDataContext)
 	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	const _onClose = () => {
@@ -85,6 +85,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
+				handleWithdraw(asset['coll_address'], Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0))
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -186,13 +187,13 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}

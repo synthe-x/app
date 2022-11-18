@@ -2,7 +2,7 @@ import * as React from 'react';
 import axios from 'axios';
 import { getContract, call } from '../src/contract';
 import { Endpoints } from '../src/const';
-import { ChainID } from '../src/chains';
+import { ChainID, chainMapping } from '../src/chains';
 const { Big } = require('big.js');
 
 const AppDataContext = React.createContext<AppDataValue>({} as AppDataValue);
@@ -62,6 +62,11 @@ function AppDataProvider({ children }: any) {
 		}));
 		// fetchData(DUMMY_ADDRESS, ChainID.NILE);
 	}, []);
+
+
+	const explorer = () => {
+		return chain === ChainID.NILE ? 'https://nile.explorer.org/#/transaction/' : chainMapping[chain]?.blockExplorers.default.url+'tx/';
+	}
 
 	const tradingBalanceOf = (_s: string) => {
 		for (let i in synths) {
@@ -348,7 +353,7 @@ function AppDataProvider({ children }: any) {
 	};
 
 	const availableToBorrow = () => {
-		return (100 * totalCollateral) / safeCRatio - totalDebt;
+		return (100 * totalCollateral) / safeCRatio - totalDebt > 0 ? (100 * totalCollateral) / safeCRatio - totalDebt : 0;
 	};
 
 	const cRatio = () => {
@@ -378,7 +383,8 @@ function AppDataProvider({ children }: any) {
 		updateCollateralAmount,
 		updateSynthWalletBalance,
 		updateSynthAmount,
-		chain, setChain
+		chain, setChain,
+		explorer
 	};
 
 	return (
@@ -422,6 +428,7 @@ interface AppDataValue {
 	) => void;
 	chain: number; 
 	setChain: (_: number) => void;
+	explorer: () => string;
 }
 
 export { AppDataProvider, AppDataContext };

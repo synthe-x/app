@@ -42,7 +42,7 @@ function Swap({handleChange}: any) {
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
 
-	const { chain } = useContext(AppDataContext);
+	const { chain, explorer } = useContext(AppDataContext);
 
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
@@ -442,13 +442,13 @@ function Swap({handleChange}: any) {
 									{hash && (
 										<Link
 											href={
-												'https://nile.tronscan.org/#/transaction/' +
+												explorer() +
 												hash
 											}
 											target="_blank">
 											{' '}
 											<Text fontSize={'sm'}>
-												View on TronScan
+												View on explorer
 											</Text>
 										</Link>
 									)}

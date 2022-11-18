@@ -39,7 +39,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	const [confirmed, setConfirmed] = useState(false);
 	const [amount, setAmount] = React.useState(0);
 
-	const {chain} = useContext(AppDataContext);
+	const { chain, explorer } = useContext(AppDataContext);
 
 	const _onClose = () => {
 		setLoading(false);
@@ -81,6 +81,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
+				handleRepay(asset['synth_id'], BigInt(amount*10**asset['decimal']).toString())
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -184,13 +185,13 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 										{hash && (
 											<Link
 												href={
-													'https://nile.tronscan.org/#/transaction/' +
+													explorer() +
 													hash
 												}
 												target="_blank">
 												{' '}
 												<Text fontSize={'sm'}>
-													View on TronScan
+													View on explorer
 												</Text>
 											</Link>
 										)}
