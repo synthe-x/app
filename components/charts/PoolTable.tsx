@@ -32,6 +32,7 @@ const dollarFormatter = new Intl.NumberFormat('en-US', {
 const tokenFormatter = new Intl.NumberFormat('en-US');
 
 export default function PoolTable({ pool }: any) {
+	console.log(pool)
 	return (
 		<>
 			{pool && pool.poolSynth_ids ? (
@@ -67,7 +68,7 @@ export default function PoolTable({ pool }: any) {
 													mr={2}
 												/>
 												{synth?.name
-													.split(' ')
+													?.split(' ')
 													.slice(1)
 													.join(' ')}
 											</Td>

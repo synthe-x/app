@@ -52,8 +52,10 @@ import { ethers } from 'ethers';
 
 const CLAIM_AMOUNTS: any = {
 	'WTRX': '100000000000',
-	'ETH': ethers.utils.parseEther('10').toString()
+	'ETH': '1000',
+	'NEAR': '10000'
 }
+
 const DepositModal = ({ handleDeposit }: any) => {
 	const [selectedAsset, setSelectedAsset] = React.useState<number>(0);
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -198,7 +200,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 	const claim = async () => {
 		setClaimLoading(true);
 		let wtrx = await getContract('WTRX', chain);
-		send(wtrx, 'deposit', [], chain)
+		console.log(asset().symbol, CLAIM_AMOUNTS[asset().symbol])
+		send(wtrx, 'deposit', [CLAIM_AMOUNTS[asset().symbol]], chain)
 		.then(async (res: any) => {
 			console.log(hash);
 			setClaimLoading(false);

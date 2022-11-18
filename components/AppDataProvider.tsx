@@ -279,6 +279,7 @@ function AppDataProvider({ children }: any) {
 									totalDebt += Number(res[i][j] / 1e18) * _synths[j].price;
 								}
 							}
+							console.log(_synths);
 							setTotalDebt(totalDebt);
 							setSynths(_synths);
 							setIsDataReady(true);

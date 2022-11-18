@@ -13,12 +13,12 @@ export const ADDRESSES: any = {
 	},
     [ChainID.AURORA]: {
 		Helper: '0x93cC35C57457ac13BD0168a57b7EdB767c5f01d3',
-		System: '0x8Db9C36E8ef7d7C397c56A7a1f7833fFEe7b7865',
-		WTRX: '0x4397CBc22246933c07F04bc3A7fDF12619D90af6'
+		System: '0x24dBDE5702bf83F8B7A7BF991FEAf311d1FD9eb0',
+		WTRX: '0xB5Cd98a00f3F1B580699865b6A72FebdC91588F7'
 	},
 };
 
 export const Endpoints: any = {
 	[ChainID.NILE]: 'https://api.synthex.finance/',
-	[ChainID.AURORA]: 'http://localhost:3030/',
+	[ChainID.AURORA]: 'https://aurora.api.synthex.finance/',
 };
