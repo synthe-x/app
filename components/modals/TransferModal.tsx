@@ -77,7 +77,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 				: send(system, 'exitPool', [inputPoolIndex, asset['synth_id'], value], chain);
 
 		tx
-		.then(async (res: any) => {
+		.then(async (res: any) => { 
 			setLoading(false);
 			setResponse('Transaction sent! Waiting for confirmation...');
 			if (chain == ChainID.NILE) {
