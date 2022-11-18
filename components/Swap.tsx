@@ -16,7 +16,7 @@ import {
 	AlertIcon,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
-import { getContract } from '../src/contract';
+import { getContract, send } from '../src/contract';
 import { useAccount } from 'wagmi';
 import web3 from 'web3';
 import { WalletContext } from '../components/WalletContextProvider';
@@ -27,6 +27,7 @@ import axios from 'axios';
 import Head from 'next/head';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
+import { ChainID } from '../src/chains';
 const Big = require('big.js');
 
 function Swap({handleChange}: any) {
@@ -40,6 +41,8 @@ function Swap({handleChange}: any) {
 	const [response, setResponse] = useState<string | null>(null);
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
+
+	const { chain } = useContext(AppDataContext);
 
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
@@ -98,29 +101,30 @@ function Swap({handleChange}: any) {
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let contract = await getContract(tronWeb, 'System');
-		contract.methods
-			.exchange(
-				tradingPool,
-				(pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]
-					.synth_id,
+		let contract = await getContract('System', chain);
+		send(contract, 'exchange', [
+			tradingPool, (pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex].synth_id,
 				web3.utils.toWei(inputAmount.toString()),
-				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]
-					.synth_id
-			)
-			.send({
-				feeLimit: 1000000000,
-			})
-			.then((res: any) => {
+				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex].synth_id
+		], chain)
+		.then(async (res: any) => {
+			setLoading(false);
+			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
 				setHash(res);
-				setLoading(false);
 				checkResponse(res);
-				setResponse('Transaction sent! Waiting for confirmation...');
-			})
-			.catch((err: any) => {
-				setLoading(false);
-				setResponse('Transaction Failed: Signature rejected');
-			});
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				setResponse('Transaction Successful!');
+			}
+		})
+		.catch((err: any) => {
+			setLoading(false);
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
+		});
 	};
 
 	// check response in intervals
@@ -157,6 +161,7 @@ function Swap({handleChange}: any) {
 	};
 
 	const { isConnected, tronWeb } = useContext(WalletContext);
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter, updateSynthWalletBalance, updateSynthAmount } = useContext(AppDataContext);
 
@@ -218,6 +223,16 @@ function Swap({handleChange}: any) {
 			return synths[_outputAssetIndex];
 		}
 	};
+
+	const swapInputExceedsBalance = () => {
+		if (inputAmount) {
+			return (
+				inputAmount >
+				(tradingBalanceOf(inputToken().synth_id) / 10 ** 18)
+			);
+		}
+		return false;
+	}
 
 	return (
 		<>
@@ -396,20 +411,14 @@ function Swap({handleChange}: any) {
 						width={'100%'}
 						bgColor={'primary'}
 						onClick={exchange}
-						disabled={loading || !isConnected || inputAmount <= 0}
+						disabled={loading || !(isConnected || isEvmConnected) || inputAmount <= 0 || swapInputExceedsBalance()}
 						loadingText="Sign the transaction in your wallet"
 						isLoading={loading}
 						_hover={{ bg: 'gray.600' }}
 						color="#171717">
-						{isConnected ? (
-							inputAmount > 0 ? (
-								<>Exchange</>
-							) : (
-								<>Enter Amount</>
-							)
-						) : (
-							<>Please connect your wallet</>
-						)}
+						{(isConnected || isEvmConnected) ? (
+							swapInputExceedsBalance() ? 'Insufficient Balance' : inputAmount > 0 ? 'Exchange' : 'Enter Amount'
+						) : 'Please connect your wallet'}
 					</Button>
 
 					{response && (

@@ -78,7 +78,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const allowanceCheck = async () => {
-		console.log('checking allowance');
 		if (!asset()) return;
 		let collateral = await getContract(
 			'CollateralERC20',
@@ -92,7 +91,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 		allowance = allowance
 			.div((10 ** asset()['decimal']).toString())
 			.toString();
-		// console.log(allowance, balance);
 		if (allowance.length < 10) {
 			if (parseInt(allowance) <= balance()) {
 				setAmount(0);
@@ -107,8 +105,8 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	// const balance = asset.walletBalance / (10**asset.decimal)
 	useEffect(() => {
-		if (tryApprove == 'null' && (isConnected || isEvmConnected)) allowanceCheck();
-	}, [allowanceCheck, selectedAsset, collaterals, isConnected, tryApprove]);
+		if (tryApprove == 'null' && (isConnected || isEvmConnected) && chain > 0) allowanceCheck();
+	}, [allowanceCheck, selectedAsset, collaterals, isConnected, tryApprove, chain]);
 
 	const _onClose = () => {
 		setLoading(false);
@@ -162,7 +160,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 					tx_id
 			)
 			.then((res) => {
-				console.log(res);
 				if (!res.data.ret) {
 					setTimeout(() => {
 						checkResponse(tx_id);

@@ -30,6 +30,7 @@ import { WalletContext } from './WalletContextProvider';
 import { AppDataContext } from './AppDataProvider';
 import axios from 'axios';
 import { ChainID } from '../src/chains';
+import { useAccount } from 'wagmi';
 
 
 const EnterPool = ({assets, pool, poolIndex}: any) => {
@@ -154,6 +155,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		updateSynthAmount(synth, poolIndex, value, true);
 	}
 
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<>{assets[0] ? <Box>
@@ -191,7 +193,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
-								disabled={!isConnected}
+								disabled={!(isConnected || isEvmConnected)}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -228,14 +230,14 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
-							disabled={loading || !isConnected || !amount || amount == 0}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0}
 							isLoading={loading}
 							loadingText='Please sign the transaction'
 							colorScheme={'red'}
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							{isConnected? (!amount || amount == 0) ? <>Enter amount</> : <>Exit Pool</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (!amount || amount == 0) ? <>Enter amount</> : <>Exit Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{response && (

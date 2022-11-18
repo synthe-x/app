@@ -30,6 +30,7 @@ import { AppDataContext } from '../AppDataProvider';
 const { Big } = require("big.js");
 import axios from 'axios';
 import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
 
 const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -42,6 +43,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 
 	const { isConnected, tronWeb } = useContext(WalletContext)
 	const { safeCRatio, totalCollateral, totalDebt, chain} = useContext(AppDataContext)
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	const _onClose = () => {
 		setLoading(false);
@@ -154,13 +156,13 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
                         <Button 
-							disabled={loading || !isConnected || !amount || amount == 0 || amount > max()}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
 							loadingText='Please sign the transaction'
 							isLoading={loading}
 							colorScheme={"red"} width="100%" mt={4} onClick={issue}
 
 						>
-							{isConnected? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 
 						</Button>
 					
 						{response && (

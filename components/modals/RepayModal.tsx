@@ -29,6 +29,7 @@ import { WalletContext } from '../WalletContextProvider';
 import axios from 'axios';
 import { AppDataContext } from '../AppDataProvider';
 import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
 
 const RepayModal = ({ asset, handleRepay }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -123,6 +124,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	};
 
 	const {isConnected, tronWeb }= useContext(WalletContext);
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<Box>
@@ -154,11 +156,11 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
                         <Button 
-							disabled={loading || !isConnected || !amount || amount == 0 || amount > max()}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
 							isLoading={loading} colorScheme={"red"} width="100%" mt={4} onClick={issue}
 							loadingText='Please sign the transaction'
 						>
-							{isConnected? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 
 						</Button>
 						
 						{response && (

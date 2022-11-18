@@ -31,8 +31,9 @@ import { AppDataContext } from './AppDataProvider';
 
 import axios from 'axios';
 import { ChainID } from '../src/chains';
+import { useAccount } from 'wagmi';
 
-const EnterPool = ({assets, pool, poolIndex}: any) => {
+const EnterPool = ({assets, pool, poolIndex}: any): any => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [amount, setAmount] = React.useState(0);
 
@@ -112,6 +113,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 			}
 		})
 		.catch((err: any) => {
+			console.log(err);
 			setLoading(false);
 			setConfirmed(true);
 			setResponse('Transaction failed. Please try again!');
@@ -154,6 +156,8 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 		updateSynthAmount(synth, poolIndex, value, false);
 	}
 
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
+
 	return (
 		<>{pool.poolSynth_ids ? <Box>
 
@@ -186,7 +190,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
-									disabled={!isConnected}
+									disabled={!(isConnected || isEvmConnected)}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -223,7 +227,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 						</Flex>
 
 						<Button
-							disabled={loading || !isConnected || !amount || amount == 0}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0}
 							isLoading={loading}
 							loadingText='Please sign the transaction'
 							bgColor='#3EE6C4'
@@ -231,7 +235,7 @@ const EnterPool = ({assets, pool, poolIndex}: any) => {
 							mt={4}
 							onClick={transfer}
 							>
-							{isConnected? (!amount || amount == 0) ? <>Enter amount</> : <>Enter Pool</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (!amount || amount == 0) ? <>Enter amount</> : <>Enter Pool</> : <>Please connect your wallet</>} 
 						</Button>
 
 						{response && (
