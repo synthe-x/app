@@ -67,7 +67,7 @@ export default function _index({ children }: any) {
 						}
 					}
 				} else {
-					fetchData(DUMMY_ADDRESS, ChainID.AURORA);
+					fetchData(DUMMY_ADDRESS[ChainID.AURORA], ChainID.AURORA);
 					setInit(true)
 				}
 		}

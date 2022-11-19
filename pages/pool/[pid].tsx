@@ -28,6 +28,7 @@ import PoolTable from '../../components/charts/PoolTable';
 import { AppDataContext } from '../../components/AppDataProvider';
 import Link from 'next/link';
 import Head from 'next/head';
+import { Endpoints } from '../../src/const';
 
 const dollarFormatter = new Intl.NumberFormat('en-US', {
 	style: 'currency',
@@ -42,18 +43,10 @@ const Pool = () => {
 	const [pool, setPool] = React.useState<any>({});
 	const [pieData, setPieData] = React.useState([]);
 
-	const { isConnected, isConnecting, address, connect } =
-		useContext(WalletContext);
-
-	const {
-		collaterals,
+	const { 
+		chain,
 		synths,
-		totalCollateral,
-		totalDebt,
-		isDataReady,
 		pools,
-		// tokenFormatter,
-		// dollarFormatter,
 	} = useContext(AppDataContext);
 
 	const [volume, setVolume] = React.useState<{}[]>([]);
@@ -97,7 +90,7 @@ const Pool = () => {
 			}
 
 			axios
-				.get('https://api.synthex.finance/pool/volume/' + _poolIndex)
+				.get(Endpoints[chain] + 'pool/volume/' + _poolIndex)
 				.then((resp) => {
 					const dayId =
 						Math.round(Date.now() / (1000 * 60 * 60 * 24)) + 1;

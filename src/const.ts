@@ -1,5 +1,10 @@
+import { ethers } from 'ethers';
 import { ChainID } from './chains';
-export const DUMMY_ADDRESS = 'TU6nPbkDzMfhtg13nUnTMbuVFFMpLSs3P3';
+export const DUMMY_ADDRESS = {
+	[ChainID.NILE]: 'TU6nPbkDzMfhtg13nUnTMbuVFFMpLSs3P3',
+	[ChainID.AURORA]: ethers.constants.AddressZero,
+};
+
 export const HELPER = '';
 export const EXCHANGE = '';
 export const VAULT = '';
