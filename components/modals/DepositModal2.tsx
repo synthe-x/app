@@ -80,6 +80,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const allowanceCheck = async () => {
+		console.log('checking allowance');
 		if (!asset()) return;
 		let collateral = await getContract(
 			'CollateralERC20',
@@ -87,12 +88,10 @@ const DepositModal = ({ handleDeposit }: any) => {
 			asset()['coll_address']
 		);
 		let allowance = await call(collateral, 'allowance', [address ?? evmAddress, getAddress('System', chain)], chain)
-		// collateral.methods
-		// 	.allowance(address, getAddress('System'))
-		// 	.call();
 		allowance = allowance
 			.div((10 ** asset()['decimal']).toString())
 			.toString();
+		console.log(allowance);
 		if (allowance.length < 10) {
 			if (parseInt(allowance) <= balance()) {
 				setAmount(0);
@@ -104,11 +103,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 			setTryApprove(false);
 		}
 	};
-
-	// const balance = asset.walletBalance / (10**asset.decimal)
-	useEffect(() => {
-		if (tryApprove == 'null' && (isConnected || isEvmConnected) && chain > 0) allowanceCheck();
-	}, [allowanceCheck, selectedAsset, collaterals, isConnected, tryApprove, chain]);
 
 	const _onClose = () => {
 		setLoading(false);
@@ -217,7 +211,6 @@ const DepositModal = ({ handleDeposit }: any) => {
 		});
 	};
 
-
 	const amountLowerThanMin = () => {
 		if (Number(amount) > asset()?.minCollateral / 10 ** asset().decimal) {
 			return false;
@@ -250,6 +243,11 @@ const DepositModal = ({ handleDeposit }: any) => {
 		setSelectedAsset(e.target.value);
 	};
 
+	const _onOpen = () => {
+		if (isConnected || isEvmConnected) allowanceCheck();
+		onOpen();
+	}
+
 	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
@@ -259,7 +257,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 				size="lg"
 				bgColor={'primary'}
 				rounded={10}
-				onClick={onOpen}>
+				onClick={_onOpen}>
 				Add
 			</Button>
 
