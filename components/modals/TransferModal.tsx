@@ -34,6 +34,7 @@ import { WalletContext } from '../WalletContextProvider';
 import { AppDataContext } from '../AppDataProvider';
 import axios from 'axios';
 import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
 
 const TransferModal = ({ asset, handleUpdate }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -76,8 +77,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 				? send(system, 'enterPool', [outputPoolIndex, asset['synth_id'], value], chain)
 				: send(system, 'exitPool', [inputPoolIndex, asset['synth_id'], value], chain);
 
-		tx
-		.then(async (res: any) => { 
+		tx.then(async (res: any) => { 
 			setLoading(false);
 			setResponse('Transaction sent! Waiting for confirmation...');
 			if (chain == ChainID.NILE) {
@@ -147,11 +147,12 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 				}
 			});
 	};
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<Box>
 			<IconButton
-				disabled={!isConnected}
+				disabled={!(isConnected || isEvmConnected)}
 				variant="ghost"
 				onClick={onOpen}
 				icon={<AiOutlineSwap color="gray.100" />}
@@ -180,7 +181,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 						</Select>
 						<InputGroup size="md">
 							<Input
-								disabled={!isConnected}
+								disabled={!(isConnected || isEvmConnected)}
 								type="number"
 								placeholder={`Enter ${asset?.symbol} amount`}
 								onChange={changeAmount}
@@ -189,7 +190,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 
 							<InputRightElement width="4.5rem">
 								<Button
-									disabled={!isConnected}
+									disabled={!(isConnected || isEvmConnected)}
 									h="1.75rem"
 									size="sm"
 									mr={1}
@@ -204,7 +205,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 						</Box>
 
 						<Select
-							disabled={!isConnected}
+							disabled={!(isConnected || isEvmConnected)}
 							value={outputPoolIndex}
 							onChange={outputPoolChange}>
 							{pools.map((pool: any, index) => {
@@ -225,7 +226,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 						<Button
 							disabled={
 								loading ||
-								!isConnected ||
+								!(isConnected || isEvmConnected) ||
 								!amount ||
 								amount == 0 ||
 								amount > max()
@@ -236,7 +237,7 @@ const TransferModal = ({ asset, handleUpdate }: any) => {
 							width="100%"
 							mt={4}
 							onClick={transfer}>
-							{isConnected ? (
+							{(isConnected || isEvmConnected) ? (
 								amount > max() ? (
 									<>Insufficient Collateral</>
 								) : !amount || amount == 0 ? (

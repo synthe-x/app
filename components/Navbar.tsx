@@ -15,6 +15,7 @@ import {
 	DrawerCloseButton,
 	useDisclosure,
 	Switch,
+	LinkBox,
 } from '@chakra-ui/react';
 
 import ConnectButton from './ConnectButton';
@@ -52,7 +53,7 @@ function NavBar() {
 						alt=""
 						width="100px"
 						height="70px"
-					/>
+						/>
 				</Box>
 
 				<Box display={{ sm: 'none', md: 'block' }}>
