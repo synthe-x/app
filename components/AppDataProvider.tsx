@@ -55,6 +55,7 @@ function AppDataProvider({ children }: any) {
 			new Intl.NumberFormat('en-US', {
 				style: 'currency',
 				currency: 'USD',
+				maximumSignificantDigits: 8,
 			})
 		);
 		setTokenFormatter(new Intl.NumberFormat('en-US', {
