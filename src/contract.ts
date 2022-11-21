@@ -18,6 +18,7 @@ export async function getContract(contractName: string, chain: number, address: 
     let contract = await ((window as any).tronWeb).contract(getABI(contractName), address)
     return contract;
   } else {
+    if(!(window as any).ethereum) return
     const provider = new ethers.providers.Web3Provider((window as any).ethereum);
     await provider.send('eth_requestAccounts', []);
     let contract = new ethers.Contract(address!, getABI(contractName), provider.getSigner());
