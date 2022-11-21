@@ -77,7 +77,7 @@ function AppDataProvider({ children }: any) {
 		}
 	};
 
-	const fetchData = (_address: string, chainId: number) => {
+	const fetchData = (_address: string|null, chainId: number) => {
 		return new Promise((resolve, reject) => {
 			setIsFetchingData(true);
 			console.log('Fetching data...', Endpoints[chainId]);
@@ -124,7 +124,7 @@ function AppDataProvider({ children }: any) {
 	const _setCollaterals = (
 		_collaterals: any,
 		helper: any,
-		_address: string,
+		_address: string|null,
 		_chain: number
 	) => {
 		return new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ function AppDataProvider({ children }: any) {
 				tokens.push(_collaterals[i].cAsset);
 			}
 
-			call(helper, 'balanceOf', [tokens, _address], _chain)
+			if(_address) call(helper, 'balanceOf', [tokens, _address], _chain)
 			.then((res: any) => {
 				let collateralBalance = 0;
 				for (let i = 0; i < res.length; i += 2) {
@@ -154,6 +154,9 @@ function AppDataProvider({ children }: any) {
 				console.log('Error:', err);
 				reject(err)
 			});
+			else {
+				setCollaterals(_collaterals);
+			}
 		});
 	};
 
@@ -218,7 +221,7 @@ function AppDataProvider({ children }: any) {
 		_tradingPools: any,
 		_synths: any,
 		helper: any,
-		_address: string,
+		_address: string|null,
 		_chain: number
 	) => {
 		return new Promise((resolve, reject) => {
@@ -227,11 +230,11 @@ function AppDataProvider({ children }: any) {
 				tokens.push(_synths[i].synth_id);
 			}
 
-			Promise.all([
+			if(_address) {
+				Promise.all([
 				call(helper, 'balanceOf', [tokens, _address], _chain),
 				call(helper, 'debtBalanceOf', [tokens, _address], _chain)
-			])
-				.then((res: any) => {
+			]).then((res: any) => {
 					let walletBalances = res[0];
 					let debtBalances = res[1];
 
@@ -280,7 +283,6 @@ function AppDataProvider({ children }: any) {
 									totalDebt += Number(res[i][j] / 1e18) * _synths[j].price;
 								}
 							}
-							console.log(_synths);
 							setTotalDebt(totalDebt);
 							setSynths(_synths);
 							setIsDataReady(true);
@@ -296,6 +298,10 @@ function AppDataProvider({ children }: any) {
 					console.log('Error:', err);
                     reject(err)
 				});
+			} else {
+				setSynths(_synths);
+				setPools(_tradingPools);
+			}
 		});
 	};
 
@@ -403,7 +409,7 @@ interface AppDataValue {
 	synths: any[];
 	totalDebt: number;
 	pools: any[];
-	fetchData: (_address: string, chainId: number) => Promise<unknown>|undefined;
+	fetchData: (_address: string|null, chainId: number) => Promise<unknown>|undefined;
 	tradingPool: number;
 	setTradingPool: (_: number) => void;
 	dataFetchError: string | null;

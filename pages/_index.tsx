@@ -63,11 +63,11 @@ export default function _index({ children }: any) {
 							}
 						})
 					} else {
-						fetchData(evmAddress!, ChainID.AURORA);
+						fetchData(null, ChainID.AURORA);
 					}
 				}
 			} else {
-				fetchData(DUMMY_ADDRESS[ChainID.AURORA], ChainID.AURORA);
+				fetchData(null, ChainID.AURORA);
 			}
 		}
 	}, [connect, connectEvm, connectors, fetchData, init, isDataReady, isFetchingData, setChain, setInit]);
