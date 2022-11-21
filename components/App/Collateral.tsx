@@ -74,7 +74,7 @@ export default function Collateral({ handleChange }: any) {
 					>
 					<Flex>
 						<Image
-							src={`/${collateral?.symbol}.png`}
+							src={`/${collateral?.symbol.toLowerCase()}.png`}
 							width={35}
 							height={35}
 							alt="logo"
