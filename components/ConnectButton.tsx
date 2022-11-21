@@ -50,7 +50,7 @@ const ConnectButton = ({}) => {
 
 	const _connectTron = () => {
 		connectTron((_address: string | null, _err: string) => {
-			if (!isDataReady && !isFetchingData && _address) {
+			if (!isFetchingData && _address) {
 				fetchData(_address, ChainID.NILE);
 				setChain(ChainID.NILE);
 			}
@@ -135,7 +135,7 @@ const ConnectButton = ({}) => {
 			<Modal isCentered isOpen={isConnectOpen} onClose={onConnectClose} >
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
 				<ModalContent 
-				maxW={'29rem'}
+				maxW={'19rem'}
 				pt={0}
 				pb={2}
 				rounded={20}
@@ -144,19 +144,36 @@ const ConnectButton = ({}) => {
 					<ModalBody>
 					<Text fontSize={"lg"} fontWeight="bold" mb={5} mt={1}>Choose a network</Text>
 						<Flex gap={5}>
-							<Button display={"flex"} bgColor={"red"} minW={"125px"} height={"125px"} rounded="20" onClick={_connectTron} _hover={{bgColor: 'gray.800'}}>
+							{/* <Button display={"flex"} bgColor={"red"} minW={"125px"} height={"125px"} rounded="20" onClick={_connectTron} _hover={{bgColor: 'gray.800'}}>
 								<Image src='/tron-outline.png' width={55} height={55} alt="tronlogo" />
+							</Button> */}
+							<Button bgColor={"#6FD24D"} height={"125px"} rounded="20" _hover={{bgColor: 'gray.800'}} onClick={() => _connectEvm(0)} minW={'16rem'}>
+								{/* <Image src='/aurora.png' width={55} height={55} alt="tronlogo" /> */}
+								<Flex
+									flexDir={'row'}
+									align="center"
+									justify={'center'}
+									gap={2}>
+									<Image
+										src="/aurora.png"
+										width={70}
+										height={70}
+										alt="tronlogo"
+									/>
+									<Box>
+									<Text mb={1} fontSize='lg' color={'white'}>Aurora Testnet</Text>
+									<Text fontSize={'sm'} color={'white'}>{ChainID.AURORA}</Text>
+									</Box>
+
+								</Flex>
 							</Button>
-							<Button bgColor={"#6FD24D"} minW={"125px"} height={"125px"} rounded="20" _hover={{bgColor: 'gray.800'}} onClick={() => _connectEvm(0)}>
-								<Image src='/aurora.png' width={55} height={55} alt="tronlogo" />
-							</Button>
-							<Button bgColor={'black'} minW={"125px"} height={"125px"} rounded="20" disabled _hover={{bg: 'gray.800'}}>
+							{/* <Button bgColor={'black'} minW={"125px"} height={"125px"} rounded="20" disabled _hover={{bg: 'gray.800'}}>
 								<Flex flexDir={"column"} align="center" justify={"center"} gap={0}>
 
 								<Text color={"gray.100"} fontSize="xs">Coming Soon</Text>
 								<Image src='/BTT.png' width={70} height={70} alt="tronlogo" />
 								</Flex>
-							</Button>
+							</Button> */}
 							{/* <Button bgGradient="linear(to-tr, #0ABEF3, #88F1CB)" minW={"100px"} height={"100px"} rounded="20">
 								<Image src='/harmony-one-logo.png' width={35} height={35} alt="tronlogo" />
 							</Button> */}

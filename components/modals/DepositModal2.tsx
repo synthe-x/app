@@ -207,7 +207,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 			setClaimLoading(false);
 			updateCollateralWalletBalance(
 				wtrx.address,
-				CLAIM_AMOUNTS[asset().symbol],
+				(parseInt(CLAIM_AMOUNTS[asset().symbol]) * 1e18).toString(),
 				false
 			);
 		})

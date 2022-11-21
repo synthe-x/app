@@ -39,6 +39,7 @@ function WalletContextProvider({children}: any) {
                     setConnectionError('Please connect to Nile Testnet');
                     callback(null, 'ERROR: Not connected to Nile Testnet')
 				} 
+                console.log('Connected to TronWeb', _addr);
                 setAddress(_addr)
                 setChain((window as any).tronWeb.fullNode.host)
                 callback(_addr, null)
