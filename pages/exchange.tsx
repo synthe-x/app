@@ -28,7 +28,7 @@ function Exchange() {
 
 	return (
 		<>
-			{isDataReady && (
+			
 				<Flex
 					mt={'10'}
 					gap={{sm: 10, md: '1%'}}
@@ -53,7 +53,6 @@ function Exchange() {
 						<Swap handleChange={handleChange}/>
 					</Box>
 				</Flex>
-			)}
 		</>
 	);
 }

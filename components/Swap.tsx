@@ -42,7 +42,7 @@ function Swap({handleChange}: any) {
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
 
-	const { chain, explorer } = useContext(AppDataContext);
+	const { chain, explorer, isDataReady } = useContext(AppDataContext);
 
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
@@ -209,7 +209,8 @@ function Swap({handleChange}: any) {
 	};
 
 	const inputToken = (_inputAssetIndex = inputAssetIndex) => {
-		if (pools[tradingPool].poolSynth_ids) {
+		if(!pools[tradingPool]) return {synth_id: '', price: 0}
+ 		if (pools[tradingPool].poolSynth_ids) {
 			return pools[tradingPool].poolSynth_ids[_inputAssetIndex];
 		} else {
 			return synths[_inputAssetIndex];
@@ -217,6 +218,7 @@ function Swap({handleChange}: any) {
 	};
 
 	const outputToken = (_outputAssetIndex = outputAssetIndex) => {
+		if(!pools[tradingPool]) return {synth_id: '', price: 0}
 		if (pools[tradingPool].poolSynth_ids) {
 			return pools[tradingPool].poolSynth_ids[_outputAssetIndex];
 		} else {
@@ -237,13 +239,13 @@ function Swap({handleChange}: any) {
 	return (
 		<>
 			<Head>
-				<title>
+				{tokenFormatter && <title>
 					{' '}
 					{tokenFormatter.format(
-						inputToken()?.price / outputToken()?.price
+						(inputToken()?.price / outputToken()?.price)
 					)}{' '}
 					{outputToken().symbol}/{inputToken().symbol} | Synthex
-				</title>
+				</title> }
 				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
 			{pools[tradingPool] && (

@@ -72,6 +72,7 @@ function AppDataProvider({ children }: any) {
 	const tradingBalanceOf = (_s: string) => {
 		for (let i in synths) {
 			if (synths[i].synth_id == _s) {
+				if(!synths[i].amount) return 0
 				return synths[i].amount[tradingPool];
 			}
 		}
@@ -300,6 +301,12 @@ function AppDataProvider({ children }: any) {
 				});
 			} else {
 				setSynths(_synths);
+				_tradingPools.splice(0, 0, {
+					pool_address:
+						'0x0000000000000000000000000000000000000000',
+					name: 'My Wallet',
+					symbol: 'USER',
+				});
 				setPools(_tradingPools);
 			}
 		});
