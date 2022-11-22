@@ -191,7 +191,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 							</Text>
 							<Text fontSize={'xs'} color="gray.400">
 								Stability Fee ={' '}
-								{(parseFloat(asset['apy']) * 100).toFixed(2)}% /
+								{(parseFloat(asset['apy'])).toFixed(2)}% /
 								Year
 							</Text>
 						</Flex>
