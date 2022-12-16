@@ -1,7 +1,6 @@
-import { Box, Button, Divider, Flex, Text, Image } from '@chakra-ui/react';
+import { Box, Divider, Flex, Text, Image } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { getContract } from '../../src/contract';
 import { AppDataContext } from '../context/AppDataProvider';
 import DepositModal from '../modals/DepositModal';
 import WithdrawModal from '../modals/WithdrawModal';

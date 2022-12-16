@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart, ArcElement, Legend } from 'chart.js'
-import { WalletContext } from '../context/WalletContextProvider';
 import { AppDataContext } from '../context/AppDataProvider';
-import { Box, Text } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 Chart.register(ArcElement);
 
 export default function DonutChart({}: any){

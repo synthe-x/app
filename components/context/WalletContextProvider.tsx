@@ -13,7 +13,6 @@ const eventServer = new HttpProvider(node);
 const privateKey = '52641f54dc5e1951657523c8e7a1c44ac76229a4b14db076dce6a6ce9ae9293d';
 const tronWebObject = new TronWeb(fullNode,solidityNode,eventServer,privateKey);
 
-
 function WalletContextProvider({children}: any) {
     const [address, setAddress] = React.useState<string|null>(null);
     const [tronWeb, setTronWeb] = React.useState({});

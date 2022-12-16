@@ -2,6 +2,7 @@ import {
 	Box,
 	Flex,
 } from '@chakra-ui/react';
+
 import IssuanceTable from '../components/IssuanceTable';
 import Collateral from '../components/app/Collateral';
 import Borrow from '../components/app/Borrow';
