@@ -18,7 +18,6 @@ import {
 	LinkBox,
 } from "@chakra-ui/react";
 
-import ConnectButton from "./ConnectButton";
 import { ConnectButton as RainbowConnect } from "@rainbow-me/rainbowkit";
 import { FaBars } from "react-icons/fa";
 import { BsMoonFill, BsSunFill } from "react-icons/bs";
@@ -203,12 +202,12 @@ function NavBar() {
 											fontWeight={"bold"}
 											fontSize="sm"
 										>
-											App
+											Home
 										</Text>
 									</Link>
 								</ListItem>
 
-								<ListItem>
+								{/* <ListItem>
 									<Link href="/pools">
 										<Text
 											my="1rem"
@@ -232,7 +231,7 @@ function NavBar() {
 											Pools
 										</Text>
 									</Link>
-								</ListItem>
+								</ListItem> */}
 
 								<ListItem>
 									<Link href={"/exchange"}>
@@ -255,12 +254,13 @@ function NavBar() {
 											fontWeight={"bold"}
 											fontSize="sm"
 										>
-											Exchange
+											Swap
 										</Text>
 									</Link>
 								</ListItem>
 								<ListItem my="1rem">
-									<ConnectButton />
+									{/* <ConnectButton /> */}
+									<RainbowConnect/>
 								</ListItem>
 							</UnorderedList>
 						</Box>

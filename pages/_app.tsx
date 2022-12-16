@@ -12,14 +12,12 @@ import {
 	createClient,
 	WagmiConfig,
 	defaultChains,
+	Chain,
 } from 'wagmi';
 // import { chains } from '../src/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { Box, ChakraProvider, Flex } from '@chakra-ui/react';
-import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
-import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
 import { WalletContextProvider } from '../components/context/WalletContextProvider';
 import Index from './_index';
 
@@ -31,7 +29,7 @@ const { chains, provider } = configureChains(
 	[{
 	  ...chain.arbitrumGoerli,
 	  iconUrl: 'https://arbitrum.io/wp-content/uploads/2021/01/Arbitrum_Symbol-Full-color-White-background.png'
-	},
+	} as Chain,
 	// chain.goerli
   ],
 	[

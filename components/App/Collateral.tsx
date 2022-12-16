@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { getContract } from '../../src/contract';
 import { AppDataContext } from '../context/AppDataProvider';
-import DepositModal from '../modals/DepositModal2';
+import DepositModal from '../modals/DepositModal';
 import WithdrawModal from '../modals/WithdrawModal';
 import { WalletContext } from '../context/WalletContextProvider';
 
