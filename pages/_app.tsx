@@ -13,50 +13,43 @@ import {
 	WagmiConfig,
 	defaultChains,
 } from 'wagmi';
-import { chains } from '../src/chains';
+// import { chains } from '../src/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { Box, ChakraProvider, Flex } from '@chakra-ui/react';
 import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
-import { WalletContextProvider } from '../components/WalletContextProvider';
+import { WalletContextProvider } from '../components/context/WalletContextProvider';
 import Index from './_index';
 
-const config: ThemeConfig = {
-	initialColorMode: 'light',
-	useSystemColorMode: true,
-};
-
 import { useEffect } from 'react';
-import { AppDataProvider } from '../components/AppDataProvider';
+import { AppDataProvider } from '../components/context/AppDataProvider';
+import { theme } from '../src/theme';
 
-const { provider, webSocketProvider } = configureChains(chains, [
-	publicProvider(),
-]);
-
-const client = createClient({
-	provider,
-	webSocketProvider,
-});
-
-const breakpoints = {
-	sm: '360px',
-	md: '768px',
-	lg: '1024px',
-	xl: '1440px',
-	'2xl': '1680px',
-};
-const theme = extendTheme({
-	//components,
-	// styles,
-	config,
-	breakpoints,
-	colors: {
-		primary: '#3EE6C4',
-		secondary: '#5677FB'
+const { chains, provider } = configureChains(
+	[{
+	  ...chain.arbitrumGoerli,
+	  iconUrl: 'https://arbitrum.io/wp-content/uploads/2021/01/Arbitrum_Symbol-Full-color-White-background.png'
 	},
-});
+	// chain.goerli
+  ],
+	[
+	  alchemyProvider({ apiKey: 'HyNaane88yHFsK8Yrn4gf2OOzHkd6GAJ' }),
+	  publicProvider()
+	]
+  );
+  
+  const { connectors } = getDefaultWallets({
+	appName: 'SyntheX',
+	chains
+  });
+  
+  const wagmiClient = createClient({
+	autoConnect: true,
+	connectors,
+	provider
+  })
 
 function MyApp({ Component, pageProps }: AppProps) {
 	useEffect(() => {
@@ -65,7 +58,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 	return (
 		<ChakraProvider theme={theme}>
-			<WagmiConfig client={client}>
+			<WagmiConfig client={wagmiClient}>
+			<RainbowKitProvider chains={chains} theme={darkTheme()}>
 				<WalletContextProvider>
 					<AppDataProvider>
 						<Index>
@@ -73,6 +67,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 						</Index>
 					</AppDataProvider>
 				</WalletContextProvider>
+				</RainbowKitProvider>
 			</WagmiConfig>
 		</ChakraProvider>
 	);

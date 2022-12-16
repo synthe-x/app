@@ -25,8 +25,8 @@ import { BiMinusCircle } from 'react-icons/bi';
 
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract, send } from '../../src/contract';
-import { WalletContext } from '../WalletContextProvider';
-import { AppDataContext } from '../AppDataProvider';
+import { WalletContext } from '../context/WalletContextProvider';
+import { AppDataContext } from '../context/AppDataProvider';
 const { Big } = require("big.js");
 import axios from 'axios';
 import { ChainID } from '../../src/chains';
@@ -66,15 +66,15 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 		setAmount(max());
 	}
 
-	const issue = async () => {
+	const withdraw = async () => {
 		if(!amount) return
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let system = await getContract('System', chain);
-		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
-		send(system, 'withdraw', [asset['coll_address'], value], chain)
+		let synthex = await getContract("SyntheX", chain);
+		let value = Big(amount).mul(Big(10).pow(Number(asset.inputToken.decimals))).toFixed(0);
+		send(synthex, 'withdraw', [asset.id, value], chain)
 		.then(async (res: any) => {
 			setLoading(false);
 			setResponse('Transaction sent! Waiting for confirmation...');
@@ -85,7 +85,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
-				handleWithdraw(asset['coll_address'], Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0))
+				handleWithdraw(asset.id, value)
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -160,7 +160,7 @@ const WithdrawModal = ({ asset, handleWithdraw }: any) => {
 							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
 							loadingText='Please sign the transaction'
 							isLoading={loading}
-							colorScheme={"red"} width="100%" mt={4} onClick={issue}
+							colorScheme={"red"} width="100%" mt={4} onClick={withdraw}
 
 						>
 							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Withdraw</> : <>Please connect your wallet</>} 

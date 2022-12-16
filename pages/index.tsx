@@ -1,32 +1,12 @@
 import {
 	Box,
-	Text,
 	Flex,
-	Divider,
-	useColorMode,
-	Progress,
-	Image,
-	Button
 } from '@chakra-ui/react';
-import Navbar from '../components/Navbar';
 import IssuanceTable from '../components/IssuanceTable';
-import CollateralTable from '../components/CollateralTable';
-import { useContext, useEffect, useState } from 'react';
-import { getContract } from '../src/contract';
-import { useAccount } from 'wagmi';
-import web3 from 'web3';
-import { WalletContext } from '../components/WalletContextProvider';
-import ConnectButton from '../components/ConnectButton';
-import { BiArrowToRight, BiError, BiErrorAlt } from 'react-icons/bi';
-import { AppDataContext } from '../components/AppDataProvider';
-import Collateral from '../components/App/Collateral';
-import Chart from '../components/App/Chart';
-import Borrow from '../components/App/Borrow';
-import { Heading } from '@chakra-ui/react';
-import { BsArrowBarRight, BsArrowReturnRight } from 'react-icons/bs';
-import { AiOutlineArrowRight } from 'react-icons/ai';
-import Link from 'next/link';
+import Collateral from '../components/app/Collateral';
+import Borrow from '../components/app/Borrow';
 import Head from 'next/head';
+import { useState } from 'react';
 
 function App() {
 	const [nullValue, setNullValue] = useState(false);
@@ -69,12 +49,12 @@ function App() {
 						<Box width={{sm: '100%', md: '28%'}}>
 							<Collateral handleChange={handleChange} />
 						</Box>
-						<Box width={{sm: '100%', md: '44%'}}>
+						<Box width={{sm: '100%', md: '72%'}}>
 							<Borrow />
 						</Box>
-						<Box width={{sm: '100%', md: '28%'}}>
+						{/* <Box width={{sm: '100%', md: '28%'}}>
 							<Chart />
-						</Box>
+						</Box> */}
 					</Flex>
 					<Flex
 						flexDirection={{
@@ -93,7 +73,7 @@ function App() {
 							<IssuanceTable handleChange={handleChange} />
 						</Box>
 					</Flex>
-					<Flex height={'200px'}  bgColor='secondary' rounded={20} px={'30px'} py={'22px'} color='white' width={'100%'}>
+					{/* <Flex height={'200px'}  bgColor='secondary' rounded={20} px={'30px'} py={'22px'} color='white' width={'100%'}>
 						<Flex flexDir={'column'} justify='space-between' width={'100%'}>
 						<Box>
 						<Heading>Trade with no slippage</Heading>
@@ -106,10 +86,11 @@ function App() {
 						</Link>
 
 						</Flex>
-						<Box bgImage='/swapmockup.png' bgSize={'350px'} bgRepeat='no-repeat' width={'45%'} mx={'-10px'} mt={-10} my={'-22px'}>
 
+						
+						<Box bgImage='/swapmockup.png' bgSize={'350px'} bgRepeat='no-repeat' width={'45%'} mx={'-10px'} mt={-10} my={'-22px'}>
 						</Box>
-					</Flex>
+					</Flex> */}
 				</Flex>
 			}
 		</>

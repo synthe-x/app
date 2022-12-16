@@ -11,10 +11,10 @@ import {
 	Heading,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
-import { WalletContext } from '../components/WalletContextProvider';
+import { WalletContext } from './context/WalletContextProvider';
 import { LinkBox, LinkOverlay } from '@chakra-ui/react';
 import PoolCardAssets from './PoolCardAssets';
-import { AppDataContext } from './AppDataProvider';
+import { AppDataContext } from './context/AppDataProvider';
 import Link from 'next/link';
 
 function PoolCard({ pool }: any) {

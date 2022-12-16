@@ -27,8 +27,8 @@ import {
 import { BsPlusCircle } from 'react-icons/bs';
 import { AiOutlineDisconnect, AiOutlineInfoCircle } from 'react-icons/ai';
 
-import { WalletContext } from './WalletContextProvider';
-import { AppDataContext } from './AppDataProvider';
+import { WalletContext } from './context/WalletContextProvider';
+import { AppDataContext } from './context/AppDataProvider';
 import { Avatar } from '@chakra-ui/react';
 import { BiLogOut } from 'react-icons/bi';
 import { MdCopyAll, MdLogout } from 'react-icons/md';

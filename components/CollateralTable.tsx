@@ -24,8 +24,8 @@ import WithdrawModal from './modals/WithdrawModal';
 import Image from 'next/image';
 import { getContract } from '../src/contract';
 import { useState } from 'react';
-import { WalletContext } from './WalletContextProvider';
-import { AppDataContext } from './AppDataProvider';
+import { WalletContext } from './context/WalletContextProvider';
+import { AppDataContext } from './context/AppDataProvider';
 import { ChainID } from '../src/chains';
 
 const CollateralTable = ({handleChange}: any) => {

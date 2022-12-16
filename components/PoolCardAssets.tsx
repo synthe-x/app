@@ -18,7 +18,7 @@ export default function PoolCardAssets({
 										width={'50px'}
                                         mr="3"
 										alt="logo"
-										src={`/${asset.symbol}.png`}
+										src={`icons/${asset.symbol}.png`}
 									/>
 							</Box>
 						</>

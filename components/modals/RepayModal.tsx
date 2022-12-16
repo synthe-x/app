@@ -8,7 +8,7 @@ import {
     Input,
     IconButton,
 	InputRightElement,
-	InputGroup,Spinner,Link, AlertIcon, Alert
+	InputGroup,Spinner,Link, AlertIcon, Alert, Select
 } from '@chakra-ui/react';
 
 import {
@@ -25,11 +25,12 @@ import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getContract, send } from '../../src/contract';
 import { useContext } from 'react';
-import { WalletContext } from '../WalletContextProvider';
+import { WalletContext } from '../context/WalletContextProvider';
 import axios from 'axios';
-import { AppDataContext } from '../AppDataProvider';
+import { AppDataContext } from '../context/AppDataProvider';
 import { ChainID } from '../../src/chains';
 import { useAccount } from 'wagmi';
+import { tokenFormatter } from '../../src/const';
 
 const RepayModal = ({ asset, handleRepay }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -38,6 +39,8 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
 	const [amount, setAmount] = React.useState(0);
+
+	const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
 
 	const { chain, explorer } = useContext(AppDataContext);
 
@@ -59,18 +62,21 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	}
 
 	const max = () => {
-		return 0.999 * Math.min(asset.amount?.[0], asset['walletBalance'])/1e18;
+		return Math.min(
+			asset._mintedTokens[selectedAssetIndex].balance / 10 ** asset.inputToken.decimals, // user token balance
+			asset.balance / 10 ** asset.inputToken.decimals / asset._mintedTokens[selectedAssetIndex].lastPriceUSD  // debt in terms of this token
+		);
 	}
 
-	const issue = async () => {
+	const repay = async () => {
 		if(!amount) return
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let system = await getContract('System', chain);
-		let value = BigInt(amount*10**asset['decimal']).toString();
-		send(system, 'repay', [asset['synth_id'], value], chain)
+		let synthex = await getContract("SyntheX", chain);
+		let value = BigInt(amount * 10 ** asset.inputToken.decimals).toString();
+		send(synthex, 'burn', [asset.id, asset._mintedTokens[selectedAssetIndex].id, value], chain)
 		.then(async (res: any) => {
 			setLoading(false);
 			setResponse('Transaction sent! Waiting for confirmation...');
@@ -81,7 +87,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
-				handleRepay(asset['synth_id'], BigInt(amount*10**asset['decimal']).toString())
+				handleRepay(asset._mintedTokens[selectedAssetIndex].id, value)
 				setResponse('Transaction Successful!');
 			}
 		})
@@ -140,6 +146,17 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 					<ModalCloseButton />
                     <ModalHeader>Repay {asset['symbol']}</ModalHeader>
 					<ModalBody>
+
+					<Flex>
+						<Text fontSize='sm'>Balance: {tokenFormatter.format(asset._mintedTokens[selectedAssetIndex].balance / 10 ** asset.inputToken.decimals)} {asset._mintedTokens[selectedAssetIndex].symbol}</Text>
+					</Flex>
+					<Select my={1} placeholder="Select asset to issue" value={selectedAssetIndex} onChange={(e) => setSelectedAssetIndex(parseInt(e.target.value))}>
+									{asset._mintedTokens.map((token: any, index: number) => (
+										<option value={index} key={index}>
+											{token.symbol}
+										</option>
+									))}
+								</Select>
 					<InputGroup size='md'>
 						<Input
 							type="number"
@@ -158,7 +175,7 @@ const RepayModal = ({ asset, handleRepay }: any) => {
                         </Flex>
                         <Button 
 							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
-							isLoading={loading} colorScheme={"red"} width="100%" mt={4} onClick={issue}
+							isLoading={loading} colorScheme={"red"} width="100%" mt={4} onClick={repay}
 							loadingText='Please sign the transaction'
 						>
 							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 

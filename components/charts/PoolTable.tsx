@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Link, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
-import { WalletContext } from '../../components/WalletContextProvider';
+import { WalletContext } from '../context/WalletContextProvider';
 import {
 	Table,
 	Thead,
@@ -61,7 +61,7 @@ export default function PoolTable({ pool }: any) {
 												display="flex"
 												alignItems={'center'}>
 												<Image
-													src={`/${synth?.symbol}.png`}
+													src={`/icons/${synth?.symbol}.png`}
 													width="25"
 													height={25}
 													alt="logo"

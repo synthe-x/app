@@ -19,7 +19,7 @@ import {
 import Image from 'next/image';
 import IssueModel from './modals/IssueModal';
 import RepayModel from './modals/RepayModal';
-import { WalletContext } from './WalletContextProvider';
+import { WalletContext } from './context/WalletContextProvider';
 import {
 	MdArrowBackIos,
 	MdNavigateBefore,
@@ -35,8 +35,10 @@ import {
 	PaginationContainer,
 	PaginationPageGroup,
 } from '@ajna/pagination';
-import { AppDataContext } from './AppDataProvider';
+import { AppDataContext } from './context/AppDataProvider';
 import { useAccount } from 'wagmi';
+import { useEffect } from 'react';
+import { TOKEN_COLORS } from '../src/const';
 
 const IssuanceTable = ({handleChange}: any) => {
 	const [nullValue, setNullValue] = useState(false);
@@ -45,6 +47,7 @@ const IssuanceTable = ({handleChange}: any) => {
 			pagesCount: 2,
 			initialState: { currentPage: 1 },
 		});
+	const [extraTokens, setExtraTokens] = useState<any>([]);
 	
 	const {
 		isConnected,
@@ -57,40 +60,57 @@ const IssuanceTable = ({handleChange}: any) => {
 		tokenFormatter,
 		dollarFormatter,
 		isDataReady,
-		updateSynthWalletBalance, updateSynthAmount
+		updateSynthBalance,
+		pools
 	} = useContext(AppDataContext);
 
 	const handleIssue = (synthId: string, value: string) => {
-		updateSynthWalletBalance(synthId, value, false)
-		updateSynthAmount(synthId, 0, value, false)
+		updateSynthBalance(synthId, value, false)
 		setNullValue(!nullValue)
 		handleChange()
 	}
 
 	const handleRepay = (synthId: string, value: string) => {
-		updateSynthWalletBalance(synthId, value, true)
-		updateSynthAmount(synthId, 0, value, true)
+		updateSynthBalance(synthId, value, true)
 		setNullValue(!nullValue)
 		handleChange()
 	}
 
+
+	useEffect(() => {
+		if(pools.length > 0 && extraTokens.length == 0){
+			// tokens with less than 10 % of total liquidity => add as extra tokens
+			let _extraTokens: number[] = []
+			for(let i in pools){
+				_extraTokens[i] = 0;
+				for(let j in pools[i]._mintedTokens){
+					if(pools[i]._mintedTokens[j]._totalSupplyUSD/pools[i].totalBorrowBalanceUSD < 0.05){
+						_extraTokens[i] += 1;
+					}
+				}
+			}
+			setExtraTokens(_extraTokens)
+		}
+	})
+
 	return (
-		<Skeleton isLoaded={debts.length > 0} minH='600px' rounded={'10'} >
+		<Skeleton isLoaded={pools.length > 0} minH='600px' rounded={'10'} >
 			<TableContainer>
 				<Table overflow={'auto'} variant="simple" >
 					<Thead>
 						<Tr>
-							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'} minW='200px'>
-								Issuance Assets
-							</Th>
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
-								Price
+								Pool
 							</Th>
+							
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Protocol Debt
 							</Th>
 							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
 								Liquidity
+							</Th>
+							<Th fontSize={'xs'} fontFamily="Poppins" color={'gray.500'} borderColor={'#3C3C3C'}>
+								LTV Ratio
 							</Th>
 							<Th
 							borderColor={'#3C3C3C'}
@@ -102,98 +122,111 @@ const IssuanceTable = ({handleChange}: any) => {
 						</Tr>
 					</Thead>
 					<Tbody >
-						{[...debts]
+						{[...pools]
 							.slice((currentPage - 1) * 8, currentPage * 8)
-							.map((debt: any) => {
+							.map((pool: any, poolIndex: number) => {
 								return (
-									<Tr key={debt['synth_id']} >
-										<Td borderColor={'#3C3C3C'}>
+									<>
+
+									<Tr>
+										<Td borderColor={'transparent'}>
 											<Flex align={'center'} gap={2}>
-												<Image
+												{/* <Image
 													src={`/${debt.symbol}.png`}
 													width={35}
 													height={35}
 													// style={tknholdingImg}
 													alt="..."
-												/>
+												/> */}
 												<Box>
 													<Text
-														fontSize="sm"
+														fontSize="lg"
 														fontWeight="bold"
 														textAlign={'left'}>
-														{debt['name']
-															.split(' ')
-															.slice(1)
-															.join(' ')}
+														{pool['name']}
 													</Text>
 													<Text
 														fontSize="xs"
 														fontWeight="light"
 														textAlign={'left'}>
-														{debt['symbol']}
+														{pool['symbol']}
 													</Text>
 												</Box>
 											</Flex>
 										</Td>
 
-										<Td borderColor={'#3C3C3C'}>
-												<Text
-													fontSize="sm"
-													// fontWeight="bold"
-													textAlign={'left'}>
-													{(isConnected || isEvmConnected)
-														? dollarFormatter.format((debt.price))
-														: '-'}{' '}
-												</Text>
-										</Td>
-										<Td maxW={'110px'} borderColor={'#3C3C3C'}>
+										
+										<Td maxW={'110px'} borderColor={'transparent'}>
 											<Box>
 												<Text
 													fontSize="sm"
 													// fontWeight="bold"
 													textAlign={'left'}>
 													{(isConnected || isEvmConnected)
-														? tokenFormatter.format(
-																debt.amount?.[0] / 1e18
-														  )
-														: '-'}{' '}
-													{debt['symbol']}
-												</Text>
-												<Text
-													fontSize="xs"
-													// fontWeight="bold"
-													textAlign={'left'}>
-													{(isConnected || isEvmConnected)
 														? dollarFormatter.format(
-																(debt.amount?.[0] * debt.price) /
-																	1e18
+																pool.balance / 1e18
 														  )
 														: '-'}{' '}
+													{pool['symbol']}
 												</Text>
+												
 											</Box>
 										</Td>
-										<Td borderColor={'#3C3C3C'}>
+										<Td borderColor={'transparent'}>
 											<Text fontSize={'sm'}>
 												{dollarFormatter.format(
-													((debt.liquidity ??
-														0) * debt.price) / 1e18
+													pool.totalBorrowBalanceUSD
 												)}
 											</Text>
 										</Td>
-										<Td isNumeric borderColor={'#3C3C3C'}>
+										<Td borderColor={'transparent'}>
+												<Text
+													fontSize="sm"
+													// fontWeight="bold"
+													textAlign={'left'}>
+													{pool.maximumLTV/100}{' '}
+												</Text>
+										</Td>
+										<Td isNumeric borderColor={'transparent'}>
 											<Flex alignItems={'end'} justify='end' gap={2}>
-												<IssueModel asset={debt} handleIssue={handleIssue} />
-												<RepayModel asset={debt} handleRepay={handleRepay} />
+												<IssueModel asset={pool} handleIssue={handleIssue} />
+												<RepayModel asset={pool} handleRepay={handleRepay} />
 											</Flex>
 										</Td>
 									</Tr>
+
+									<Tr >
+										<Td  borderColor={'#3C3C3C'} colSpan={5}>
+											<Flex align='center' >
+													{pool._mintedTokens.map((token: any, index: number) => (
+														<>
+														<Box w={token._totalSupplyUSD/pool.totalBorrowBalanceUSD*100 +'%'} >
+															<Box minH='40px'>
+																<Flex align={'center'} gap={1} display={token._totalSupplyUSD/pool.totalBorrowBalanceUSD > 0.05 ? 'flex':'none'}>
+																	<Image src={`/icons/${token.symbol}.png`} height={'40px'} width={'40px'} alt=''/>
+																	<Text fontSize={'xs'} my={1}>{token.symbol}</Text>
+																</Flex>
+															</Box>
+														<Box h={'8px'} bgColor={TOKEN_COLORS[token.symbol]} mt={'0px'}></Box>
+														</Box>
+														</>
+													))}
+												<Text fontSize={'sm'} ml={6}>+ {extraTokens[poolIndex]} more...</Text>
+
+											</Flex>
+
+										</Td>
+									</Tr>
+
+									</>
 								);
 							})}
+
 					</Tbody>
 				</Table>
 			</TableContainer>
 
-			<Flex justify={'center'}>
+			{/* <Flex justify={'center'}>
 				<Pagination
 					pagesCount={pagesCount}
 					currentPage={currentPage}
@@ -220,9 +253,10 @@ const IssuanceTable = ({handleChange}: any) => {
 						</PaginationNext>
 					</PaginationContainer>
 				</Pagination>
-			</Flex>
+			</Flex> */}
 		</Skeleton>
 	);
 };
 
 export default IssuanceTable;
+

@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
-import { WalletContext } from '../../components/WalletContextProvider';
+import { WalletContext } from '../../components/context/WalletContextProvider';
 import {
 	Table,
 	Thead,
@@ -25,7 +25,7 @@ import React from 'react';
 import PoolPie from '../../components/charts/PoolPie';
 import axios from 'axios';
 import PoolTable from '../../components/charts/PoolTable';
-import { AppDataContext } from '../../components/AppDataProvider';
+import { AppDataContext } from '../../components/context/AppDataProvider';
 import Link from 'next/link';
 import Head from 'next/head';
 import { Endpoints } from '../../src/const';

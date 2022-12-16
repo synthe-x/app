@@ -15,7 +15,7 @@ import { useContext, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Swap from '../components/Swap';
 import ExchangeSideBar from '../components/TradingSideBar';
-import { AppDataContext } from '../components/AppDataProvider';
+import { AppDataContext } from '../components/context/AppDataProvider';
 import index from './pool/index';
 
 function Exchange() {

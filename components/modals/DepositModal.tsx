@@ -39,9 +39,9 @@ const Big = require('big.js');
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { getAddress, getContract } from '../../src/contract';
 import { useEffect, useContext } from 'react';
-import { WalletContext } from '../WalletContextProvider';
+import { WalletContext } from '../context/WalletContextProvider';
 import { BiPlusCircle } from 'react-icons/bi';
-import { AppDataContext } from '../AppDataProvider';
+import { AppDataContext } from '../context/AppDataProvider';
 
 const DepositModal = ({ asset, handleDeposit }: any) => {
 	const balance = asset.walletBalance / (10**asset.decimal)
@@ -195,7 +195,7 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 							<Box>
 								<InputGroup size="md" alignItems={'center'}>
 									<Image
-										src={`/${asset.symbol}.png`}
+										src={`/icons/${asset.symbol}.png`}
 										alt=""
 										width="35"
 										height={35}
@@ -236,7 +236,7 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 						) : (
 							<Flex my={4} gap={5}>
 								<Image
-									src={`/${asset.symbol}.png`}
+									src={`/icons/${asset.symbol}.png`}
 									alt=""
 									width="35"
 									height={35}

@@ -19,15 +19,16 @@ import { useContext, useEffect, useState } from 'react';
 import { getContract, send } from '../src/contract';
 import { useAccount } from 'wagmi';
 import web3 from 'web3';
-import { WalletContext } from '../components/WalletContextProvider';
+import { WalletContext } from './context/WalletContextProvider';
 import { MdOutlineSwapVert } from 'react-icons/md';
 import TradingChart from './charts/TradingChart';
-import { AppDataContext } from './AppDataProvider';
+import { AppDataContext } from './context/AppDataProvider';
 import axios from 'axios';
 import Head from 'next/head';
 import Image from 'next/image';
 import { BsArrowRightCircle } from 'react-icons/bs';
 import { ChainID } from '../src/chains';
+import { ethers } from 'ethers';
 const Big = require('big.js');
 
 function Swap({handleChange}: any) {
@@ -47,7 +48,7 @@ function Swap({handleChange}: any) {
 	const updateInputAmount = (e: any) => {
 		setInputAmount(e.target.value);
 		let outputAmount =
-			(e.target.value * inputToken().price) / outputToken().price;
+			(e.target.value * inputToken().lastPriceUSD) / outputToken().lastPriceUSD;
 		setOutputAmount(outputAmount);
 	};
 
@@ -58,18 +59,15 @@ function Swap({handleChange}: any) {
 		setInputAssetIndex(e.target.value);
 		// calculate output amount
 		let _outputAmount =
-			(inputAmount * inputToken(e.target.value).price) /
-			outputToken().price;
+			(inputAmount * inputToken(e.target.value).lastPriceUSD) /
+			outputToken().lastPriceUSD;
 		setOutputAmount(_outputAmount);
 	};
 
 	const updateOutputAmount = (e: any) => {
 		setOutputAmount(e.target.value);
 		let inputAmount =
-			(e.target.value *
-				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]
-					.price) /
-			(pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex].price;
+			(e.target.value * pools[tradingPool]._mintedTokens[outputAssetIndex].lastPriceUSD) / pools[tradingPool]._mintedTokens[inputAssetIndex].lastPriceUSD;
 		setInputAmount(inputAmount);
 	};
 
@@ -80,8 +78,8 @@ function Swap({handleChange}: any) {
 		setOutputAssetIndex(e.target.value);
 		// calculate input amount
 		let _inputAmount =
-			(outputAmount * outputToken(e.target.value).price) /
-			inputToken().price;
+			(outputAmount * outputToken(e.target.value).lastPriceUSD) /
+			inputToken().lastPriceUSD;
 		setInputAmount(_inputAmount);
 	};
 
@@ -101,11 +99,16 @@ function Swap({handleChange}: any) {
 		setConfirmed(false);
 		setHash(null);
 		setResponse('');
-		let contract = await getContract('System', chain);
+		let contract = await getContract('SyntheX', chain);
+		console.log(pools[tradingPool].id, 
+			pools[tradingPool]._mintedTokens[inputAssetIndex].id,
+			ethers.utils.parseEther(inputAmount.toString()),
+			pools[tradingPool]._mintedTokens[outputAssetIndex].id);
 		send(contract, 'exchange', [
-			tradingPool, (pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex].synth_id,
-				web3.utils.toWei(inputAmount.toString()),
-				(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex].synth_id
+			pools[tradingPool].id, 
+			pools[tradingPool]._mintedTokens[inputAssetIndex].id,
+			pools[tradingPool]._mintedTokens[outputAssetIndex].id,
+			ethers.utils.parseEther(inputAmount.toString()),
 		], chain)
 		.then(async (res: any) => {
 			setLoading(false);
@@ -117,10 +120,12 @@ function Swap({handleChange}: any) {
 				setHash(res.hash);
 				await res.wait(1);
 				setConfirmed(true);
+				handleExchange(inputToken().id, outputToken().id, Big(inputAmount).mul(10**18).toString(), Big(outputAmount).mul(10**18).toString());
 				setResponse('Transaction Successful!');
 			}
 		})
 		.catch((err: any) => {
+			console.log('err', err)
 			setLoading(false);
 			setConfirmed(true);
 			setResponse('Transaction failed. Please try again!');
@@ -163,78 +168,54 @@ function Swap({handleChange}: any) {
 	const { isConnected, tronWeb } = useContext(WalletContext);
 	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
-	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter, updateSynthWalletBalance, updateSynthAmount } = useContext(AppDataContext);
+	const { synths, tradingPool, pools, tradingBalanceOf, tokenFormatter, updateSynthBalance } = useContext(AppDataContext);
 
 	const handleExchange = (src: string, dst: string, srcValue: string, dstValue: string) => {
-		updateSynthAmount(dst, tradingPool, dstValue, false)
-		updateSynthAmount(src, tradingPool, srcValue, true)
+		updateSynthBalance(dst, dstValue, false)
+		updateSynthBalance(src, srcValue, true)
 		setNullValue(!nullValue)
 		handleChange()
 	}
 
 	useEffect(() => {
 		if (
-			inputAssetIndex > 1 &&
-			(pools[tradingPool].poolSynth_ids ?? synths).length <
-				inputAssetIndex
+			inputAssetIndex > 1 && pools[tradingPool]._mintedTokens.length < inputAssetIndex
 		) {
 			setInputAssetIndex(0);
 		}
 		if (
-			outputAssetIndex > 1 &&
-			(pools[tradingPool].poolSynth_ids ?? synths).length <
-				outputAssetIndex
+			outputAssetIndex > 1 && pools[tradingPool]._mintedTokens.length < outputAssetIndex
 		) {
-			setOutputAssetIndex(
-				(pools[tradingPool].poolSynth_ids ?? synths).length - 1
-			);
+			setOutputAssetIndex(pools[tradingPool]._mintedTokens.length - 1);
 		}
 	}, [inputAssetIndex, outputAssetIndex, pools, synths, tradingPool]);
 
 	const handleMax = () => {
-		let _inputAsset = (pools[tradingPool].poolSynth_ids ?? synths)[
-			inputAssetIndex
-		];
-		let _inputAmount =
-			(0.999 * tradingBalanceOf(_inputAsset.synth_id)) /
-			10 ** (_inputAsset.decimal ?? 18);
+		let _inputAmount = inputToken().balance / 1e18
 		setInputAmount(_inputAmount);
-		let _outputAmount =
-			(_inputAmount *
-				(pools[tradingPool].poolSynth_ids ?? synths)[inputAssetIndex]!
-					.price) /
-			(pools[tradingPool].poolSynth_ids ?? synths)[outputAssetIndex]!
-				.price;
+		let _outputAmount = (_inputAmount * inputToken().lastPriceUSD) / outputToken().lastPriceUSD;
 		setOutputAmount(_outputAmount);
 	};
 
 	const inputToken = (_inputAssetIndex = inputAssetIndex) => {
-		if(!pools[tradingPool]) return {synth_id: '', price: 0}
- 		if (pools[tradingPool].poolSynth_ids) {
-			return pools[tradingPool].poolSynth_ids[_inputAssetIndex];
-		} else {
-			return synths[_inputAssetIndex];
-		}
+		if(!pools[tradingPool]) return null
+		return pools[tradingPool]._mintedTokens[_inputAssetIndex];
 	};
 
 	const outputToken = (_outputAssetIndex = outputAssetIndex) => {
-		if(!pools[tradingPool]) return {synth_id: '', price: 0}
-		if (pools[tradingPool].poolSynth_ids) {
-			return pools[tradingPool].poolSynth_ids[_outputAssetIndex];
-		} else {
-			return synths[_outputAssetIndex];
-		}
+		if(!pools[tradingPool]) return null
+		return pools[tradingPool]._mintedTokens[_outputAssetIndex];
 	};
 
 	const swapInputExceedsBalance = () => {
 		if (inputAmount) {
 			return (
-				inputAmount >
-				(tradingBalanceOf(inputToken().synth_id) / 10 ** 18)
+				inputAmount > inputToken().balance / 1e18
 			);
 		}
 		return false;
 	}
+
 
 	return (
 		<>
@@ -242,9 +223,9 @@ function Swap({handleChange}: any) {
 				{tokenFormatter && <title>
 					{' '}
 					{tokenFormatter.format(
-						(inputToken()?.price / outputToken()?.price)
+						(inputToken()?.lastPriceUSD / outputToken()?.lastPriceUSD)
 					)}{' '}
-					{outputToken().symbol}/{inputToken().symbol} | Synthex
+					{outputToken()?.symbol}/{inputToken()?.symbol} | Synthex
 				</title> }
 				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
 			</Head>
@@ -262,7 +243,7 @@ function Swap({handleChange}: any) {
 						<Flex gap={2}>
 							<Box mt={2}>
 								<Image
-									src={'/' + inputToken()?.symbol + '.png'}
+									src={'/icons/' + inputToken()?.symbol + '.png'}
 									height={'50px'}
 									width={'50px'}
 									style={{
@@ -283,15 +264,9 @@ function Swap({handleChange}: any) {
 									display={'flex'}
 									alignItems="center"
 									gap={1}>
-									{inputToken()
-										?.name.split(' ')
-										.slice(1)
-										.join(' ')}{' '}
+									{inputToken()?.name}{' '}
 									<BsArrowRightCircle />{' '}
-									{outputToken()
-										?.name.split(' ')
-										.slice(1)
-										.join(' ')}
+									{outputToken()?.name}
 								</Text>
 							</Box>
 						</Flex>
@@ -300,8 +275,8 @@ function Swap({handleChange}: any) {
 							<Flex flexDir={'column'} align={'end'} gap={1}>
 								<Text fontSize={'3xl'} fontWeight="bold">
 									{tokenFormatter.format(
-										inputToken()?.price /
-											outputToken()?.price
+										inputToken()?.lastPriceUSD /
+											outputToken()?.lastPriceUSD
 									)}
 								</Text>
 								<Text fontSize={'sm'}>
@@ -313,12 +288,12 @@ function Swap({handleChange}: any) {
 					</Flex>
 					<TradingChart
 						input={
-							(pools[tradingPool].poolSynth_ids ?? synths)[
+							(pools[tradingPool]._mintedTokens)[
 								inputAssetIndex
 							]?.symbol
 						}
 						output={
-							(pools[tradingPool].poolSynth_ids ?? synths)[
+							(pools[tradingPool]._mintedTokens)[
 								outputAssetIndex
 							]?.symbol
 						}
@@ -354,12 +329,12 @@ function Swap({handleChange}: any) {
 							height="50px"
 							value={inputAssetIndex}
 							onChange={updateInputAssetIndex}>
-							{(pools[tradingPool].poolSynth_ids ?? synths).map(
+							{pools[tradingPool]._mintedTokens.map(
 								(synth: any, index: number) => (
 									<option
-										key={synth['synth_id']}
+										key={synth.id}
 										value={index}>
-										{synth['symbol']}
+										{synth.symbol}
 									</option>
 								)
 							)}
@@ -392,10 +367,10 @@ function Swap({handleChange}: any) {
 							height="50px"
 							value={outputAssetIndex}
 							onChange={updateOutputAssetIndex}>
-							{(pools[tradingPool].poolSynth_ids ?? synths).map(
+							{(pools[tradingPool]._mintedTokens ?? synths).map(
 								(synth: any, index: number) => (
 									<option
-										key={synth['synth_id']}
+										key={synth['id']}
 										value={index}>
 										{synth['symbol']}
 									</option>

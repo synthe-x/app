@@ -2,10 +2,10 @@ import { Box, Button, Divider, Flex, Text, Image } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { getContract } from '../../src/contract';
-import { AppDataContext } from '../AppDataProvider';
+import { AppDataContext } from '../context/AppDataProvider';
 import DepositModal from '../modals/DepositModal2';
 import WithdrawModal from '../modals/WithdrawModal';
-import { WalletContext } from '../WalletContextProvider';
+import { WalletContext } from '../context/WalletContextProvider';
 
 export default function Collateral({ handleChange }: any) {
 	const [nullValue, setNullValue] = useState(false);
@@ -32,15 +32,12 @@ export default function Collateral({ handleChange }: any) {
 	const handleDeposit = (collateral: string, value: string) => {
 		updateCollateralWalletBalance(collateral, value, true)
 		updateCollateralAmount(collateral, value, false)
-		console.log(1, collaterals)
 		setNullValue(!nullValue);
-		console.log(2, collaterals)
 		handleChange()
-		console.log(3, collaterals)
 	}
 
 	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
-	
+
 	return (
 		<Box bgColor="#171717" pb={4} rounded={15} height='100%'>
 			<Flex
@@ -64,6 +61,8 @@ export default function Collateral({ handleChange }: any) {
 					<DepositModal handleDeposit={handleDeposit}/>
 				</Box>
 			</Flex>
+			<Box>
+
 			{collaterals.map((collateral, index) => (
 				<>
 				<Flex
@@ -74,7 +73,7 @@ export default function Collateral({ handleChange }: any) {
 					>
 					<Flex>
 						<Image
-							src={`/${collateral?.symbol}_.png`}
+							src={`/icons/${collateral.inputToken.symbol}.png`}
 							width={35}
 							height={35}
 							alt="logo"
@@ -92,11 +91,11 @@ export default function Collateral({ handleChange }: any) {
 								textAlign={'left'} color='primary'>
 								{(isConnected || isEvmConnected)
 									? tokenFormatter.format(
-											collateral.amount /
-												10 ** collateral.decimal
+											collateral.balance /
+												10 ** collateral.inputToken.decimals
 									  )
 									: '-'}{' '}
-								{collateral['symbol']}
+								{collateral.inputToken.symbol}
 							</Text>
 							
 						</Box>
@@ -110,6 +109,8 @@ export default function Collateral({ handleChange }: any) {
 				{(index != (collaterals.length - 1)) && <Divider width={'90%'} mx='auto' borderColor={'#3C3C3C'} />}
 				</>
 			))}
+			</Box>
+
 		</Box>
 	);
 }

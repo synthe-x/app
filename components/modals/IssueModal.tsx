@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
 	Button,
 	Box,
@@ -14,8 +14,9 @@ import {
 	Progress,
 	Image,
 	Alert,
-	AlertIcon
-} from '@chakra-ui/react';
+	AlertIcon,
+	Select,
+} from "@chakra-ui/react";
 
 import {
 	Modal,
@@ -25,25 +26,29 @@ import {
 	ModalFooter,
 	ModalBody,
 	ModalCloseButton,
-} from '@chakra-ui/react';
-import axios from 'axios';
+} from "@chakra-ui/react";
+import axios from "axios";
 
-import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract, send } from '../../src/contract';
-import { useContext } from 'react';
-import { WalletContext } from '../WalletContextProvider';
-import { BiPlusCircle } from 'react-icons/bi';
-import { AppDataContext } from '../AppDataProvider';
-import { ChainID } from '../../src/chains';
-import { useAccount } from 'wagmi';
+import { AiOutlineInfoCircle } from "react-icons/ai";
+import { getContract, send } from "../../src/contract";
+import { useContext } from "react";
+import { WalletContext } from "../context/WalletContextProvider";
+import { BiPlusCircle } from "react-icons/bi";
+import { AppDataContext } from "../context/AppDataProvider";
+import { ChainID } from "../../src/chains";
+import { useAccount } from "wagmi";
+import { dollarFormatter, tokenFormatter } from '../../src/const';
+import Big from "big.js";
 
 const DepositModal = ({ asset, handleIssue }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	
+
 	const [loading, setLoading] = useState(false);
 	const [response, setResponse] = useState<string | null>(null);
 	const [hash, setHash] = useState(null);
 	const [confirmed, setConfirmed] = useState(false);
+
+	const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
 
 	const [amount, setAmount] = React.useState(0);
 
@@ -60,7 +65,8 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const { chain, availableToBorrow, explorer } = useContext(AppDataContext);
+	const { chain, availableToBorrow, explorer, togglePoolEnabled, adjustedCollateral, adjustedDebt } =
+		useContext(AppDataContext);
 
 	const setMax = () => {
 		// 1/mincRatio * collateralBalance = max amount of debt
@@ -68,8 +74,8 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 	};
 
 	const max = () => {
-		return (0.999 * availableToBorrow()) / asset.price
-	}
+		return (adjustedCollateral-adjustedDebt)/asset._mintedTokens[selectedAssetIndex]?.lastPriceUSD;
+	};
 
 	// 1/1.69 - 1/1.5 = 0.58823529411764705882352941176471 - 0.66666666666666666666666666666667 = -0.07843137254901960784313725490196
 	const issue = async () => {
@@ -77,14 +83,14 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 		setLoading(true);
 		setConfirmed(false);
 		setHash(null);
-		setResponse('');
+		setResponse("");
 
-		let system = await getContract('System', chain);
-		let value = BigInt(amount * 10 ** asset['decimal']).toString();
-		send(system, 'borrow', [asset['synth_id'], value], chain)
+		let synthex = await getContract("SyntheX", chain);
+		let value = BigInt(amount * 10 ** asset.inputToken.decimals).toString();
+		send(synthex, asset.isEnabled ? 'issue' : 'enterAndIssue', [asset.id, asset._mintedTokens[selectedAssetIndex].id, value], chain)
 			.then(async (res: any) => {
 				setLoading(false);
-				setResponse('Transaction sent! Waiting for confirmation...');
+				setResponse("Transaction sent! Waiting for confirmation...");
 				if (chain == ChainID.NILE) {
 					setHash(res);
 					checkResponse(res);
@@ -92,21 +98,22 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 					setHash(res.hash);
 					await res.wait(1);
 					setConfirmed(true);
-					handleIssue(asset['synth_id'], BigInt(amount * 10 ** asset['decimal']).toString())
-					setResponse('Transaction Successful!');
+					handleIssue(asset._mintedTokens[selectedAssetIndex].id, value);
+					if (!asset.isEnabled) togglePoolEnabled(asset.id);
+					setResponse("Transaction Successful!");
 				}
 			})
 			.catch((err: any) => {
 				setLoading(false);
 				setConfirmed(true);
-				setResponse('Transaction failed. Please try again!');
+				setResponse("Transaction failed. Please try again!");
 			});
 	};
 
 	const checkResponse = (tx_id: string, retryCount = 0) => {
 		axios
 			.get(
-				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
+				"https://nile.trongrid.io/wallet/gettransactionbyid?value=" +
 					tx_id
 			)
 			.then((res) => {
@@ -117,9 +124,12 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 					}, 2000);
 				} else {
 					setConfirmed(true);
-					if (res.data.ret[0].contractRet == 'SUCCESS') {
-						setResponse('Transaction Successful!');
-						handleIssue(asset['synth_id'], BigInt(amount * 10 ** asset['decimal']).toString())
+					if (res.data.ret[0].contractRet == "SUCCESS") {
+						setResponse("Transaction Successful!");
+						handleIssue(
+							asset["synth_id"],
+							BigInt(amount * 10 ** asset["decimal"]).toString()
+						);
 					} else {
 						if (retryCount < 3)
 							setTimeout(() => {
@@ -127,7 +137,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 							}, 2000);
 						else {
 							setResponse(
-								'Transaction Failed. Please try again.'
+								"Transaction Failed. Please try again."
 							);
 						}
 					}
@@ -135,8 +145,12 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 			});
 	};
 
-	const {isConnected, tronWeb} = useContext(WalletContext)
-	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
+	const { isConnected, tronWeb } = useContext(WalletContext);
+	const {
+		address: evmAddress,
+		isConnected: isEvmConnected,
+		isConnecting: isEvmConnecting,
+	} = useAccount();
 
 	return (
 		<Box>
@@ -148,30 +162,51 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 				aria-label={''}
 				isRound={true}></IconButton> */}
 
-
-				<Button onClick={onOpen} variant={'ghost'} size='sm' bgColor={'secondary'} rounded={100} color="white" my={1} _hover={{bgColor: 'gray.700'}}>
-				<Text mr={1}>Borrow</Text> <BiPlusCircle size={20} /> 
-				</Button>
-				<Modal isCentered isOpen={isOpen} onClose={_onClose}>
+			<Button
+				onClick={onOpen}
+				variant={"ghost"}
+				size="sm"
+				bgColor={"secondary"}
+				rounded={100}
+				color="white"
+				my={1}
+				_hover={{ bgColor: "gray.700" }}
+			>
+				<Text mr={1}>Issue</Text> <BiPlusCircle size={20} />
+			</Button>
+			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'} bgColor="">
+				<ModalContent width={"30rem"} bgColor="">
 					<ModalCloseButton />
-					<ModalHeader>Issue {asset['symbol']}</ModalHeader>
+					<ModalHeader>Issue {asset.name}</ModalHeader>
 					<ModalBody>
-						<InputGroup size="md" alignItems={'center'} >
+						
+						<Flex justify={'space-between'}>
+							<Text my={1} fontSize='sm'>Price: {dollarFormatter.format(asset._mintedTokens[selectedAssetIndex]?.lastPriceUSD)}</Text>
+							<Text my={1} fontSize='sm'>Available to borrow: {tokenFormatter.format((adjustedCollateral-adjustedDebt)/asset._mintedTokens[selectedAssetIndex]?.lastPriceUSD)} {asset._mintedTokens[selectedAssetIndex]?.symbol}</Text>
+						</Flex>
+						<Select my={1} placeholder="Select asset to issue" value={selectedAssetIndex} onChange={(e) => setSelectedAssetIndex(parseInt(e.target.value))}>
+							{asset._mintedTokens.map((token: any, index: number) => (
+								<option value={index} key={index}>
+									{token.symbol}
+								</option>
+							))}
+						</Select>
+						<InputGroup size="md" alignItems={"center"} my={1}>
 							<Image
-								src={`/${asset.symbol}.png`}
+								src={`/icons/${asset.symbol}.png`}
 								alt=""
 								width="35"
 								height={35}
-								mr={2}
 							/>
 							<Input
 								type="number"
 								placeholder="Enter amount"
 								onChange={changeAmount}
 								value={amount}
-								disabled={!(isConnected || isEvmConnected)}
+								disabled={
+									!(isConnected || isEvmConnected)
+								}
 							/>
 							<InputRightElement width="4.5rem">
 								<Button
@@ -179,46 +214,68 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 									size="sm"
 									mr={1}
 									onClick={setMax}
-									disabled={!(isConnected || isEvmConnected)}
-									>
+									disabled={
+										!(isConnected || isEvmConnected)
+									}
+								>
 									Set Max
 								</Button>
 							</InputRightElement>
 						</InputGroup>
 						<Flex mt={4} justify="space-between">
-							<Text fontSize={'xs'} color="gray.400">
-								1 {asset['symbol']} = {asset['price']} USD
+							<Text fontSize={"xs"} color="gray.400">
+								1 {asset["symbol"]} = {asset["price"]}{" "}
+								USD
 							</Text>
-							<Text fontSize={'xs'} color="gray.400">
-								Stability Fee ={' '}
-								{(parseFloat(asset['apy'])).toFixed(2)}% /
+							<Text fontSize={"xs"} color="gray.400">
+								Stability Fee ={" "}
+								{parseFloat(asset["apy"]).toFixed(2)}% /
 								Year
 							</Text>
 						</Flex>
 						<Button
-							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
+							disabled={
+								loading ||
+								!(isConnected || isEvmConnected) ||
+								!amount ||
+								amount == 0 ||
+								amount > max()
+							}
 							isLoading={loading}
-							loadingText='Please sign the transaction'
-							bgColor='#3EE6C4'
+							loadingText="Please sign the transaction"
+							bgColor="#3EE6C4"
 							width="100%"
 							mt={4}
-							onClick={issue}>
-							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Collateral</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Issue</> : <>Please connect your wallet</>} 
+							onClick={issue}
+						>
+							{isConnected || isEvmConnected ? (
+								amount > max() ? (
+									<>Insufficient Collateral</>
+								) : !amount || amount == 0 ? (
+									<>Enter amount</>
+								) : (
+									<>Issue</>
+								)
+							) : (
+								<>Please connect your wallet</>
+							)}
 						</Button>
-						
+				
+
 						{response && (
-							<Box width={'100%'} my={2} color="black">
+							<Box width={"100%"} my={2} color="black">
 								<Alert
 									status={
-										response.includes('confirm')
-											? 'info'
+										response.includes("confirm")
+											? "info"
 											: confirmed &&
-											  response.includes('Success')
-											? 'success'
-											: 'error'
+											  response.includes("Success")
+											? "success"
+											: "error"
 									}
 									variant="subtle"
-									rounded={6}>
+									rounded={6}
+								>
 									<AlertIcon />
 									<Box>
 										<Text fontSize="md" mb={0}>
@@ -226,13 +283,11 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 										</Text>
 										{hash && (
 											<Link
-												href={
-													explorer() +
-													hash
-												}
-												target="_blank">
-												{' '}
-												<Text fontSize={'sm'}>
+												href={explorer() + hash}
+												target="_blank"
+											>
+												{" "}
+												<Text fontSize={"sm"}>
 													View on explorer
 												</Text>
 											</Link>
