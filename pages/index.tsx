@@ -4,8 +4,8 @@ import {
 } from '@chakra-ui/react';
 
 import IssuanceTable from '../components/IssuanceTable';
-import Collateral from '../components/App/Collateral';
-import Borrow from '../components/App/Borrow';
+import Collateral from '../components/app/Collateral';
+import Borrow from '../components/app/Borrow';
 import Head from 'next/head';
 import { useState } from 'react';
 
