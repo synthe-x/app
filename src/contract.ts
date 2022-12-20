@@ -7,7 +7,7 @@ export function getABI(contractName: string) {
   return contractBuild.abi;
 }
 
-export function getAddress(contractName: string, chain: number = ChainID.NILE) {
+export function getAddress(contractName: string, chain: number = ChainID.ARB_GOERLI) {
   return ADDRESSES[chain][contractName]
 }
 
@@ -37,6 +37,6 @@ export function send(contract: any, method: string, params: any[], chain: number
   if(chain == ChainID.NILE){
     return contract[method](...params).send();
   } else {
-    return contract[method](...params);
+    return contract[method](...params, {gasPrice: ethers.utils.parseUnits('1.6', 'gwei')});
   }
 }

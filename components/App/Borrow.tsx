@@ -1,8 +1,12 @@
-import { Box, Flex, Text, Divider } from '@chakra-ui/react';
-import React, { useContext } from 'react';
+import { Box, Flex, Text, Divider, Button } from '@chakra-ui/react';
+import React, { useContext, useState } from 'react';
 import { AppDataContext } from '../context/AppDataProvider';
 import Stats from './Stats';
 import { tokenFormatter } from '../../src/const';
+import {useEffect} from 'react';
+import { useAccount } from 'wagmi';
+import { call, getABI, getAddress, getContract } from '../../src/contract';
+import { ethers } from 'ethers';
 
 export default function Borrow() {
 	const {
@@ -13,7 +17,47 @@ export default function Borrow() {
 		minCRatio,
 		safeCRatio,
 		dollarFormatter,
+		chain
 	} = useContext(AppDataContext);
+
+	const [synAccrued, setSynAccrued] = useState<any>(null);
+	const [claiming, setClaiming] = useState(false);
+
+	const {
+		address,
+		isConnected,
+		isConnecting,
+	} = useAccount();
+
+	useEffect(() => {
+		if (!synAccrued && address) {
+			(async () => {
+				const provider = new ethers.providers.Web3Provider(
+					(window as any).ethereum!,
+					"any"
+				);
+				const synthex = await getContract("SyntheX", chain);
+				synthex.callStatic.synAccrued(address)
+					.then((result: any) => {
+						setSynAccrued(result.toString());
+					})
+			})();
+		}
+	})
+
+	const claim = async () => {
+		setClaiming(true);
+		const synthex = await getContract("SyntheX", chain);
+		synthex.claimSYN1(address)
+			.then(async (result: any) => {
+				await result.wait(1);
+				setClaiming(false);
+			})
+			.catch((err: any) =>{
+				console.log(err);
+				setClaiming(false);
+			})
+	}
 
 	return (
 		<Flex
@@ -40,17 +84,18 @@ export default function Borrow() {
 							{dollarFormatter?.format(availableToBorrow())}
 						</Text>
 					</Box> */}
-					{/* <Box textAlign={'right'}>
-						<Text fontSize={'sm'}>Health Factor</Text>
+					<Box textAlign={'right'}>
+						<Text fontSize={'sm'}>Claim Rewards</Text>
 						<Text fontSize={'2xl'} fontWeight="bold">
-							{tokenFormatter?.format(adjustedCollateral/adjustedDebt)}
+							{tokenFormatter?.format(synAccrued/1e18)} $SYN
 						</Text>
-					</Box> */}
+						<Button color={'black'} size='sm' mt={1} width='100%' onClick={claim} isLoading={claiming} loadingText='Claiming'>Claim 💰</Button>
+					</Box>
 				</Flex>
 				{/* <Stats/> */}
 			</Flex>
 
-			<Divider mb={4} borderColor={'#3C3C3C'}/>
+			{/* <Divider mb={4} borderColor={'#3C3C3C'}/> */}
 			<Flex flexDir={'column'} justify='space-between' height={'50%'} >
 				<Flex justify={'space-between'}>
 					{/* <Box>
@@ -75,13 +120,13 @@ export default function Borrow() {
 					</Box> */}
 				</Flex>
 
-				{/* <Box textAlign={'right'} mt={5}>
-					<Text mb={1.5} fontSize={'sm'} color='gray'>Safe Minimum: 130 %</Text>
+				<Box textAlign={'right'} mb={4}>
+					<Text mb={1.5} fontSize={'sm'} color='gray'>Safe Minimum: 1.30</Text>
 					<Flex width={'100%'}>
-						<Box minH={4} roundedLeft={10} bgColor='primary' width={(((100 * totalCollateral) / totalDebt) - safeCRatio)/safeCRatio}></Box>
-						<Box minH={4} roundedRight={10} bgColor='gray.700' width={'100%'}></Box>
+						<Box minH={2} roundedLeft={10} bgColor='primary' width={100 * ((adjustedCollateral / adjustedDebt) - 1.3)/1.3}></Box>
+						<Box minH={2} roundedRight={10} bgColor='gray.700' width={'100%'}></Box>
 					</Flex>
-				</Box> */}
+				</Box>
 			</Flex>
 		</Flex>
 	);

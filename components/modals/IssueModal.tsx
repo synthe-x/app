@@ -172,7 +172,7 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 				my={1}
 				_hover={{ bgColor: "gray.700" }}
 			>
-				<Text mr={1}>Issue</Text> <BiPlusCircle size={20} />
+				<Text mr={1}>Mint</Text> <BiPlusCircle size={20} />
 			</Button>
 			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
@@ -224,13 +224,12 @@ const DepositModal = ({ asset, handleIssue }: any) => {
 						</InputGroup>
 						<Flex mt={4} justify="space-between">
 							<Text fontSize={"xs"} color="gray.400">
-								1 {asset["symbol"]} = {asset["price"]}{" "}
+								1 {asset._mintedTokens[selectedAssetIndex].symbol} = {asset._mintedTokens[selectedAssetIndex].lastPriceUSD}{" "}
 								USD
 							</Text>
 							<Text fontSize={"xs"} color="gray.400">
-								Stability Fee ={" "}
-								{parseFloat(asset["apy"]).toFixed(2)}% /
-								Year
+								Volatility Ratio ={" "}
+								{parseFloat(asset.maximumLTV) / 100}
 							</Text>
 						</Flex>
 						<Button

@@ -72,7 +72,9 @@ function AppDataProvider({ children }: any) {
 	const [minCRatio, setMinCRatio] = React.useState(130);
 	const [safeCRatio, setSafeCRatio] = React.useState(200);
 
-	const [chain, setChain] = React.useState(0);
+	const [chain, setChain] = React.useState(ChainID.ARB_GOERLI);
+
+	const [refresh, setRefresh] = React.useState(0);
 
 	React.useEffect(() => {
 		// fetchData(DUMMY_ADDRESS, ChainID.NILE);
@@ -147,7 +149,7 @@ function AppDataProvider({ children }: any) {
 			axios
 				.post(Endpoints[chainId], {
 					query: `{
-								markets(first: 5) {
+								markets(first: 5, orderBy: totalBorrowBalanceUSD, orderDirection: desc) {
 									id
 									name
 									canBorrowFrom
@@ -161,6 +163,7 @@ function AppDataProvider({ children }: any) {
 									totalBorrowBalanceUSD
 									inputTokenPriceUSD
 									maximumLTV
+									_rewardSpeed
 									_mintedTokens (orderBy: _totalSupplyUSD, orderDirection: desc) {
 										id
 										name
@@ -174,6 +177,13 @@ function AppDataProvider({ children }: any) {
 					variables: {},
 				})
 				.then(async (res) => {
+					if(res.data.errors){
+						setDataFetchError(
+							"Failed to fetch data. Please refresh the page."
+						);
+						reject(res.data.errors);
+						return;
+					}
 					const markets = res.data.data.markets;
 					let _collaterals = [];
 					let _pools = [];
@@ -268,6 +278,7 @@ function AppDataProvider({ children }: any) {
 					_collaterals[i].id,
 					itf.encodeFunctionData("balanceOf", [_address]),
 				]);
+				console.log(_collaterals[i].id, _address);
 				calls.push([
 					_collaterals[i].id,
 					itf.encodeFunctionData("allowance", [
@@ -279,9 +290,9 @@ function AppDataProvider({ children }: any) {
 					getAddress("SyntheX", _chain),
 					synthexitf.encodeFunctionData("accountCollateralBalance", [
 						_address,
+						_collaterals[i].id,
 					]),
 				]);
-				console.log(_collaterals[i].id, _address);
 				calls.push([
 					getAddress("SyntheX", _chain),
 					synthexitf.encodeFunctionData("collateralMembership", [
@@ -423,6 +434,7 @@ function AppDataProvider({ children }: any) {
 				).toString();
 			}
 		}
+		setRefresh(Math.random());
 		setCollaterals(_collaterals);
 	};
 
@@ -445,6 +457,7 @@ function AppDataProvider({ children }: any) {
 					.div(10 ** _collaterals[i].inputToken.decimals);
 
 				// update total collateral
+				setRefresh(Math.random());
 				if (isMinus) {
 					setTotalCollateral(
 						Big(totalCollateral).minus(amountUSD).toString()
@@ -466,7 +479,7 @@ function AppDataProvider({ children }: any) {
 				}
 			}
 		}
-		console.log("settin", _collaterals);
+		setRefresh(Math.random());
 		setCollaterals(_collaterals);
 	};
 
@@ -624,7 +637,6 @@ function AppDataProvider({ children }: any) {
 			let _synths = _pools[i]._mintedTokens;
 			for (let j = 0; j < _synths.length; j++) {
 				if (_synths[j].id == synthAddress) {
-					console.log("0");
 					_synths[j].balance = (
 						isMinus
 							? Big(_synths[j].balance).minus(amount)
@@ -657,7 +669,7 @@ function AppDataProvider({ children }: any) {
 				}
 			}
 			_pools[i]._mintedTokens = _synths;
-			console.log("done", _pools);
+			setRefresh(Math.random());
 			setPools(_pools);
 		}
 	};

@@ -50,6 +50,7 @@ import { ChainID } from "../../src/chains";
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
 import { tokenFormatter } from "../../src/const";
+import { BsPlusCircleFill } from "react-icons/bs";
 
 const CLAIM_AMOUNTS: any = {
 	WTRX: "100000000000",
@@ -106,7 +107,9 @@ const DepositModal = ({ handleDeposit }: any) => {
 			.mul(Big(10).pow(Number(asset().inputToken.decimals)))
 			.toFixed(0);
 
-		send(synthex, asset().isEnabled ? 'deposit': 'enterAndDeposit', [asset().id, value], chain)
+		console.log(asset().isEnabled);
+
+		send(synthex, 'enterAndDeposit', [asset().id, value], chain)
 			.then(async (res: any) => {
 				setLoading(false);
 				setResponse("Transaction sent! Waiting for confirmation...");
@@ -255,7 +258,7 @@ const DepositModal = ({ handleDeposit }: any) => {
 				onClick={onOpen}
 				_hover={{ bgColor: "gray.700", color: "white" }}
 			>
-				<Text mr={1}>Add</Text> <AiOutlinePlusCircle />
+				<Text mr={1}>Add</Text> <BiPlusCircle />
 			</Button>
 
 			<Modal isCentered isOpen={isOpen} onClose={_onClose}>

@@ -75,7 +75,7 @@ export default function _index({ children }: any) {
 	const router = useRouter();
 
 	const backgroundStyle = {
-		backgroundColor: '#0B0B0B'
+		backgroundColor: '#0D0D0D'
 	};
 
 	return (

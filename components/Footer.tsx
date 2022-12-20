@@ -69,7 +69,7 @@ export default function LargeWithAppLinksAndSocial() {
           spacing={4}
           justify={{ md: 'space-between' }}
           align={{ md: 'center' }}>
-          <Text fontSize={'sm'}>© 2022 ChainScore Limited. All rights reserved</Text>
+          <Text fontSize={'xs'} mb={1}>© 2022 SyntheX Finance. All rights reserved</Text>
           <Stack direction={'row'} spacing={6}>
             <Link target={'_blank'} href={'https://twitter.com/synthe_x'}>
               <FaTwitter />

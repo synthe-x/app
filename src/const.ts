@@ -22,7 +22,7 @@ export const ADDRESSES: any = {
 		WTRX: "0x6CF5B73CC04D54418686dc9FE389fc7b90ad0e89",
 	},
 	[ChainID.ARB_GOERLI]: {
-		SyntheX: "0xF5B32d7a0809BBB830F584CCfa8391ecA232Ffc2",
+		SyntheX: "0x241691dE5EDC2dfC16E93ff8A0445c2f8d3ec779",
 		Multicall: "0x511f64296fa72526231E5A55615d8e4eE5a2d4cF",
 	},
 };
@@ -64,7 +64,10 @@ export const TOKEN_COLORS: any = {
 	NVDAx: "#4CAF50",
 	GOOGLx: "#4285F4",
 	AMDx: "#00B10",
-	USDx: "#5677FB",
+	AAPLx: "#6B6B6B",
+	USDcx: "#5677FB",
+	USDsx: "#5677FB",
+	USDfx: "#5677FB",
 	EURx: "#FF8C00",
 	JPYx: "#3EE6C4",
 	GBPx: "#EF4255",

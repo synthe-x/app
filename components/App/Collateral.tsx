@@ -43,7 +43,7 @@ export default function Collateral({ handleChange }: any) {
 				flexDir={'column'}
 				justify="space-between"
 				height={'200px'}
-				bgColor="#fff"
+				bgColor="gray.100"
 				width={'100%'}
 				color="black"
 				p={'12px'}
