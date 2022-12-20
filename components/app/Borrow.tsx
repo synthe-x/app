@@ -1,7 +1,6 @@
 import { Box, Flex, Text, Divider, Button } from '@chakra-ui/react';
 import React, { useContext, useState } from 'react';
 import { AppDataContext } from '../context/AppDataProvider';
-import Stats from './Stats';
 import { tokenFormatter } from '../../src/const';
 import {useEffect} from 'react';
 import { useAccount } from 'wagmi';
