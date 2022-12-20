@@ -1,24 +1,13 @@
 import {
 	Box,
-	Text,
 	Flex,
-	Divider,
-	useColorMode,
-	Progress,
 } from '@chakra-ui/react';
-import Navbar from '../components/Navbar';
+
 import IssuanceTable from '../components/IssuanceTable';
-import CollateralTable from '../components/CollateralTable';
-import { useContext, useEffect, useState } from 'react';
-import { getContract } from '../src/utils';
-import { useAccount } from 'wagmi';
-import web3 from 'web3';
-import Chart from '../components/DonutChart';
-import axios from 'axios';
-import { WalletContext } from '../components/WalletContextProvider';
-import ConnectButton from '../components/ConnectButton';
-import { BiError, BiErrorAlt } from 'react-icons/bi';
-import { AppDataContext } from '../components/AppDataProvider';
+import Collateral from '../components/app/Collateral';
+import Borrow from '../components/app/Borrow';
+import Head from 'next/head';
+import { useState } from 'react';
 
 function App() {
 	const [nullValue, setNullValue] = useState(false);
@@ -27,15 +16,6 @@ function App() {
 		setNullValue(!nullValue);
 	};
 
-	const {
-		totalCollateral,
-		totalDebt,
-		availableToBorrow,
-		minCRatio,
-		safeCRatio,
-		dollarFormatter,
-	} = useContext(AppDataContext);
-
 	const TableStyle = {
 		px: '1rem',
 		pt: '1rem',
@@ -43,105 +23,39 @@ function App() {
 		width: { sm: '100%', md: '100%', lg: '50%' },
 		flex: '1',
 		minH: '200px',
-		bg: '#FFFFFF',
+		bg: '#171717',
+		color: '#fff',
 		borderRadius: '20px',
 		boxShadow: 'lg',
 	};
 
 	return (
 		<>
+			<Head>
+				<title>App | SyntheX</title>
+				<link rel="icon" type="image/x-icon" href="/logo32.png"></link>
+			</Head>
 			{
-				<Box mt={10} mb={20}>
+				<Flex flexDir={'column'} mt={10} mb={10} gap={3}>
 					<Flex
-						flexDirection={{ sm: 'column', md: 'column', lg: 'row' }}
-						mb={10}
+						flexDirection={{
+							sm: 'column',
+							md: 'column',
+							lg: 'row',
+						}}
 						color={'#fff'}
-						align="start"
-						
+						align="stretch" 
+						gap={3}
 						>
-						<Box
-							display={'flex'}
-							justifyContent="space-between"
-							mb={{ sm: '1rem', lg: '0' }}
-							width={{ sm: '100%', md: '50%' }}
-							>
-							<Flex
-								flexDir={'column'}
-								justify={{ sm: 'center', md: 'start' }}
-								align={{ sm: 'center', md: 'start' }}
-								w="100%">
-								<Box
-									w="7rem"
-									h="0.3rem"
-									bg="#36a2eb"
-									rounded={100}></Box>
-								<Text fontSize={'sm'}>Collateral Balance</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									{dollarFormatter?.format(totalCollateral)}
-								</Text>
-
-								<Divider my={4} borderColor={'gray.500'} />
-								<Box
-									w="5rem"
-									h="0.3rem"
-									bg="#ffcd56"
-									rounded={100}></Box>
-								<Text fontSize={'sm'}>Borrow Balance</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									{dollarFormatter?.format(totalDebt)}
-								</Text>
-
-								<Divider my={4} borderColor={'gray.500'} />
-								<Box
-									w="7rem"
-									h="0.3rem"
-									bg="#ff6384"
-									rounded={100}></Box>
-								<Text fontSize={'sm'}>Available to Borrow</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									{dollarFormatter?.format(
-										availableToBorrow()
-									)}
-								</Text>
-							</Flex>
+						<Box width={{sm: '100%', md: '28%'}}>
+							<Collateral handleChange={handleChange} />
 						</Box>
-
-						<Chart />
-
-						<Box
-							display={'flex'}
-							justifyContent="space-between"
-							mb={{ sm: '1rem', lg: '0' }}
-							width={{ sm: '100%', md: '50%' }}
-							>
-							<Flex
-								flexDir={'column'}
-								justify={{ sm: 'center', md: 'end' }}
-								align={{ sm: 'center', md: 'end' }}
-								w="100%">
-								<Text fontSize={'sm'}>Stability Rate</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									1.01%
-								</Text>
-
-								<Divider my={4} borderColor={'gray.500'} />
-								<Text fontSize={'sm'}>
-									Collateralisation Ratio
-								</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									{(
-										(100 * totalCollateral) /
-										totalDebt
-									).toFixed(2)}{' '}
-									%
-								</Text>
-								<Divider my={4} borderColor={'gray.500'} />
-								<Text fontSize={'sm'}>Minimum Required</Text>
-								<Text fontSize={'xl'} fontWeight="bold">
-									{minCRatio} %
-								</Text>
-							</Flex>
+						<Box width={{sm: '100%', md: '72%'}}>
+							<Borrow />
 						</Box>
+						{/* <Box width={{sm: '100%', md: '28%'}}>
+							<Chart />
+						</Box> */}
 					</Flex>
 					<Flex
 						flexDirection={{
@@ -152,15 +66,33 @@ function App() {
 						justifyContent="space-between"
 						gap={10}
 						flexWrap="wrap">
-						<Box {...TableStyle}>
+						{/* <Box {...TableStyle}>
 							<CollateralTable handleChange={handleChange} />
-						</Box>
+						</Box> */}
 
 						<Box {...TableStyle}>
 							<IssuanceTable handleChange={handleChange} />
 						</Box>
 					</Flex>
-				</Box>
+					{/* <Flex height={'200px'}  bgColor='secondary' rounded={20} px={'30px'} py={'22px'} color='white' width={'100%'}>
+						<Flex flexDir={'column'} justify='space-between' width={'100%'}>
+						<Box>
+						<Heading>Trade with no slippage</Heading>
+						<Text>Frictionless trading with no fees</Text>
+						</Box>
+						<Link href='/pools'>
+						<Button maxW={'200px'} size='lg' bgColor='black' fontSize={'md'} rounded={10}>
+							<Text mr={2}>Enter a Pool</Text> 
+							<AiOutlineArrowRight/> </Button>
+						</Link>
+
+						</Flex>
+
+						
+						<Box bgImage='/swapmockup.png' bgSize={'350px'} bgRepeat='no-repeat' width={'45%'} mx={'-10px'} mt={-10} my={'-22px'}>
+						</Box>
+					</Flex> */}
+				</Flex>
 			}
 		</>
 	);

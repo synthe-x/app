@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	Button,
 	Box,
@@ -8,7 +8,7 @@ import {
     Input,
     IconButton,
 	InputRightElement,
-	InputGroup,Spinner,Link
+	InputGroup,Spinner,Link, AlertIcon, Alert, Select
 } from '@chakra-ui/react';
 
 import {
@@ -23,24 +23,33 @@ import {
 
 import { BiMinusCircle } from 'react-icons/bi';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getContract } from '../../src/utils';
+import { getContract, send } from '../../src/contract';
 import { useContext } from 'react';
-import { WalletContext } from '../WalletContextProvider';
+import { WalletContext } from '../context/WalletContextProvider';
+import axios from 'axios';
+import { AppDataContext } from '../context/AppDataProvider';
+import { ChainID } from '../../src/chains';
+import { useAccount } from 'wagmi';
+import { tokenFormatter } from '../../src/const';
 
 const RepayModal = ({ asset, handleRepay }: any) => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const [loader, setloader] = React.useState(false)
-	const [hash, sethash] =  React.useState("")
-	const [repayerror,setrepayerror] = React.useState("")
-	const [repayconfirm, setrepayconfirm] = React.useState(false)
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<string | null>(null);
+	const [hash, setHash] = useState(null);
+	const [confirmed, setConfirmed] = useState(false);
 	const [amount, setAmount] = React.useState(0);
 
+	const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
+
+	const { chain, explorer } = useContext(AppDataContext);
+
 	const _onClose = () => {
+		setLoading(false);
+		setResponse(null);
+		setHash(null);
+		setConfirmed(false);
 		setAmount(0);
-		setrepayerror("");
-		setrepayconfirm(false);
-		sethash("");
-		setloader(false);
 		onClose();
 	}
 
@@ -53,52 +62,82 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 	}
 
 	const max = () => {
-		return 0.999 * Math.min(asset.amount[0], asset['walletBalance'])/1e18;
+		return Math.min(
+			asset._mintedTokens[selectedAssetIndex].balance / 10 ** asset.inputToken.decimals, // user token balance
+			asset.balance / 10 ** asset.inputToken.decimals / asset._mintedTokens[selectedAssetIndex].lastPriceUSD  // debt in terms of this token
+		);
 	}
 
-	const issue = async () => {
+	const repay = async () => {
 		if(!amount) return
-		let system = await getContract(tronWeb, 'System');
-		let value = BigInt(amount*10**asset['decimal']).toString();
-		setloader(true)
-		setrepayerror("");
-		setrepayconfirm(false);
-		system.methods.repay(asset['synth_id'], value)
-		.send({
-			value, 
-			// shouldPollResponse:true
-			feeLimit: 1000000000
-		}, (error: any, hash: any) => {
-			if(error){
-				if(error.output) {
-					if(error.output.contractResult){
-						setrepayerror((window as any).tronWeb.toAscii(error.output.contractResult[0]));
-					} else {
-						setrepayerror("Errored. Please try again");
-					}
-				} else {
-					setrepayerror(error.error);
-				}
-				setloader(false)
-			}
-			if(hash){
-				console.log("hash", hash);
-				sethash(hash)
-				if(hash){
-					setloader(false)
-					setrepayconfirm(true)
-					handleRepay(asset['synth_id'], value)
-				}
+		setLoading(true);
+		setConfirmed(false);
+		setHash(null);
+		setResponse('');
+		let synthex = await getContract("SyntheX", chain);
+		let value = BigInt(amount * 10 ** asset.inputToken.decimals).toString();
+		send(synthex, 'burn', [asset.id, asset._mintedTokens[selectedAssetIndex].id, value], chain)
+		.then(async (res: any) => {
+			setLoading(false);
+			setResponse('Transaction sent! Waiting for confirmation...');
+			if (chain == ChainID.NILE) {
+				setHash(res);
+				checkResponse(res);
+			} else {
+				setHash(res.hash);
+				await res.wait(1);
+				setConfirmed(true);
+				handleRepay(asset._mintedTokens[selectedAssetIndex].id, value)
+				setResponse('Transaction Successful!');
 			}
 		})
+		.catch((err: any) => {
+			setLoading(false);
+			setConfirmed(true);
+			setResponse('Transaction failed. Please try again!');
+		});
 	}
+
+	const checkResponse = (tx_id: string, retryCount = 0) => {
+		axios
+			.get(
+				'https://nile.trongrid.io/wallet/gettransactionbyid?value=' +
+					tx_id
+			)
+			.then((res) => {
+				console.log(res);
+				if (!res.data.ret) {
+					setTimeout(() => {
+						checkResponse(tx_id);
+					}, 2000);
+				} else {
+					setConfirmed(true);
+					if (res.data.ret[0].contractRet == 'SUCCESS') {
+						setResponse('Transaction Successful!');
+						handleRepay(asset['synth_id'], BigInt(amount*10**asset['decimal']).toString())
+					} else {
+						if (retryCount < 3)
+							setTimeout(() => {
+								checkResponse(tx_id, retryCount + 1);
+							}, 2000);
+						else {
+							setResponse(
+								'Transaction Failed. Please try again.'
+							);
+						}
+					}
+				}
+			});
+	};
+
 	const {isConnected, tronWeb }= useContext(WalletContext);
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
 
 	return (
 		<Box>
 			<IconButton 
 			// disabled={!isConnected} 
-			variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={35} color="gray"/>} aria-label={''} isRound={true}>
+			variant="ghost" onClick={onOpen} icon={<BiMinusCircle size={20} color="gray"/>} aria-label={''} isRound={true} bgColor='white' size={'sm'} my={1}>
 			</IconButton>
 			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg='blackAlpha.100'
@@ -107,6 +146,17 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 					<ModalCloseButton />
                     <ModalHeader>Repay {asset['symbol']}</ModalHeader>
 					<ModalBody>
+
+					<Flex>
+						<Text fontSize='sm'>Balance: {tokenFormatter.format(asset._mintedTokens[selectedAssetIndex].balance / 10 ** asset.inputToken.decimals)} {asset._mintedTokens[selectedAssetIndex].symbol}</Text>
+					</Flex>
+					<Select my={1} placeholder="Select asset to issue" value={selectedAssetIndex} onChange={(e) => setSelectedAssetIndex(parseInt(e.target.value))}>
+									{asset._mintedTokens.map((token: any, index: number) => (
+										<option value={index} key={index}>
+											{token.symbol}
+										</option>
+									))}
+								</Select>
 					<InputGroup size='md'>
 						<Input
 							type="number"
@@ -124,26 +174,48 @@ const RepayModal = ({ asset, handleRepay }: any) => {
 						<Text fontSize={"xs"} color="gray.400" >1 {asset['symbol']} = {(asset['price'])} USD</Text>
                         </Flex>
                         <Button 
-							disabled={!isConnected || !amount || amount == 0 || amount > max()}
-							isLoading={loader} colorScheme={"red"} width="100%" mt={4} onClick={issue}
+							disabled={loading || !(isConnected || isEvmConnected) || !amount || amount == 0 || amount > max()}
+							isLoading={loading} colorScheme={"red"} width="100%" mt={4} onClick={repay}
+							loadingText='Please sign the transaction'
 						>
-							{isConnected? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 
+							{(isConnected || isEvmConnected)? (amount > max()) ? <>Insufficient Debt</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Repay</> : <>Please connect your wallet</>} 
 						</Button>
-						{loader &&<Flex alignItems={"center"} flexDirection={"row"} justifyContent="center" mt="1.5rem">
-							
-							<Box >
-								<Text fontFamily={"Roboto"} fontSize="md"> Waiting for the blockchain to confirm your transaction. 
-								<Link color="blue.200" fontSize={"sm"} href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">{' '}View on Tronscan</Link ></Text>
+						
+						{response && (
+							<Box width={'100%'} my={2} color="black">
+								<Alert
+									status={
+										response.includes('confirm')
+											? 'info'
+											: confirmed &&
+											  response.includes('Success')
+											? 'success'
+											: 'error'
+									}
+									variant="subtle"
+									rounded={6}>
+									<AlertIcon />
+									<Box>
+										<Text fontSize="md" mb={0}>
+											{response}
+										</Text>
+										{hash && (
+											<Link
+												href={
+													explorer() +
+													hash
+												}
+												target="_blank">
+												{' '}
+												<Text fontSize={'sm'}>
+													View on explorer
+												</Text>
+											</Link>
+										)}
+									</Box>
+								</Alert>
 							</Box>
-						</Flex>}
-						{repayerror && <Text textAlign={"center"} color="red">{repayerror}</Text>}
-							{repayconfirm && <Flex flexDirection={"column"} mt="1rem" justifyContent="center" alignItems="center">
-								<Text fontFamily={"Roboto"} textAlign={"center"}>Transaction Successful</Text>
-								<Box>
-								<Link fontSize={"sm"} color="blue.200" href={`https://nile.tronscan.org/#/transaction/${hash}`} target="_blank" rel="noreferrer">View on Tronscan</Link >
-								</Box>
-
-							</Flex>}
+						)}
 					</ModalBody>
                     <ModalFooter>
 

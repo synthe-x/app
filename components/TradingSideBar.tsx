@@ -8,7 +8,7 @@ import {
 	Input,
 	Select,
 	Button,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 import {
 	Table,
 	Thead,
@@ -19,21 +19,18 @@ import {
 	Td,
 	TableCaption,
 	TableContainer,
-} from '@chakra-ui/react';
-import { useContext, useState } from 'react';
-import { WalletContext } from '../components/WalletContextProvider';
-import { AppDataContext } from './AppDataProvider';
-import TransferModal from './modals/TransferModal';
+} from "@chakra-ui/react";
+import Image from "next/image";
+import { useContext, useState } from "react";
+import { WalletContext } from "./context/WalletContextProvider";
+import { AppDataContext } from "./context/AppDataProvider";
+import TransferModal from "./modals/TransferModal";
 
 function ExchangeSideBar({}) {
 	const [nullValue, setNullValue] = useState(false);
 
-	const {
-		isConnected,
-		isConnecting,
-		address,
-		connect,
-	} = useContext(WalletContext);
+	const { isConnected, isConnecting, address, connect } =
+		useContext(WalletContext);
 
 	const {
 		synths,
@@ -42,7 +39,7 @@ function ExchangeSideBar({}) {
 		tradingPool,
 		setTradingPool,
 		pools,
-		tradingBalanceOf
+		tradingBalanceOf,
 	} = useContext(AppDataContext);
 
 	const updatePoolIndex = (e: any) => {
@@ -50,66 +47,94 @@ function ExchangeSideBar({}) {
 	};
 
 	const getSynth = (address: string) => {
-		return synths.find((s: any) => s.synth_id === address);
-	}
+		return synths.find((s: any) => s.id === address);
+	};
 
 	const handleUpdate = () => {
 		setNullValue(!nullValue);
-	}
+	};
 
 	return (
 		<>
-			<Box>
-                <Text mt={10} mb={2} fontSize={"xs"} fontWeight="bold" color={"gray"} ml={1}>CHOOSE A POOL</Text>
-				<Select
-					mb={10}
-					onChange={updatePoolIndex}
-					value={tradingPool}
-					color="white"
-					// bgColor={'gray'}
-					// height="100"
-                    >
-					{pools.map((pool: any, index: number) => {
-						return (
-							<option key={pool?.symbol} value={index} >
-								<Text>{pool?.name}</Text>
-							</option>
-						);
-					})}
-				</Select>
-				<TableContainer border={"1px solid #2C2C2C"} rounded={6} py={2} bgColor="#171717" color={"white"}>
-					<Table variant="simple" size="sm">
-						<Thead>
-							<Tr>
-								<Th color="#686868">Asset</Th>
-								<Th color="#686868">Balance</Th>
-								<Th></Th>
-							</Tr>
-						</Thead>
-						<Tbody>
-							{((pools[tradingPool] && pools[tradingPool].poolSynth_ids) ?? synths).map((_synth: any, index: number) => {
-								return (
-									<Tr key={index}>
-										<Td>
-											{_synth.name
-												.split(' ')
-												.slice(1)
-												.join(' ')}
-										</Td>
-										<Td>
-											{(tradingBalanceOf(_synth.synth_id)/10**(_synth.decimal ?? 18)).toFixed(2)}{' '}
-											{_synth.symbol}
-										</Td>
-										<Td>
-                                            <TransferModal asset={getSynth(_synth.synth_id)} handleUpdate={handleUpdate} />
-										</Td>
-									</Tr>
-								);
-							})}
-						</Tbody>
-					</Table>
-				</TableContainer>
-			</Box>
+			<Text
+				mb={2}
+				mt={6}
+				fontSize={"xs"}
+				fontWeight="bold"
+				color={"gray"}
+				ml={1}
+			>
+				CHOOSE A POOL
+			</Text>
+			<Select mb={10} onChange={updatePoolIndex} value={tradingPool}>
+				{pools.map((pool: any, index: number) => {
+					return (
+						<option key={pool?.symbol} value={index}>
+							<Text>{pool?.name}</Text>
+						</option>
+					);
+				})}
+			</Select>
+
+			<TableContainer rounded={6} bgColor="#171717" color={"white"}>
+				<Table variant="simple" size="sm">
+					<Thead>
+						<Tr>
+							<Th color="#686868" borderColor={"#3C3C3C"}>
+								Asset
+							</Th>
+							<Th color="#686868" borderColor={"#3C3C3C"} isNumeric>
+								Balance
+							</Th>
+						</Tr>
+					</Thead>
+					<Tbody>
+						{pools[tradingPool] && (
+							<>
+								{pools[tradingPool]._mintedTokens.map(
+									(_synth: any, index: number) => {
+										return (
+											<Tr key={index}>
+												<Td borderColor={"#3C3C3C"} py={1}>
+													<Flex
+														align={"center"}
+														gap={"1"}
+													>
+														<Image
+															src={
+																"/icons/" +
+																_synth.symbol +
+																".png"
+															}
+															height={'30px'}
+															width={'30px'}
+															style={{minWidth: '30px', minHeight: '30px'}}
+															alt={_synth.symbol}
+														/>
+														{_synth.name}
+													</Flex>
+												</Td>
+												<Td borderColor={"#3C3C3C"} isNumeric>
+													{(
+														
+															_synth.balance
+														 /
+														10 **
+															(_synth.decimal ??
+																18)
+													).toFixed(2)}{" "}
+													{_synth.symbol}
+												</Td>
+												
+											</Tr>
+										);
+									}
+								)}
+							</>
+						)}
+					</Tbody>
+				</Table>
+			</TableContainer>
 		</>
 	);
 }

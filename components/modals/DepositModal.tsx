@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
 	Button,
 	Box,
@@ -14,7 +14,10 @@ import {
 	Image,
 	InputLeftAddon,
 	InputRightAddon,
-} from '@chakra-ui/react';
+	Select,
+	Alert,
+	AlertIcon,
+} from "@chakra-ui/react";
 
 import {
 	Modal,
@@ -24,7 +27,7 @@ import {
 	ModalFooter,
 	ModalBody,
 	ModalCloseButton,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
 import {
 	Slider,
@@ -32,35 +35,60 @@ import {
 	SliderFilledTrack,
 	SliderThumb,
 	SliderMark,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-const Big = require('big.js');
+const Big = require("big.js");
 
-import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { getAddress, getContract } from '../../src/utils';
-import { useEffect, useContext } from 'react';
-import { WalletContext } from '../WalletContextProvider';
-import { BiPlusCircle } from 'react-icons/bi';
-import { AppDataContext } from '../AppDataProvider';
+import { AiOutlineInfoCircle, AiOutlinePlusCircle } from "react-icons/ai";
+import { getAddress, getContract, send, call } from "../../src/contract";
+import { useEffect, useContext } from "react";
+import { WalletContext } from "../context/WalletContextProvider";
+import { BiPlusCircle } from "react-icons/bi";
+import { AppDataContext } from "../context/AppDataProvider";
+import axios from "axios";
+import { ChainID } from "../../src/chains";
+import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import { tokenFormatter } from "../../src/const";
+import { BsPlusCircleFill } from "react-icons/bs";
 
-const DepositModal = ({ asset, handleDeposit }: any) => {
-	const balance = asset.walletBalance / (10**asset.decimal)
+const CLAIM_AMOUNTS: any = {
+	WTRX: "100000000000",
+	ETH: "1000",
+	NEAR: "10000",
+};
+
+const DepositModal = ({ handleDeposit }: any) => {
+	const [selectedAsset, setSelectedAsset] = React.useState<number>(0);
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	const [amount, setAmount] = React.useState(balance * 0.3);
-	const [loader, setloader] = React.useState(false);
-	const [hash, sethash] = React.useState('');
-	const [depositerror, setdepositerror] = React.useState('');
-	const [depositconfirm, setdepositconfirm] = React.useState(false);
-	const [tryApprove, setTryApprove] = React.useState<string | boolean>(
-		'null'
-	);
+	const { collaterals, chain, updateCollateralWalletBalance, addCollateralAllowance, explorer, toggleCollateralEnabled } = useContext(AppDataContext);
+
+	const [amount, setAmount] = React.useState(0);
+	const [sliderValue, setSliderValue] = React.useState(0);
+	const [claimLoading, setClaimLoading] = useState(false);
+
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<string | null>(null);
+	const [hash, setHash] = useState(null);
+	const [confirmed, setConfirmed] = useState(false);
+
+	// const { isConnected, tronWeb, address } = useContext(WalletContext);
+	const { isConnected, address } = useAccount();
+
+
+	const asset = () => collaterals[selectedAsset];
+	const balance = () => {
+		if (!asset()) return 0;
+		if (!asset().walletBalance) return 0;
+		return asset().walletBalance / 10 ** asset().inputToken.decimals;
+	};
 
 	const _onClose = () => {
-		setdepositerror('');
-		setdepositconfirm(false);
-		setAmount(balance * 0.3);
-		sethash('');
-		setloader(false);
+		setLoading(false);
+		setResponse(null);
+		setHash(null);
+		setConfirmed(false);
+		setAmount(0);
 		onClose();
 	};
 
@@ -68,261 +96,367 @@ const DepositModal = ({ asset, handleDeposit }: any) => {
 		setAmount(event.target.value);
 	};
 
-	const issue = async () => {
+	const deposit = async () => {
 		if (!amount) return;
-		let system = await getContract(tronWeb, 'System');
-		let value = Big(amount).mul(Big(10).pow(Number(asset['decimal']))).toFixed(0);
-		setloader(true);
-		setdepositerror('');
-		setdepositconfirm(false);
-		system.methods.deposit(asset['coll_address'], value).send(
-			{
-				value,
-				// shouldPollResponse:true
-				feeLimit: 1000000000,
-			},
-			(error: any, hash: any) => {
-				if (error) {
-					if (error.output) {
-						if (error.output.contractResult) {
-							setdepositerror(
-								(window as any).tronWeb.toAscii(
-									error.output.contractResult[0]
-								)
-							);
-						} else {
-							setdepositerror('Errored. Please try again');
-						}
-					} else {
-						setdepositerror(error.error);
+		setLoading(true);
+		setConfirmed(false);
+		setHash(null);
+		setResponse("");
+		let synthex = await getContract("SyntheX", chain);
+		let value = Big(amount)
+			.mul(Big(10).pow(Number(asset().inputToken.decimals)))
+			.toFixed(0);
+
+		console.log(asset().isEnabled);
+
+		send(synthex, 'enterAndDeposit', [asset().id, value], chain)
+			.then(async (res: any) => {
+				setLoading(false);
+				setResponse("Transaction sent! Waiting for confirmation...");
+				if (chain == ChainID.NILE) {
+					setHash(res);
+					checkResponse(res);
+				} else {
+					setHash(res.hash);
+					await res.wait(1);
+					setConfirmed(true);
+					handleDeposit(
+						asset()["id"],
+						Big(amount)
+							.mul(Big(10).pow(Number(asset().inputToken.decimals)))
+							.toFixed(0)
+					);
+					if(!asset().isEnabled){
+						toggleCollateralEnabled(asset().id)
 					}
-					setloader(false);
+					updateSlider(20)
+					setResponse("Transaction Successful!");
 				}
-				if (hash) {
-					sethash(hash);
-					if (hash) {
-						setloader(false);
-						setdepositconfirm(true);
-						handleDeposit(asset['coll_address'], value);
-					}
-				}
-			}
-		);
+			})
+			.catch((err: any) => {
+				console.log('err', err)
+				setLoading(false);
+				setConfirmed(true);
+				setResponse("Transaction failed. Please try again!");
+			});
 	};
 
-	const approve = async () => {
-		let collateral = await getContract(
-			tronWeb,
-			'CollateralERC20',
-			asset['coll_address']
-		);
-		setloader(true);
-		collateral
-			.approve(getAddress('System'), '100000000000000000000000000000000')
-			.send({}, (error: any, hash: any) => {
-				if (error) {
-					console.log(error);
-				}
-				if (hash) {
-					setTryApprove(false);
-					setloader(false);
+	const checkResponse = (tx_id: string, retryCount = 0) => {
+		axios
+			.get(
+				"https://nile.trongrid.io/wallet/gettransactionbyid?value=" +
+					tx_id
+			)
+			.then((res) => {
+				if (!res.data.ret) {
+					setTimeout(() => {
+						checkResponse(tx_id);
+					}, 2000);
+				} else {
+					setConfirmed(true);
+					if (res.data.ret[0].contractRet == "SUCCESS") {
+						setResponse("Transaction Successful!");
+						handleDeposit(
+							asset()["coll_address"],
+							Big(amount)
+								.mul(Big(10).pow(Number(asset()["decimal"])))
+								.toFixed(0)
+						);
+					} else {
+						if (retryCount < 3)
+							setTimeout(() => {
+								checkResponse(tx_id, retryCount + 1);
+							}, 2000);
+						else {
+							setResponse(
+								"Transaction Failed. Please try again."
+							);
+						}
+					}
 				}
 			});
 	};
 
-	const allowanceCheck = async () => {
-		if(!(tronWeb as any).contract) return;
-		let collateral = await getContract(
-			tronWeb,
-			'CollateralERC20',
-			asset['coll_address']
-		);
-		let allowance = await collateral.methods
-			.allowance(
-				address,
-				getAddress('System')
-			)
-			.call();
-		allowance = allowance
-			.div((10 ** asset['decimal']).toString())
+	const claim = async () => {
+		setClaimLoading(true);
+		let token = await getContract("MockToken", chain, asset().id);
+		const _amount = ethers.utils
+			.parseEther(CLAIM_AMOUNTS[asset().inputToken.symbol])
 			.toString();
-		// console.log(allowance, balance);
-		if (allowance.length < 10) {
-			if (parseInt(allowance) <= balance) {
-				setAmount(0);
-				setTryApprove(true);
-			} else {
-				setTryApprove(false);
-			}
-		} else {
-			setTryApprove(false);
-		}
+		send(token, "mint", [address, _amount], chain)
+			.then(async (res: any) => {
+				console.log(hash);
+				setClaimLoading(false);
+				updateCollateralWalletBalance(asset().id, _amount, false);
+			})
+			.catch((err: any) => {
+				console.log(err);
+				setClaimLoading(false);
+			});
 	};
 
-	useEffect(() => {
-		if (tryApprove == 'null' && isConnected) allowanceCheck();
-	});
+	const amountLowerThanMin = () => {
+		// if (Number(amount) > asset()?.minCollateral / 10 ** asset().decimal) {
+		// 	return false;
+		// }
+		// return true;
+		return false;
+	};
+
+	const approve = async () => {
+		setLoading(true);
+		let collateral = await getContract("ERC20", chain, asset()["id"]);
+		send(
+			collateral,
+			"approve",
+			[getAddress("SyntheX", chain), ethers.constants.MaxUint256],
+			chain
+		)
+		.then(async (res: any) => {
+			await res.wait(1);
+			addCollateralAllowance(asset().id, ethers.constants.MaxUint256.toString());
+			setLoading(false);
+		})
+		.catch((err: any) => {
+			console.log('err', err);
+			setLoading(false);
+		});
+	};
 
 	const updateSlider = (e: any) => {
-		setAmount((balance * e) / 100);
+		setSliderValue(e);
+		setAmount((balance() * e) / 100);
 	};
 
-	const {isConnected, tronWeb, address} = useContext(WalletContext);
-	const { updateCollateralWalletBalance, updateCollateralAmount } = useContext(AppDataContext);
+	const updateAsset = (e: any) => {
+		setSelectedAsset(e.target.value);
+	};
+
+	const tryApprove = () => {
+		// console.log(asset()?.allowance, (amount+0.1));
+
+		// console.log(Big(asset()?.allowance).lt(amount+0.1));
+		if (!asset()) return true;
+		if (!asset().allowance) return true;
+		return Big(asset()?.allowance).lt(ethers.constants.One);
+	};
+
+	const {
+		address: evmAddress,
+		isConnected: isEvmConnected,
+		isConnecting: isEvmConnecting,
+	} = useAccount();
+
 
 	return (
 		<Box>
-			<IconButton
-			// disabled={!isConnected}
-				variant="ghost"
+			<Button
+				width={"100%"}
+				size="lg"
+				bgColor={"primary"}
+				rounded={10}
 				onClick={onOpen}
-				icon={<BiPlusCircle size={35} color="gray" />}
-				aria-label={''}
-				isRound={true}></IconButton>
-			<Modal isCentered isOpen={isOpen} onClose={_onClose} >
+				_hover={{ bgColor: "gray.700", color: "white" }}
+			>
+				<Text mr={1}>Add</Text> <BiPlusCircle />
+			</Button>
+
+			<Modal isCentered isOpen={isOpen} onClose={_onClose}>
 				<ModalOverlay bg="blackAlpha.100" backdropFilter="blur(30px)" />
-				<ModalContent width={'30rem'}
-				// bgColor="blackAlpha.800" color={"white"}
+				<ModalContent
+					width={"30rem"}
+					// bgColor="blackAlpha.800" color={"white"}
 				>
 					<ModalCloseButton />
 
-					<ModalHeader>
-						Deposit {asset['symbol']} as collateral
-					</ModalHeader>
-					{/* {tryApprove} */}
+					<ModalHeader>Deposit collateral</ModalHeader>
 					<ModalBody>
-						{!tryApprove ? (
-							<Box>
-								<InputGroup size="md" alignItems={'center'}>
-									<Image
-										src={`/${asset.symbol}.png`}
-										alt=""
-										width="35"
-										height={35}
-										mr={2}
-									/>
-									<Input
-										type="number"
-										placeholder="Enter amount"
-										onChange={changeAmount}
-										value={amount}
-										disabled={tryApprove as boolean}
-									/>
-									<InputRightAddon>
-									{asset['symbol']}
-									</InputRightAddon>
-								</InputGroup>
-								<Slider
-									isDisabled={Boolean(tryApprove)}
-									aria-label="slider-ex-1"
-									defaultValue={30}
-									onChange={updateSlider}
-									mt={4}
-									// mx="13%"
-									// width={"74%"}
-								>
-									<SliderTrack>
-										<SliderFilledTrack bgColor="#276220" />
-									</SliderTrack>
-									<SliderThumb />
-								</Slider>
-								<Flex mt={4} justify="space-between">
-									<Text fontSize={'xs'} color="gray.400">
-										1 {asset['symbol']} = {asset['price']}{' '}
-										USD
-									</Text>
-								</Flex>
-							</Box>
-						) : (
-							<Flex my={4} gap={5}>
+						
+						{!asset() && <Text mb={4}>Choose an asset you would like to deposit</Text>}
+						<Select
+							placeholder="Select asset"
+							onChange={updateAsset}
+							mb={2}
+							value={selectedAsset}
+						>
+							{collaterals.map(
+								(collateral: any, index: number) => (
+									<option
+										key={collateral.symbol}
+										value={index}
+									>
+										{collateral.name}
+									</option>
+								)
+							)}
+						</Select>
+						{ asset() && <>{tryApprove() ? (
+							<>
+							<Flex my={4}>
 								<Image
-									src={`/${asset.symbol}.png`}
+									src={`/icons/${asset()?.symbol}.png`}
 									alt=""
 									width="35"
 									height={35}
 									mb={5}
 								/>
-								<Text fontSize={'sm'}>
-									To Deposit or Repay {asset.name} token to
-									the SyntheX, you need to enable it first.
+								<Text fontSize={"sm"}>
+									To Deposit {asset()?.name} token, you need
+									to approve it for SyntheX to use.
 								</Text>
 							</Flex>
-						)}
-
-						{(!tryApprove) ? (
-							<Button
-								isLoading={loader}
-								disabled={!isConnected || !amount || amount == 0 || amount > balance}
-								colorScheme={'whatsapp'}
-								width="100%"
-								mt={4}
-								onClick={issue}>
-								{isConnected? (amount > balance) ? <>Insufficient Balance</> : (!amount || amount == 0) ?  <>Enter amount</> : <>Deposit</> : <>Please connect your wallet</>} 
-							</Button>
+								<Button
+									disabled={!(isConnected || isEvmConnected)}
+									isLoading={loading}
+									loadingText="Please sign the transaction"
+									colorScheme={"orange"}
+									width="100%"
+									mt={4}
+									onClick={approve}
+									isDisabled={loading}
+								>
+									{isConnected || isEvmConnected ? (
+										<>Approve {asset()?.symbol}</>
+									) : (
+										<>Please connect your wallet</>
+									)}
+								</Button>
+								</>
 						) : (
-							<Button
-								disabled={!isConnected}
-								isLoading={loader}
-								colorScheme={'orange'}
-								width="100%"
-								mt={4}
-								onClick={approve}>
-								{isConnected? <>Approve {asset['symbol']}</> : <>Please connect your wallet</>}
-							</Button>
-						)}
-
-						{loader && (
-							<Flex
-								alignItems={'center'}
-								flexDirection={'row'}
-								justifyContent="center"
-								mt="1.5rem">
-
+							<>
 								<Box>
-									<Text fontFamily={'Roboto'} fontSize="md">
-										{' '}
-										Waiting for the blockchain to confirm
-										your transaction.
-										<Link
-											color="blue.200"
-											fontSize={'sm'}
-											href={`https://nile.tronscan.org/#/transaction/${hash}`}
-											target="_blank"
-											rel="noreferrer">
-											{' '}
-											View on Tronscan
-										</Link>
-									</Text>
+									<Flex
+										justify={"space-between"}
+										align="center"
+										width={"100%"}
+										mb={2}
+									>
+										<Text textAlign="right" fontSize={"xs"} color="gray.400">
+											Balance:{" "}
+											{tokenFormatter.format(balance())}{" "}
+											{asset()?.symbol}
+										</Text>
+										<Button
+											isLoading={claimLoading}
+											size={"xs"}
+											// rounded={40}
+											onClick={claim}
+											color="black"
+											// variant={'ghost'}
+										>
+											Claim testnet tokens 💰
+										</Button>
+									</Flex>
+									<InputGroup size="md" alignItems={"center"}>
+										<Image
+											src={`/icons/${asset()?.symbol}.png`}
+											alt=""
+											width="35"
+											height={35}
+										/>
+										<Input
+											type="number"
+											placeholder="Enter amount"
+											onChange={changeAmount}
+											value={amount}
+										/>
+										<InputRightAddon>
+										<Text fontSize={'sm'}>
+											{asset()?.inputToken.symbol}
+										</Text>
+										</InputRightAddon>
+									</InputGroup>
+									<Slider
+										aria-label="slider-ex-1"
+										defaultValue={30}
+										onChange={updateSlider}
+										mt={4}
+										value={sliderValue}
+									>
+										<SliderTrack>
+											<SliderFilledTrack bgColor="#3EE6C4" />
+										</SliderTrack>
+										<SliderThumb />
+									</Slider>
+									<Flex mt={4} justify="space-between">
+										<Text fontSize={"xs"} color="gray.400">
+											Volatility Ratio: {asset()?.maximumLTV/100}
+										</Text>
+
+										<Text fontSize={"xs"} color="gray.400">
+											1 {asset()?.inputToken.symbol} ={" "}
+											{asset()?.inputTokenPriceUSD} USD
+										</Text>
+									</Flex>
 								</Box>
-							</Flex>
-						)}
-						{depositerror && (
-							<Text textAlign={'center'} color="red">
-								{depositerror}
-							</Text>
-						)}
-						{depositconfirm && (
-							<Flex
-								flexDirection={'column'}
-								mt="1rem"
-								justifyContent="center"
-								alignItems="center">
-								<Text
-									fontFamily={'Roboto'}
-									textAlign={'center'}>
-									Transaction Submitted
-								</Text>
-								<Box>
-									<Link
-										fontSize={'sm'}
-										color="blue.200"
-										href={`https://nile.tronscan.org/#/transaction/${hash}`}
-										target="_blank"
-										rel="noreferrer">
-										View on Tronscan
-									</Link>
-								</Box>
-							</Flex>
+								<Button
+									isLoading={loading}
+									loadingText="Please sign the transaction"
+									disabled={
+										amountLowerThanMin() ||
+										loading ||
+										!(isConnected || isEvmConnected) ||
+										!amount ||
+										amount == 0 ||
+										amount > balance()
+									}
+									bgColor="#3EE6C4"
+									color={"gray.800"}
+									width="100%"
+									mt={4}
+									isDisabled={loading}
+									onClick={deposit}
+								>
+									{isConnected || isEvmConnected ? (
+										!amount || amount == 0 ? (
+											"Enter amount"
+										) : amountLowerThanMin() ? (
+											"Amount too less"
+										) : amount > balance() ? (
+											"Insufficient Balance"
+										) : (
+											<>Deposit</>
+										)
+									) : (
+										<>Please connect your wallet</>
+									)}
+								</Button>
+							</>
+						)}</>} 
+
+						{response && (
+							<Box width={"100%"} my={2} color="black">
+								<Alert
+									status={
+										response.includes("confirm")
+											? "info"
+											: confirmed &&
+											  response.includes("Success")
+											? "success"
+											: "error"
+									}
+									variant="subtle"
+									rounded={6}
+								>
+									<AlertIcon />
+									<Box>
+										<Text fontSize="md" mb={0}>
+											{response}
+										</Text>
+										{hash && (
+											<Link
+												href={explorer() + hash}
+												target="_blank"
+											>
+												{" "}
+												<Text fontSize={"sm"}>
+													View on explorer
+												</Text>
+											</Link>
+										)}
+									</Box>
+								</Alert>
+							</Box>
 						)}
 					</ModalBody>
 					<ModalFooter>

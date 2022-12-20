@@ -2,12 +2,15 @@ import { Box, Flex, Progress, Text } from '@chakra-ui/react';
 import React, { useContext } from 'react';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
-import { WalletContext } from '../components/WalletContextProvider';
+import { WalletContext } from '../components/context/WalletContextProvider';
 import { useEffect } from 'react';
 import { id } from 'ethers/lib/utils';
 import { useRouter } from 'next/router';
-import { AppDataContext } from '../components/AppDataProvider';
+import { AppDataContext } from '../components/context/AppDataProvider';
 import { useState } from 'react';
+import { ChainID, chainIndex } from '../src/chains';
+import { useAccount, useConnect } from 'wagmi';
+import { DUMMY_ADDRESS } from '../src/const';
 
 export default function _index({ children }: any) {
 
@@ -29,32 +32,50 @@ export default function _index({ children }: any) {
 		availableToBorrow,
 		fetchData,
 		isFetchingData,
+		setChain
 	} = useContext(AppDataContext);
+	const [init, setInit] = useState(false);
 
-	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			if (localStorage.getItem('address') && !isConnected && !isConnecting) {
-				connect((_address: string|null, _err: string) => {
-					if(!isDataReady && !isFetchingData && _address) {
-                        fetchData(tronWeb, _address)
-                    }
-				});
-			}
-		}
-	});
+	const {address: evmAddress, isConnected: isEvmConnected, isConnecting: isEvmConnecting} = useAccount();
+	const {connectAsync: connectEvm, connectors} = useConnect();
+
+	// useEffect(() => {
+	// 	if (typeof window !== 'undefined' && !init) {
+	// 		setInit(true)
+	// 		const _address = localStorage.getItem('address');
+	// 		const _chain = localStorage.getItem('chain');
+	// 		if(_address && _chain){
+	// 			if(parseInt(_chain) == ChainID.NILE){
+	// 				connect((_address: string | null, _err: string) => {
+	// 					if (!isDataReady && !isFetchingData && _address) {
+	// 						fetchData(_address, ChainID.NILE);
+	// 						setChain(ChainID.NILE);
+	// 					}
+	// 				});
+	// 			} else {
+	// 				if(!isEvmConnected && !evmAddress){
+	// 					connectEvm({chainId: parseInt(_chain), connector: connectors[chainIndex[parseInt(_chain)]]}).then((res: any) => {
+	// 						if (!isDataReady && !isFetchingData && res.account) {
+	// 							fetchData(res.account, ChainID.AURORA);
+	// 							setChain(ChainID.AURORA);
+	// 							localStorage.setItem("address", res.account)
+	// 							localStorage.setItem("chain", ChainID.AURORA.toString());
+	// 						}
+	// 					})
+	// 				} else {
+	// 					fetchData(null, ChainID.AURORA);
+	// 				}
+	// 			}
+	// 		} else {
+	// 			fetchData(null, ChainID.AURORA);
+	// 		}
+	// 	}
+	// }, [connect, connectEvm, connectors, fetchData, init, isDataReady, isFetchingData, setChain, setInit]);
 
 	const router = useRouter();
 
 	const backgroundStyle = {
-		backgroundColor: '#000',
-		backgroundRepeat: 'no-repeat',
-		height:
-			router.pathname === '/' || router.pathname.includes('pool/')
-				? {sm: '100%', md: '480px'}
-				: '100%',
-		backgroundSize: 'contain',
-		backgroundPosition: 'top',
-		// minW: '100%',
+		backgroundColor: '#0D0D0D'
 	};
 
 	return (
@@ -74,9 +95,10 @@ export default function _index({ children }: any) {
 				<Flex
 					justify={'center'}
 					flexDirection={{ sm: 'column', md: 'row' }}
-					minH="100vh">
+					minH="94vh">
 					<Box maxWidth={'1300px'} 
                     minW={{sm: '0', md: '0', lg: '1200px'}}
+					px={{sm: '4', md: '0'}}
                     >
 						<Navbar />
 						{children}
